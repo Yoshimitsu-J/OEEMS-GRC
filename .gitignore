@@ -1,0 +1,6 @@
+# Sensitive Data
+_confidentials/
+
+# System Files
+*.ini
+.DS_Store
