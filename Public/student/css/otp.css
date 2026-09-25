@@ -1,0 +1,166 @@
+/* ========================================= */
+   OTP VERIFICATION PAGE
+/* ========================================= */
+
+body {
+  background-color: #f0f0f0;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-logo {
+  height: 40px;
+  object-fit: contain;
+}
+
+.otp-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin-top: 60px;
+}
+
+.otp-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 30px 25px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  position: relative;
+  text-align: center;
+}
+
+.otp-provider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.otp-provider span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.google-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.close-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.otp-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.otp-red {
+  color: #8B0000;
+}
+
+.otp-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 15px;
+}
+
+.otp-description {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.otp-description strong {
+  color: #000;
+}
+
+/* 6-digit OTP inputs */
+.otp-inputs-6 {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.otp-box-6 {
+  width: 48px;
+  height: 65px;
+  font-size: 1.5rem;
+  text-align: center;
+  border: 2px solid #333;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #000;
+  font-weight: 600;
+  outline: none;
+}
+
+.otp-box-6:focus {
+  border-color: #8B0000;
+}
+
+.otp-resend {
+  font-size: 13px;
+  color: #000;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.otp-resend a {
+  color: #8B0000;
+  text-decoration: underline;
+}
+
+.otp-attempts {
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+  margin-bottom: 20px;
+}
+
+.btn-verify {
+  background-color: #8B0000;
+  color: #ffffff;
+  border: none;
+  padding: 12px 50px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
+}
+
+.btn-verify:hover {
+  background-color: #a00000;
+}
+
+.otp-message {
+  margin-top: 12px;
+  font-size: 13px;
+  min-height: 18px;
+}

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statement of Application - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/soapp.css">
+</head>
+<body>
+
+  <div class="soapp-container" id="soappContainer">
+    <div class="soapp-header">
+      <img src="../assets/image/grc-logo.png" alt="GRC Logo" class="soapp-logo">
+      <div class="soapp-header-text">
+        <h3>Global Reciprocal Colleges</h3>
+        <p>GRC Bldg. 454. 1400 Rizal Ave Ext, East Grade,<br>Caloocan, Metro Manila</p>
+      </div>
+    </div>
+
+    <div class="soapp-top-row">
+      <div>
+        <h2 class="soapp-title">Statement of Application</h2>
+      </div>
+      <div class="soapp-applicant-id">
+        <span>Applicant</span>
+        <span class="red-bold" id="soappApplicantId">#012345</span>
+      </div>
+    </div>
+
+    <div class="soapp-qr-section">
+      <div class="soapp-info-left">
+        <p>APPLICANT: <strong id="soappApplicantName">Delacruz, Juan</strong></p>
+        <p>SCHOOL YEAR: <strong>2025-2026</strong></p>
+        <p>SEMESTER: <strong>1st Semester</strong></p>
+      </div>
+      <div class="soapp-qr-right">
+        <div class="qr-code-box">
+          <!-- ✅ Real QR code na ito -->
+          <div id="soappQrCode" class="qr-code-placeholder"></div>
+          <p class="qr-scan-label">Scan Me</p>
+        </div>
+        <p class="qr-instruction">
+          Present your <span class="red-text">Application ID</span> or <span class="red-text">QR Code</span> to Examination Facilitator to Verify your Application with your payment slip provided from Cashier
+        </p>
+      </div>
+    </div>
+
+    <div class="soapp-section">
+      <h4>Application Information</h4>
+      <div class="soapp-row"><p>Date of Application:</p><p>April 1, 2026</p></div>
+      <div class="soapp-row"><p>Applicant ID:</p><p>012345</p></div>
+      <div class="soapp-row"><p>Approved:</p><p>April 2, 2026</p></div>
+      <div class="soapp-row"><p>Exam Date:</p><p>April 15, 2026 | 7:30 AM</p></div>
+      <div class="soapp-row"><p>Exam Facility:</p><p>COMLAB1 2F</p></div>
+    </div>
+
+    <div class="soapp-section">
+      <h4>Applicant Information</h4>
+      <div class="soapp-row"><p>Email Address:</p><p>juandelacruz1@gmail.com</p></div>
+      <div class="soapp-row"><p>Contact No.:</p><p>+63123 456 7890</p></div>
+    </div>
+
+    <div class="soapp-section">
+      <h4>Address</h4>
+      <div class="soapp-row"><p>Country:</p><p>Philippines</p></div>
+      <div class="soapp-row"><p>Region:</p><p>NCR</p></div>
+      <div class="soapp-row"><p>City/Municipality:</p><p>Caloocan</p></div>
+      <div class="soapp-row"><p>Barangay:</p><p>Brgy 81</p></div>
+      <div class="soapp-row"><p>Home Street:</p><p>81 10th Avenue, Ext. Cor. Grace Park</p></div>
+    </div>
+
+    <div class="soapp-section">
+      <h4>Parent/Guardian Informations</h4>
+      <div class="soapp-row"><p>Name:</p><p>Maria D. Bee</p></div>
+      <div class="soapp-row"><p>Contact No.:</p><p>+63998 765 4321</p></div>
+    </div>
+
+    <div class="soapp-footer">
+      <div class="soapp-applicant-label"><span>Applicant</span></div>
+      <div class="soapp-applicant-number">012345</div>
+    </div>
+
+    <div class="soapp-buttons">
+      <a href="applicationSummary.html" class="btn-back">← Back</a>
+      <button onclick="window.print()" class="btn-download">DOWNLOAD</button>
+    </div>
+  </div>
+
+  <!-- ✅ QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+  <script>
+    // =========================================
+    // GENERATE QR PARA SA SOAPP
+    // =========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const qrContainer = document.getElementById('soappQrCode');
+      if (!qrContainer) return;
+
+      if (typeof QRCode === 'undefined') {
+        console.error('QRCode library not loaded.');
+        return;
+      }
+
+      // Kunin ang data mula sa localStorage
+      const applicantData = JSON.parse(localStorage.getItem('applicantData') || '{}');
+      const applicantId = applicantData.applicantId || '012345';
+      const name = `${applicantData.lastName || 'Delacruz'}, ${applicantData.givenName || 'Juan'}`;
+
+      // Update text fields
+      const idEl = document.getElementById('soappApplicantId');
+      const nameEl = document.getElementById('soappApplicantName');
+      if (idEl) idEl.textContent = `#${applicantId}`;
+      if (nameEl) nameEl.textContent = name;
+
+      // QR data — verification URL + JSON payload
+      const qrData = JSON.stringify({
+        type: 'GRC_SOAPP',
+        applicantId: applicantId,
+        name: name,
+        verifyUrl: `https://grc.edu.ph/verify/${applicantId}`
+      });
+
+      // Generate
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: qrData,
+        width: 100,
+        height: 100,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  </script>
+  <script src="js/applicantGuard.js"></script>
+  <script src="js/applicantCommon.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

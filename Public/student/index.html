@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applicant Portal - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand">
+      <button class="toggle-btn" id="toggleSidebar" aria-label="Toggle sidebar">&#9776;</button>
+      <h1>Global Reciprocal Colleges</h1>
+    </div>
+
+    <div class="header-actions">
+      <button class="header-icon-btn" title="Notifications" aria-label="Notifications">
+        <i class="bi bi-bell"></i>
+        <span class="notification-badge">2</span>
+      </button>
+
+      <div class="profile-dropdown-wrapper">
+        <button class="user-profile" id="profileToggle" aria-label="Open profile menu">
+          <i class="bi bi-person-circle"></i>
+        </button>
+
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
+            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+          </div>
+
+          <div class="profile-dropdown-divider"></div>
+
+          <ul class="profile-dropdown-menu">
+            <li>
+              <a href="studentInformation.html">
+                <i class="bi bi-person-vcard"></i>
+                <span>My Profile</span>
+              </a>
+            </li>
+            <li>
+              <a href="mailto:admissions@grc.edu.ph?subject=Report%20a%20Problem">
+                <i class="bi bi-envelope"></i>
+                <span>Report a problem</span>
+              </a>
+            </li>
+          </ul>
+
+          <div class="profile-dropdown-divider"></div>
+
+          <a href="../login.html" class="profile-dropdown-logout">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log Out</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <div class="admin-container">
+          <div class="admin-sidebar">
+            <div class="admin-sidebar-logo">
+              <img src="../assets/image/grc-logo.png" alt="Logo">
+            </div>
+
+            <ul>
+              <li><a href="index.html" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+              <li><a href="studentInformation.html" data-page="studentInfo"><i class="bi bi-person-vcard"></i><span>Student Information</span></a></li>
+              <li><a href="myApplication.html" data-page="myApplication"><i class="bi bi-file-earmark-text"></i><span>My Application</span></a></li>
+              <li><a href="scheduleExam.html" data-page="scheduleExam"><i class="bi bi-calendar-event"></i><span>Schedule Exam</span></a></li>
+              <li><a href="uploadDocuments.html" data-page="uploadDocuments"><i class="bi bi-cloud-arrow-up"></i><span>Upload Documents</span></a></li>
+              <li><a href="applicationSummary.html" data-page="applicationSummary"><i class="bi bi-clipboard-check"></i><span>Application Summary</span></a></li>
+              <li><a href="examResult.html" data-page="examResult"><i class="bi bi-trophy"></i><span>Exam Result</span></a></li>
+            </ul>
+
+            <div class="sidebar-logout-container">
+              <a href="../login.html" class="btn-primary logout-btn-black">
+                <i class="bi bi-box-arrow-right"></i><span>LOG-OUT</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main-content dashboard-main">
+
+      <div class="dashboard-banner">
+        <div class="banner-left">
+          <p class="banner-greeting" id="bannerGreeting">Good morning,</p>
+          <h1 class="banner-name">
+            <span id="welcomeName">Juan Dela Cruz</span>
+            <i class="bi bi-hand-thumbs-up-fill banner-wave"></i>
+          </h1>
+          <p class="banner-subtext">
+            Applicant ID: <strong id="bannerApplicantId">#012345</strong> &nbsp;•&nbsp;
+            Application Status: <span class="banner-status">In Progress</span>
+          </p>
+        </div>
+        <div class="banner-right">
+          <div class="banner-illustration">
+            <i class="bi bi-mortarboard-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-red"><i class="bi bi-file-earmark-text"></i></div>
+          <div class="stat-info">
+            <p class="stat-label">Application</p>
+            <p class="stat-value">Step 2 of 4</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue"><i class="bi bi-calendar-check"></i></div>
+          <div class="stat-info">
+            <p class="stat-label">Exam Schedule</p>
+            <p class="stat-value" id="examScheduleText">April 15, 2026</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-green"><i class="bi bi-cloud-arrow-up"></i></div>
+          <div class="stat-info">
+            <p class="stat-label">Documents</p>
+            <p class="stat-value">2 of 3 Uploaded</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-orange"><i class="bi bi-clock-history"></i></div>
+          <div class="stat-info">
+            <p class="stat-label">Exam Countdown</p>
+            <p class="stat-value" id="examCountdown">— days left</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card progress-card">
+        <div class="card-header-row">
+          <h3 class="card-title-small">Application Progress</h3>
+          <span class="progress-percent">50% Complete</span>
+        </div>
+        <div class="progress-bar-wrapper">
+          <div class="progress-bar-fill" style="width: 50%;"></div>
+        </div>
+        <div class="stepper">
+          <div class="step completed">
+            <div class="step-circle"><i class="bi bi-check-lg"></i></div>
+            <p class="step-label">Account Setup</p>
+          </div>
+          <div class="step completed">
+            <div class="step-circle"><i class="bi bi-check-lg"></i></div>
+            <p class="step-label">Schedule Exam</p>
+          </div>
+          <div class="step active">
+            <div class="step-circle">3</div>
+            <p class="step-label">Upload Documents</p>
+          </div>
+          <div class="step">
+            <div class="step-circle">4</div>
+            <p class="step-label">Take Exam</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-two-col">
+        <div class="card next-step-card">
+          <div class="next-step-header">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <h3>Next Step</h3>
+          </div>
+          <p class="next-step-desc">
+            Kailangan mo pang i-upload ang <strong>1 document</strong> (PSA Birth Certificate)
+            para makumpleto ang application mo.
+          </p>
+          <a href="uploadDocuments.html" class="btn-primary next-step-btn">
+            Upload Now <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+
+        <div class="card announcements-card">
+          <div class="announcements-header">
+            <i class="bi bi-megaphone-fill"></i>
+            <h3>Announcements</h3>
+          </div>
+          <ul class="announcement-list">
+            <li>
+              <span class="announcement-dot"></span>
+              <div>
+                <p class="announcement-title">Exam fee payment</p>
+                <p class="announcement-date">Php 200.00 — bayaran sa Cashier bago mag-exam</p>
+              </div>
+            </li>
+            <li>
+              <span class="announcement-dot"></span>
+              <div>
+                <p class="announcement-title">Bring valid ID</p>
+                <p class="announcement-date">Required sa exam day — April 15, 2026</p>
+              </div>
+            </li>
+            <li>
+              <span class="announcement-dot"></span>
+              <div>
+                <p class="announcement-title">Arrive 10 minutes early</p>
+                <p class="announcement-date">Computer Lab 1, 2nd Floor</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+
+    </main>
+  </div>
+
+  <script src="js/applicantGuard.js"></script>
+  <script src="js/applicantCommon.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

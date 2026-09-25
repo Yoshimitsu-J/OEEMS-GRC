@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - OEEMS</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="signup-body">
+
+  <nav class="grc-navbar">
+    <div class="grc-navbar-inner">
+      <a href="index.html" class="grc-navbar-brand">
+        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="grc-navbar-logo">
+        <span>OEEMS</span>
+      </a>
+      <ul class="grc-navbar-nav">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#about-us">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="login-wrapper">
+    <div class="login-box">
+      <h2>LOGIN</h2>
+
+      <form id="loginForm">
+        <label for="username">Email / Username</label>
+        <input type="text" id="username" name="username" required placeholder="Enter your username">
+
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+
+        <div class="forgot-pass-container">
+          <a href="#" id="openForgotPassword">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-login">LOGIN</button>
+
+        <div id="message"></div>
+
+        <div class="signup-link-container">
+          Don't have an account? <a href="signUp.html">Sign Up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="forgotPasswordModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <span class="close-modal" id="closeForgotPassword">&times;</span>
+
+      <div id="forgotStep1" class="forgot-step">
+        <h2>Forgot Password?</h2>
+        <p class="otp-help">Enter your email address and we'll send you a verification code.</p>
+        <label for="forgotEmail" class="modal-label">Email Address</label>
+        <input type="email" id="forgotEmail" class="modal-input" placeholder="you@example.com" required>
+        <button id="sendCodeBtn" class="btn-primary btn-block">Send Verification Code</button>
+        <p id="forgotMessage1" class="forgot-message"></p>
+      </div>
+
+      <div id="forgotStep2" class="forgot-step hidden">
+        <h2>Verify Code</h2>
+        <p class="otp-help">Enter the 4-digit code sent to your email.</p>
+        <p class="otp-demo">(Demo Mode: Type <strong>1234</strong> to verify)</p>
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
+          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
+          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
+          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
+        </div>
+        <button id="verifyCodeBtn" class="btn-primary btn-block">Verify Code</button>
+        <p id="forgotMessage2" class="forgot-message"></p>
+      </div>
+
+      <div id="forgotStep3" class="forgot-step hidden">
+        <h2>Reset Password</h2>
+        <p class="otp-help">Choose a new password for your account.</p>
+        <label for="newPassword" class="modal-label">New Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="newPassword" class="modal-input" placeholder="Enter new password">
+          <button type="button" class="toggle-password" id="toggleNewPassword">
+            <i class="bi bi-eye" id="eyeIconNew"></i>
+          </button>
+        </div>
+        <label for="confirmNewPassword" class="modal-label">Confirm Password</label>
+        <div class="password-wrapper">
+          <input type="password" id="confirmNewPassword" class="modal-input" placeholder="Confirm new password">
+          <button type="button" class="toggle-password" id="toggleConfirmNew">
+            <i class="bi bi-eye" id="eyeIconConfirmNew"></i>
+          </button>
+        </div>
+        <button id="resetPasswordBtn" class="btn-primary btn-block">Reset Password</button>
+        <p id="forgotMessage3" class="forgot-message"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

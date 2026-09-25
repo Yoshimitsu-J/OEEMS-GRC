@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEEMS - Admin Schedules</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <div class="top-status-bar">
+    <div class="top-status-left">
+      <button class="mobile-hamburger-btn" onclick="toggleMobileSidebar()"><i class="bi bi-list"></i></button>
+      <span class="hide-on-mobile"><strong>PC No.:</strong> 1</span>
+      <span class="hide-on-mobile"><strong>Session Time:</strong> 00:00:03</span>
+      <span><strong>Status:</strong> <span class="status-active">Active</span></span>
+    </div>
+    <div class="top-status-right">
+      <span class="hide-on-mobile"><strong>Time:</strong> 09:01 PM</span>
+      <span class="hide-on-mobile"><strong>Day:</strong> Monday</span>
+      <span class="hide-on-mobile"><strong>Date:</strong> 08/24/2026</span>
+      <a href="adminLoginPage.html" class="btn-logout-nav">LOG-OUT</a>
+      <span><i class="bi bi-person-circle"></i> <span class="hide-on-mobile">Dr. Esguerra / Admin</span></span>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">
+        <img src="../assets/image/grc-logo.png" alt="Logo">
+      </div>
+      <div>
+        <div class="sidebar-group-title">Main Controls</div>
+        <a href="adminQuickView.html" class="sidebar-btn">Quick View</a>
+        <a href="adminSchedules.html" class="sidebar-btn active">Schedules</a>
+        <a href="adminQuestionnaire.html" class="sidebar-btn">Questionnaire</a>
+        <a href="applicationPage.html" class="sidebar-btn">Applications</a>
+        <a href="adminSystemStatus.html" class="sidebar-btn">System Status</a>
+      </div>
+      <div>
+        <div class="sidebar-group-title">Summaries</div>
+        <a href="adminFacilities.html" class="sidebar-btn">Facilities</a>
+        <a href="adminResults.html" class="sidebar-btn">Results</a>
+      </div>
+    </aside>
+
+    <main class="admin-main-content">
+
+      <!-- =========================================
+           VIEW 1: SCHEDULE MANAGER
+           ========================================= -->
+      <div id="scheduleManagerView">
+        <h2 class="page-title">SCHEDULE MANAGER</h2>
+
+        <div class="schedules-grid">
+
+          <!-- CALENDAR -->
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">CURRENT CONFIGURATION</h4>
+            <div class="calendar-header">
+              <button class="calendar-nav-btn" id="prevMonth"><i class="bi bi-chevron-left"></i></button>
+              <span class="calendar-month-label">APRIL</span>
+              <button class="calendar-nav-btn" id="nextMonth"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div class="admin-calendar-grid" id="adminCalendar"></div>
+            <p class="calendar-note">Note: Click an specific day to view it's informations</p>
+            <div class="schedule-info-box">
+              <h5 class="schedule-info-title">SCHEDULE INFORMATIONS</h5>
+              <div class="schedule-info-row"><span>DATE:</span><span id="infoDate">April 15, 2026</span></div>
+              <div class="schedule-info-row"><span>SCHOOL YEAR:</span><span>2025-2026</span></div>
+              <div class="schedule-info-row"><span>FACILITIES:</span><span>COMLAB1, COMLAB2, COMLAB3</span></div>
+              <div class="schedule-info-row"><span>NO. OF PCs:</span><span>25</span></div>
+            </div>
+            <button class="btn-schedule-action" id="openEditSchedule">EDIT SCHEDULE</button>
+          </div>
+
+          <!-- PC INFORMATIONS -->
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">PERSONAL COMPUTER INFORMATIONS</h4>
+            <div class="pc-legend">
+              <h5 class="pc-legend-title">LEGEND:</h5>
+              <div class="pc-legend-item"><span class="pc-dot pc-dot-working"></span><span>WORKING PROPERLY</span></div>
+              <div class="pc-legend-item"><span class="pc-dot pc-dot-unavailable"></span><span>UNAVAILABLE TO USE</span></div>
+              <div class="pc-legend-item"><span class="pc-dot pc-dot-maintenance"></span><span>MAINTENANCE</span></div>
+            </div>
+            <div class="pc-status-selector">
+              <label>PCs STATUS:</label>
+              <select id="pcLabSelect">
+                <option value="COMLAB1">COMLAB1</option>
+                <option value="COMLAB2">COMLAB2</option>
+                <option value="COMLAB3">COMLAB3</option>
+                <option value="COMLAB4">COMLAB4</option>
+              </select>
+            </div>
+            <div class="pc-status-grid" id="pcStatusGrid"></div>
+            <p class="pc-note">Note: Click on specific PC for change STATUS</p>
+            <button class="btn-schedule-action btn-save-pc" id="savePCStatus">SAVE</button>
+          </div>
+
+          <!-- SUMMARY CHARTS -->
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">SUMMARY CHARTS</h4>
+            <div class="schedule-chart-block">
+              <h5 class="schedule-chart-title">EXAM SCHEDULE FOR THIS MONTH</h5>
+              <div class="schedule-chart-wrapper"><canvas id="examScheduleChart"></canvas></div>
+            </div>
+            <div class="schedule-chart-block">
+              <h5 class="schedule-chart-title">PCs STATUS FOR SELECTED DAY</h5>
+              <div class="schedule-chart-wrapper"><canvas id="pcStatusChart"></canvas></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- =========================================
+           VIEW 2: EDIT SCHEDULE
+           ========================================= -->
+      <div id="editScheduleView" class="hidden">
+        <h2 class="page-title">EDIT SCHEDULE</h2>
+
+        <div class="edit-schedule-grid">
+
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">CONFIGURE EXAMINATION DAY SCHEDULE</h4>
+            <div class="calendar-header">
+              <button class="calendar-nav-btn" id="prevMonthEdit"><i class="bi bi-chevron-left"></i></button>
+              <span class="calendar-month-label">APRIL</span>
+              <button class="calendar-nav-btn" id="nextMonthEdit"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div class="admin-calendar-grid" id="editCalendar"></div>
+            <p class="calendar-note">Note: Click to <strong>MARK AS AVAILABLE</strong> a specific day</p>
+          </div>
+
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">BATCH SCHEDULE</h4>
+            <div class="edit-date-info">
+              <span><strong>DATE(S):</strong> APRIL 25 TO APRIL 29</span>
+              <span><strong>SET TIME |</strong> USE 24 HOURS FORMAT</span>
+            </div>
+            <div class="batch-table">
+              <div class="batch-header">
+                <span>BATCH</span><span>START AT</span><span>END AT</span>
+              </div>
+              <div class="batch-row">
+                <span>BATCH 1</span>
+                <input type="time" value="07:00" class="batch-time">
+                <input type="time" value="09:00" class="batch-time">
+              </div>
+              <div class="batch-row">
+                <span>BATCH 2</span>
+                <input type="time" value="09:00" class="batch-time">
+                <input type="time" value="11:00" class="batch-time">
+              </div>
+              <div class="batch-row">
+                <span>New Batch <button class="btn-add-batch">+</button></span>
+                <input type="time" value="13:00" class="batch-time">
+                <input type="time" value="15:00" class="batch-time">
+              </div>
+            </div>
+            <button class="btn-schedule-action btn-save-changes" id="saveScheduleChanges">SAVE CHANGES</button>
+            <button class="btn-schedule-action btn-cancel-edit" id="cancelEditSchedule">CANCEL</button>
+          </div>
+
+          <div class="table-card schedule-col">
+            <h4 class="schedule-section-title">EXAM SCHEDULE</h4>
+            <div class="schedule-chart-wrapper-large"><canvas id="editScheduleChart"></canvas></div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/adminCommon.js"></script>
+  <script src="js/adminSchedules.js"></script>
+</body>
+</html>

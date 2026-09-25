@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEEMS - Admin Questionnaire</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="admin-body">
+
+  <!-- TOP STATUS BAR -->
+  <div class="top-status-bar">
+    <div class="top-status-left">
+      <button class="mobile-hamburger-btn" onclick="toggleMobileSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="hide-on-mobile"><strong>PC No.:</strong> 1</span>
+      <span class="hide-on-mobile"><strong>Session Time:</strong> 00:00:03</span>
+      <span><strong>Status:</strong> <span class="status-active">Active</span></span>
+    </div>
+    <div class="top-status-right">
+      <span class="hide-on-mobile"><strong>Time:</strong> 09:01 PM</span>
+      <span class="hide-on-mobile"><strong>Day:</strong> Monday</span>
+      <span class="hide-on-mobile"><strong>Date:</strong> 08/24/2026</span>
+      <a href="adminLoginPage.html" class="btn-logout-nav">LOG-OUT</a>
+      <span><i class="bi bi-person-circle"></i> <span class="hide-on-mobile">Dr. Esguerra / Admin</span></span>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">
+        <img src="../assets/image/grc-logo.png" alt="Logo">
+      </div>
+      <div>
+        <div class="sidebar-group-title">Main Controls</div>
+        <a href="adminQuickView.html" class="sidebar-btn">Quick View</a>
+        <a href="adminSchedules.html" class="sidebar-btn">Schedules</a>
+        <a href="adminQuestionnaire.html" class="sidebar-btn active">Questionnaire</a>
+        <a href="applicationPage.html" class="sidebar-btn">Applications</a>
+        <a href="adminSystemStatus.html" class="sidebar-btn">System Status</a>
+      </div>
+      <div>
+        <div class="sidebar-group-title">Summaries</div>
+        <a href="adminFacilities.html" class="sidebar-btn">Facilities</a>
+        <a href="adminResults.html" class="sidebar-btn">Results</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main-content">
+      <h2 class="page-title">QUESTIONNAIRE</h2>
+
+      <div class="questionnaire-container">
+
+        <!-- =========================================
+             COLUMN 1: CATEGORIES
+             ========================================= -->
+        <div class="questionnaire-sidebar">
+
+          <!-- Category Selector -->
+          <div class="q-form-group">
+            <label class="q-label">Select Category</label>
+            <select id="categorySelect" class="q-select">
+              <option value="Logical reasoning">Logical reasoning</option>
+              <option value="Abstract">Abstract</option>
+              <option value="Filipino">Filipino</option>
+              <option value="English">English</option>
+              <option value="Math">Math</option>
+            </select>
+          </div>
+
+          <!-- Add New Category -->
+          <div class="q-form-group">
+            <label class="q-label">Add New Category</label>
+            <div class="q-add-category-row">
+              <input type="text" id="newCategoryInput" class="q-input" placeholder="Enter category name">
+              <button class="q-add-btn" id="addCategoryBtn" title="Add Category">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Categories List -->
+          <h4 class="q-categories-title">CATEGORIES</h4>
+          <ul class="q-categories-list" id="categoriesList">
+            <!-- Will be populated by JS -->
+          </ul>
+
+          <!-- Save Changes -->
+          <button class="q-save-btn" id="saveChangesBtn">SAVE CHANGES</button>
+          <p class="q-note">Note: On going exam will reload</p>
+
+          <!-- OR Divider -->
+          <div class="q-or-divider">OR</div>
+
+          <!-- Import/Export -->
+          <button class="q-import-btn" id="importBtn">
+            <i class="bi bi-upload"></i> IMPORT .json
+          </button>
+          <input type="file" id="importFile" accept=".json" hidden>
+
+          <button class="q-export-btn" id="exportBtn">
+            <i class="bi bi-download"></i> EXPORT AS .json
+          </button>
+
+          <p class="q-account-note">WILL COMMIT BY ACCOUNT ID: <strong>123456</strong></p>
+        </div>
+
+        <!-- =========================================
+             COLUMN 2: QUESTION EDITOR
+             ========================================= -->
+        <div class="questionnaire-editor-area">
+          <div class="q-questions-header">
+            <span class="q-current-category" id="currentCategoryDisplay">Logical reasoning</span>
+            <button class="q-add-question-btn" id="addQuestionBtn">
+              <i class="bi bi-plus-lg"></i> Add Question
+            </button>
+          </div>
+
+          <div id="questionsContainer" class="q-questions-container">
+            <!-- Questions will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- =========================================
+             COLUMN 3: SUMMARY
+             ========================================= -->
+        <div class="questionnaire-summary">
+          <h3 class="q-summary-title">SUMMARY</h3>
+          <div id="summaryContent">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/adminCommon.js"></script>
+  <script src="js/adminQuestionnaire.js"></script>
+</body>
+</html>

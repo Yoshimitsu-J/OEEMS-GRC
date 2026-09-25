@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Application - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand">
+      <button class="toggle-btn" id="toggleSidebar" aria-label="Toggle sidebar">&#9776;</button>
+      <h1>Global Reciprocal Colleges</h1>
+    </div>
+
+    <div class="header-actions">
+      <button class="header-icon-btn" title="Notifications"><i class="bi bi-bell"></i><span class="notification-badge">2</span></button>
+      <div class="profile-dropdown-wrapper">
+        <button class="user-profile" id="profileToggle"><i class="bi bi-person-circle"></i></button>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
+            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
+            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+          <ul class="profile-dropdown-menu">
+            <li><a href="studentInformation.html"><i class="bi bi-person-vcard"></i><span>My Profile</span></a></li>
+            <li><a href="mailto:admissions@grc.edu.ph?subject=Report%20a%20Problem"><i class="bi bi-envelope"></i><span>Report a problem</span></a></li>
+          </ul>
+          <div class="profile-dropdown-divider"></div>
+          <a href="../login.html" class="profile-dropdown-logout"><i class="bi bi-box-arrow-right"></i><span>Log Out</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <div class="admin-container">
+          <div class="admin-sidebar">
+            <div class="admin-sidebar-logo"><img src="../assets/image/grc-logo.png" alt="Logo"></div>
+            <ul>
+              <li><a href="index.html" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+              <li><a href="studentInformation.html" data-page="studentInfo"><i class="bi bi-person-vcard"></i><span>Student Information</span></a></li>
+              <li><a href="myApplication.html" data-page="myApplication"><i class="bi bi-file-earmark-text"></i><span>My Application</span></a></li>
+              <li><a href="scheduleExam.html" data-page="scheduleExam"><i class="bi bi-calendar-event"></i><span>Schedule Exam</span></a></li>
+              <li><a href="uploadDocuments.html" data-page="uploadDocuments"><i class="bi bi-cloud-arrow-up"></i><span>Upload Documents</span></a></li>
+              <li><a href="applicationSummary.html" data-page="applicationSummary"><i class="bi bi-clipboard-check"></i><span>Application Summary</span></a></li>
+              <li><a href="examResult.html" data-page="examResult"><i class="bi bi-trophy"></i><span>Exam Result</span></a></li>
+            </ul>
+            <div class="sidebar-logout-container">
+              <a href="../login.html" class="btn-primary logout-btn-black"><i class="bi bi-box-arrow-right"></i><span>LOG-OUT</span></a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h1 class="card-title">My Application</h1>
+
+      <div class="card">
+        <div class="app-map-top">
+          <h2 class="app-map-title">APPLICATION MAP GUIDE</h2>
+          <div class="app-map-info">
+            <p><strong>APPLICATION STATUS:</strong> In Progress</p>
+            <p><strong>APPLICANT:</strong> Delacruz, Juan</p>
+            <p><strong>APPLICANT ID:</strong> 012345</p>
+            <p><strong>DATE:</strong> April 1, 2026</p>
+          </div>
+        </div>
+
+        <div class="step-map-grid">
+          <div class="step-map-item">
+            <div class="step-map-top-row">
+              <div class="step-num-circle">1</div>
+              <div class="step-connector"></div>
+              <div class="step-num-circle">2</div>
+            </div>
+            <div class="step-map-body">
+              <div class="step-content">
+                <a href="scheduleExam.html" class="step-box">
+                  <span class="step-box-label">Schedule Me</span>
+                  <i class="bi bi-calendar2-week step-box-icon"></i>
+                </a>
+                <p class="step-desc">*Look for available days &amp; batch and apply</p>
+              </div>
+              <div class="step-content">
+                <a href="uploadDocuments.html" class="step-box">
+                  <span class="step-box-label">Upload Documents</span>
+                  <i class="bi bi-file-earmark-arrow-up step-box-icon"></i>
+                </a>
+                <p class="step-desc">*Upload the required documents that will be inspected by our Admission staff</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="step-map-item">
+            <div class="step-map-top-row">
+              <div class="step-num-circle">3</div>
+              <div class="step-connector"></div>
+              <div class="step-num-circle">4</div>
+            </div>
+            <div class="step-map-body">
+              <div class="step-content">
+                <a href="applicationSummary.html" class="step-box">
+                  <span class="step-box-label">Application Confirmation</span>
+                  <i class="bi bi-clipboard2-check step-box-icon"></i>
+                </a>
+                <p class="step-desc">*Approval of Application from Admission</p>
+              </div>
+              <div class="step-content">
+                <a href="takeExam.html" class="step-box">
+                  <span class="step-box-label">Download SOApp</span>
+                  <i class="bi bi-file-earmark-arrow-down step-box-icon"></i>
+                </a>
+                <p class="step-desc">*Download your Statement of Application Document</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="app-actions-grid">
+          <a href="scheduleExam.html" class="btn-grid-item btn-primary"><i class="bi bi-calendar-event"></i> Schedule Me</a>
+          <a href="uploadDocuments.html" class="btn-grid-item btn-primary"><i class="bi bi-cloud-arrow-up"></i> Upload Documents</a>
+          <a href="applicationSummary.html" class="btn-grid-item btn-secondary"><i class="bi bi-clipboard-check"></i> Application Summary</a>
+          <a href="takeExam.html" class="btn-grid-item btn-primary"><i class="bi bi-pencil-square"></i> Take Exam</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/applicantGuard.js"></script>
+  <script src="js/applicantCommon.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

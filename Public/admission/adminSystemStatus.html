@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEEMS - Admin System Status</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <!-- TOP STATUS BAR -->
+  <div class="top-status-bar">
+    <div class="top-status-left">
+      <button class="mobile-hamburger-btn" onclick="toggleMobileSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="hide-on-mobile"><strong>PC No.:</strong> 1</span>
+      <span class="hide-on-mobile"><strong>Session Time:</strong> 00:00:03</span>
+      <span><strong>Status:</strong> <span class="status-active">Active</span></span>
+    </div>
+    <div class="top-status-right">
+      <span class="hide-on-mobile"><strong>Time:</strong> 09:01 PM</span>
+      <span class="hide-on-mobile"><strong>Day:</strong> Monday</span>
+      <span class="hide-on-mobile"><strong>Date:</strong> 08/24/2026</span>
+      <a href="adminLoginPage.html" class="btn-logout-nav">LOG-OUT</a>
+      <span><i class="bi bi-person-circle"></i> <span class="hide-on-mobile">Dr. Esguerra / Admin</span></span>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">
+        <img src="../assets/image/grc-logo.png" alt="Logo">
+      </div>
+      <div>
+        <div class="sidebar-group-title">Main Controls</div>
+        <a href="adminQuickView.html" class="sidebar-btn">Quick View</a>
+        <a href="adminSchedules.html" class="sidebar-btn">Schedules</a>
+        <a href="adminQuestionnaire.html" class="sidebar-btn">Questionnaire</a>
+        <a href="applicationPage.html" class="sidebar-btn">Applications</a>
+        <a href="adminSystemStatus.html" class="sidebar-btn active">System Status</a>
+      </div>
+      <div>
+        <div class="sidebar-group-title">Summaries</div>
+        <a href="adminFacilities.html" class="sidebar-btn">Facilities</a>
+        <a href="adminResults.html" class="sidebar-btn">Results</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main-content">
+      <h2 class="page-title">SYSTEM STATUS</h2>
+
+      <!-- =========================================
+           ROW 1: 4 DONUT CHARTS
+           ========================================= -->
+      <div class="status-charts-row">
+
+        <!-- CHART 1: Student Results Storage -->
+        <div class="table-card status-chart-card">
+          <h4 class="status-chart-title">STUDENT RESULTS STORAGE</h4>
+          <div class="status-legend">
+            <span><span class="legend-dot legend-red"></span> Used</span>
+            <span><span class="legend-dot legend-green"></span> Available</span>
+          </div>
+          <div class="status-chart-wrapper">
+            <canvas id="studentResultsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- CHART 2: Accounts Storage -->
+        <div class="table-card status-chart-card">
+          <h4 class="status-chart-title">ACCOUNTS STORAGE</h4>
+          <div class="status-legend">
+            <span><span class="legend-dot legend-orange"></span> Created</span>
+            <span><span class="legend-dot legend-green"></span> Available</span>
+          </div>
+          <div class="status-chart-wrapper">
+            <canvas id="accountsStorageChart"></canvas>
+          </div>
+        </div>
+
+        <!-- CHART 3: OEES Users -->
+        <div class="table-card status-chart-card">
+          <h4 class="status-chart-title">OEES USERS</h4>
+          <div class="status-legend">
+            <span><span class="legend-dot legend-dark"></span> Offline</span>
+            <span><span class="legend-dot legend-green"></span> Online</span>
+          </div>
+          <div class="status-chart-wrapper">
+            <canvas id="oeesUsersChart"></canvas>
+          </div>
+        </div>
+
+        <!-- CHART 4: Admission OEEMS Users -->
+        <div class="table-card status-chart-card">
+          <h4 class="status-chart-title">ADMISSION OEEMS USERS</h4>
+          <div class="status-legend">
+            <span><span class="legend-dot legend-dark"></span> Offline</span>
+            <span><span class="legend-dot legend-green"></span> Online</span>
+          </div>
+          <div class="status-chart-wrapper">
+            <canvas id="admissionUsersChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =========================================
+           ROW 2: 3 INFO PANELS
+           ========================================= -->
+      <div class="status-info-row">
+
+        <!-- PANEL 1: Storage Details -->
+        <div class="table-card status-info-panel">
+          <h4 class="status-info-title">STUDENT RESULTS STORAGE</h4>
+          <div class="storage-row">
+            <span class="storage-label">Capacity:</span>
+            <span class="storage-value">100TB</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">Used:</span>
+            <span class="storage-value">25,600 GB</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">Available:</span>
+            <span class="storage-value available-value">76,800 GB</span>
+          </div>
+
+          <h4 class="status-info-title mt-20">ACCOUNTS STORAGE</h4>
+          <div class="storage-row">
+            <span class="storage-label">Capacity:</span>
+            <span class="storage-value">100TB</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">Used:</span>
+            <span class="storage-value">25,600 GB</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">Available:</span>
+            <span class="storage-value available-value">76,800 GB</span>
+          </div>
+        </div>
+
+        <!-- PANEL 2: Device Information -->
+        <div class="table-card status-info-panel">
+          <h4 class="status-info-title red-title">YOUR DEVICE INFORMATIONS</h4>
+
+          <div class="device-row">
+            <span class="device-label">Device Name:</span>
+            <span class="device-value">PC-ADMISSION-01</span>
+          </div>
+
+          <div class="device-row">
+            <span class="device-label">IP Address:</span>
+            <span class="device-value">192.1**.***.*** (static)</span>
+          </div>
+
+          <div class="device-row">
+            <span class="device-label">PC Status:</span>
+            <span class="device-value status-online">
+              <i class="bi bi-wifi"></i> Connected to Internet
+            </span>
+          </div>
+        </div>
+
+        <!-- PANEL 3: User | Admission -->
+        <div class="table-card status-info-panel user-panel">
+          <h4 class="status-info-title red-title">USER | Admission</h4>
+
+          <div class="user-row">
+            <span class="user-label">NAME:</span>
+            <span class="user-value">Juan Antonio Delacruz</span>
+          </div>
+
+          <div class="user-row">
+            <span class="user-label">STATUS:</span>
+            <span class="user-value user-active">Active</span>
+          </div>
+
+          <div class="user-row">
+            <span class="user-label">LOGGED IN:</span>
+            <span class="user-value">1 hour ago</span>
+          </div>
+
+          <div class="user-row">
+            <span class="user-label">ACCOUNT ID:</span>
+            <span class="user-value">123456</span>
+          </div>
+
+          <div class="user-row user-row-stack">
+            <span class="user-label">CONTACT:</span>
+            <span class="user-value">+63912-345-6789 | juandelacruz@gmail.com</span>
+          </div>
+
+          <div class="user-row">
+            <span class="user-label">ROLE:</span>
+            <span class="user-value">Coordinator</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/adminCommon.js"></script>
+  <script src="js/adminSystemStatus.js"></script>
+</body>
+</html>

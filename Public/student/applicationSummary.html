@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Summary - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand">
+      <button class="toggle-btn" id="toggleSidebar">&#9776;</button>
+      <h1>Global Reciprocal Colleges</h1>
+    </div>
+    <div class="header-actions">
+      <button class="header-icon-btn" title="Notifications"><i class="bi bi-bell"></i><span class="notification-badge">2</span></button>
+      <div class="profile-dropdown-wrapper">
+        <button class="user-profile" id="profileToggle"><i class="bi bi-person-circle"></i></button>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
+            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
+            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+          <ul class="profile-dropdown-menu">
+            <li><a href="studentInformation.html"><i class="bi bi-person-vcard"></i><span>My Profile</span></a></li>
+            <li><a href="mailto:admissions@grc.edu.ph?subject=Report%20a%20Problem"><i class="bi bi-envelope"></i><span>Report a problem</span></a></li>
+          </ul>
+          <div class="profile-dropdown-divider"></div>
+          <a href="../login.html" class="profile-dropdown-logout"><i class="bi bi-box-arrow-right"></i><span>Log Out</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <div class="admin-container">
+          <div class="admin-sidebar">
+            <div class="admin-sidebar-logo"><img src="../assets/image/grc-logo.png" alt="Logo"></div>
+            <ul>
+              <li><a href="index.html" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+              <li><a href="studentInformation.html" data-page="studentInfo"><i class="bi bi-person-vcard"></i><span>Student Information</span></a></li>
+              <li><a href="myApplication.html" data-page="myApplication"><i class="bi bi-file-earmark-text"></i><span>My Application</span></a></li>
+              <li><a href="scheduleExam.html" data-page="scheduleExam"><i class="bi bi-calendar-event"></i><span>Schedule Exam</span></a></li>
+              <li><a href="uploadDocuments.html" data-page="uploadDocuments"><i class="bi bi-cloud-arrow-up"></i><span>Upload Documents</span></a></li>
+              <li><a href="applicationSummary.html" data-page="applicationSummary"><i class="bi bi-clipboard-check"></i><span>Application Summary</span></a></li>
+              <li><a href="examResult.html" data-page="examResult"><i class="bi bi-trophy"></i><span>Exam Result</span></a></li>
+            </ul>
+            <div class="sidebar-logout-container">
+              <a href="../login.html" class="btn-primary logout-btn-black"><i class="bi bi-box-arrow-right"></i><span>LOG-OUT</span></a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="card">
+        <h1 class="card-title text-center">Application Summary</h1>
+
+        <div class="summary-header">
+          <div class="summary-qr-box">
+            <div id="summaryQrCode" class="summary-qr-image"></div>
+            <p class="summary-qr-label">Scan Me</p>
+          </div>
+          <div class="summary-name-box">
+            <h2 id="summaryName">Juan Delacruz</h2>
+            <p id="summaryEmail">juandelacruz1@gmail.com</p>
+          </div>
+        </div>
+
+        <table class="summary-table">
+          <tr><td>Sex</td><td>Male</td></tr>
+          <tr><td>Address</td><td>81 10th Avenue, Ext. Cor. Grace Park, Caloocan City, Barangay 81, NCR, Philippines</td></tr>
+          <tr><td>Phone Number</td><td>09123456789</td></tr>
+          <tr><td>Account Creation Date</td><td>April 01, 2026</td></tr>
+          <tr><td>Booking Exam Date</td><td>April 01, 2026</td></tr>
+          <tr><td>Amount of Exam</td><td>Php 200.00</td></tr>
+          <tr><td>Examination Schedule</td><td>April 15, 2026, Wednesday</td></tr>
+          <tr><td>Examination Time</td><td>7:30 - 9:30 AM</td></tr>
+          <tr><td>Exam Facility Location</td><td>Computer Lab 1, 2nd Floor</td></tr>
+        </table>
+
+        <p class="summary-disclaimer">
+          *This is not valid for taking Entrance Examination. Wait for your application to be approved by admission and receive an Statement of Application.
+        </p>
+
+        <div class="summary-actions">
+          <button class="btn-primary btn-download-summary" onclick="window.location.href='statementOfApplication.html'">DOWNLOAD SUMMARY</button>
+          <button class="btn-secondary" id="openDisclaimer">READ DISCLAIMER</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="disclaimerModal" class="modal-overlay hidden">
+    <div class="modal-card disclaimer-card">
+      <span class="close-modal" id="closeDisclaimer">&times;</span>
+      <h1 class="disclaimer-title">Disclaimer!</h1>
+      <p class="disclaimer-intro">
+        To ensure the safety and security inside of exam facility, Please read these rules that you gonna strictly follow:
+      </p>
+
+      <ol class="disclaimer-list">
+        <li><strong>Valid Identification:</strong> Show the E-Document that OEEMS provides to ensure the person is the same person who applied.</li>
+        <li><strong>Reporting Time:</strong> Please be arrived at the exam facility at least 10 minutes early before the exam starts.</li>
+        <li><strong>Assigned Seating:</strong> Examinees must sit only on their designated desk. Switching seats without authorization is grounds for disqualification.</li>
+        <li><strong>Electronic Gadgets:</strong> Smartphones, tablets, Bluetooth devices, and programmable calculators are prohibited inside of the exam facility.</li>
+        <li><strong>Silence:</strong> Absolute silence must be maintained. Any communication—verbal or non-verbal—between examinees will be treated as malpractice.</li>
+        <li><strong>Query Handling:</strong> If an examinee has a question regarding a PC malfunction or exam malfunction, they must raise their hand and wait for a facilitator.</li>
+        <li><strong>Cheating:</strong> Using any unauthorized materials or looking at another examinees PC.</li>
+        <li><strong>Impersonation:</strong> Having someone else take the exam on your behalf.</li>
+        <li><strong>Disruption:</strong> Creating a disturbance or behaving rudely toward facilitators.</li>
+        <li><strong>Sharing Online:</strong> Attempting to share the Exam Question's online illegally, will be facing consequences.</li>
+      </ol>
+
+      <button id="okDisclaimer" class="btn-disclaimer-ok">OK</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="js/applicantGuard.js"></script>
+  <script src="js/applicantCommon.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/disclaimer.js"></script>
+  <script src="js/applicationSummary.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set-up Your Account - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/setUp.css">
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand">
+      <img src="../assets/image/grc-logo.png" alt="GRC Logo" class="header-logo">
+      <h1>Global Reciprocal Colleges</h1>
+    </div>
+  </header>
+
+  <div class="setup-wrapper">
+
+    <!-- =========================================
+         STEP 1: PERSONAL INFO
+         ========================================= -->
+    <div class="setup-card" id="setupCard">
+      <h1 class="setup-title">SET-UP YOUR ACCOUNT</h1>
+
+      <form id="setUpForm">
+        <div class="form-group-setup">
+          <label>Last Name:</label>
+          <input type="text" id="lastName" class="setup-input" placeholder="e.g Delacruz" required>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Given Name:</label>
+          <input type="text" id="givenName" class="setup-input" placeholder="e.g Juan" required>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Middle Name:</label>
+          <input type="text" id="middleName" class="setup-input" placeholder="Optional">
+        </div>
+
+        <button type="submit" class="btn-next">NEXT</button>
+        <p id="setUpMessage" class="setUp-message"></p>
+      </form>
+    </div>
+
+    <!-- =========================================
+         STEP 2: STUDENT INFORMATION
+         ========================================= -->
+    <div class="setup-card hidden" id="studentInfoCard">
+      <h1 class="setup-title">STUDENT INFORMATION</h1>
+
+      <form id="studentInfoForm">
+        <div class="form-group-setup">
+          <label>Sex:</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="sex" value="Male" required> Male
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="sex" value="Female"> Female
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Birthday:</label>
+          <input type="date" id="birthday" class="setup-input" required>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Phone Number:</label>
+          <div class="phone-wrapper">
+            <span class="phone-prefix">+63</span>
+            <input type="tel" id="phone" class="setup-input phone-input" placeholder="Optional">
+          </div>
+        </div>
+
+        <!-- ✅ COUNTRY (Dynamic) -->
+        <div class="form-group-setup">
+          <label for="country">Country:</label>
+          <select id="country" class="setup-input" required>
+            <option value="">Select Country</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <!-- ✅ REGION (Dynamic based sa Country) -->
+        <div class="form-group-setup">
+          <label for="region">Region:</label>
+          <select id="region" class="setup-input" required disabled>
+            <option value="">Select Region</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <!-- ✅ CITY/MUNICIPALITY (Dynamic based sa Region) -->
+        <div class="form-group-setup">
+          <label for="city">City / Municipality:</label>
+          <select id="city" class="setup-input" required disabled>
+            <option value="">Select City</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <!-- ✅ BARANGAY (Dynamic based sa City) -->
+        <div class="form-group-setup">
+          <label for="barangay">Barangay:</label>
+          <select id="barangay" class="setup-input" required disabled>
+            <option value="">Select Barangay</option>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Street Address:</label>
+          <input type="text" id="streetAddress" class="setup-input" placeholder="House No., Street Name" required>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Guardian's Name:</label>
+          <input type="text" id="guardianName" class="setup-input" placeholder="Full Name of Parent/Guardian" required>
+        </div>
+
+        <div class="form-group-setup">
+          <label>Guardian's Phone Number:</label>
+          <div class="phone-wrapper">
+            <span class="phone-prefix">+63</span>
+            <input type="tel" id="guardianPhone" class="setup-input phone-input" placeholder="Guardian's Phone" required>
+          </div>
+        </div>
+
+        <div class="form-group-setup checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="termsCheck" required>
+            I agree to <a href="#" class="terms-link" id="openTerms">Terms &amp; Conditions</a>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-next">Go to Student Dashboard</button>
+        <p id="studentInfoMessage" class="setUp-message"></p>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- =========================================
+       TERMS & CONDITIONS MODAL
+       ========================================= -->
+  <div id="termsModal" class="modal-overlay hidden">
+    <div class="modal-card terms-modal-card">
+      <span class="close-modal" id="closeTerms">&times;</span>
+      <h2 class="terms-title">Terms &amp; Conditions</h2>
+      <p class="terms-subtitle">Global Reciprocal Colleges — Online Entrance Examination Management System (OEEMS)</p>
+
+      <div class="terms-body">
+        <h3>1. Acceptance of Terms</h3>
+        <p>Sa pag-register at paggamit ng OEEMS, ikaw ay sumasang-ayon sa lahat ng terms and conditions na nakasaad dito. Kung hindi ka sumasang-ayon, huwag gamitin ang system.</p>
+
+        <h3>2. Eligibility</h3>
+        <p>Ang OEEMS ay para lamang sa mga applicant na gustong kumuha ng entrance examination sa Global Reciprocal Colleges. Kailangan mong magbigay ng tumpak at totoong impormasyon.</p>
+
+        <h3>3. Account Responsibility</h3>
+        <p>Ikaw ay responsable sa seguridad ng iyong account. Huwag ibahagi ang iyong username at password sa iba. Ang lahat ng aktibidad na nangyayari sa iyong account ay iyong pananagutan.</p>
+
+        <h3>4. Data Privacy</h3>
+        <p>Ang lahat ng personal na impormasyon na iyong ibibigay ay itatago nang mahigpit at gagamitin lamang para sa admission purposes. Sumasang-ayon ka sa pagproseso ng iyong data ayon sa Data Privacy Act of 2012.</p>
+
+        <h3>5. Examination Rules</h3>
+        <p>Sa panahon ng examination, dapat mong sundin ang lahat ng rules at regulations ng GRC. Ang anumang paglabag ay maaaring humantong sa disqualification.</p>
+
+        <h3>6. Document Submission</h3>
+        <p>Kailangan mong isumite ang lahat ng required na dokumento (Form 138, PSA Birth Certificate, Good Moral, 2x2 Picture) para makumpleto ang iyong application.</p>
+
+        <h3>7. Fees and Payments</h3>
+        <p>May bayad ang entrance examination (Php 200.00). Ang bayad ay hindi maibabalik kahit hindi ka makapag-exam.</p>
+
+        <h3>8. Code of Conduct</h3>
+        <p>Dapat kang maging tapat sa lahat ng oras. Ang pandadaya, pagpapanggap, o anumang maling gawain ay may kaukulang parusa.</p>
+
+        <h3>9. Changes to Terms</h3>
+        <p>Ang GRC ay may karapatang baguhin ang mga terms na ito anumang oras. Ang patuloy na paggamit ng system ay nangangahulugan ng iyong pagsang-ayon sa mga pagbabago.</p>
+
+        <h3>10. Contact Information</h3>
+        <p>Para sa mga katanungan, maaari kang mag-email sa <strong>admissions@grc.edu.ph</strong> o tumawag sa <strong>+63 2 8123 4567</strong>.</p>
+      </div>
+
+      <div class="terms-actions">
+        <button class="btn-decline" id="declineTerms">DECLINE</button>
+        <button class="btn-approve" id="acceptTerms">I AGREE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/setUp.js"></script>
+</body>
+</html>

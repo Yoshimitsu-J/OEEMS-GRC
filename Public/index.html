@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Global Reciprocal Colleges - Entrance Exam Portal</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header>
+    <nav class="navbar-grc">
+      <a href="index.html" class="brand-link-disabled">
+        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="brand-logo" />
+      </a>
+
+      <ul class="desktop-nav">
+        <li><a href="#" class="disabled-link" aria-disabled="true">Home</a></li>
+        <li><a href="#" class="disabled-link" aria-disabled="true">Events</a></li>
+
+        <li class="has-dropdown">
+          <a href="#" class="dropdown-btn disabled-link" aria-disabled="true">
+            Academics <i class="bi bi-chevron-down"></i>
+          </a>
+          <ul class="desktop-dropdown">
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Business Administration</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Entrepreneurship</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Accountancy</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Education</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Computer Studies</a></li>
+          </ul>
+        </li>
+
+        <li><a href="#" class="disabled-link" aria-disabled="true">Downloadable Forms</a></li>
+
+        <!-- ✅ STUDENT SERVICES — toggle open, items disabled except Login + Signup -->
+        <li class="has-dropdown">
+          <a href="#" class="dropdown-btn">
+            Student Services <i class="bi bi-chevron-down"></i>
+          </a>
+          <ul class="desktop-dropdown">
+            <li><a href="#" class="disabled-link" aria-disabled="true">Admissions</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Library</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Scholarship</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Office of the Student Affairs</a></li>
+            <!-- ✅ ENABLED -->
+            <li><a href="login.html">Login to OEEMS (Student)</a></li>
+          </ul>
+        </li>
+
+        <li class="has-dropdown">
+          <a href="#" class="dropdown-btn disabled-link" aria-disabled="true">
+            Alumni Services <i class="bi bi-chevron-down"></i>
+          </a>
+          <ul class="desktop-dropdown">
+            <li><a href="#" class="disabled-link" aria-disabled="true">Alumni Tracer</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Testimonials</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Job Offers</a></li>
+          </ul>
+        </li>
+
+        <li><a href="#" class="disabled-link" aria-disabled="true">Contact Us</a></li>
+        <li><a href="#" class="disabled-link" aria-disabled="true">About Us</a></li>
+      </ul>
+
+      <button id="openDrawerBtn" class="hamburger-landing" aria-label="Open Menu">&#9776;</button>
+    </nav>
+  </header>
+
+  <!-- =========================================
+       MOBILE DRAWER
+       ========================================= -->
+  <div id="navDrawerOverlay" class="drawer-overlay hidden">
+    <div class="drawer-container">
+      <div class="drawer-header">
+        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="drawer-logo" />
+        <button id="closeDrawerBtn" class="btn-close-drawer">&times;</button>
+      </div>
+      <ul class="drawer-menu">
+        <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">Home</a></li>
+        <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">Events</a></li>
+
+        <li class="menu-item">
+          <button class="dropdown-toggle disabled-btn" disabled>
+            Academics <i class="bi bi-chevron-down"></i>
+          </button>
+          <ul class="submenu hidden">
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Business Administration</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Entrepreneurship</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Accountancy</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Education</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">College of Computer Studies</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item">
+          <button class="dropdown-toggle disabled-btn" disabled>
+            Downloadable Forms <i class="bi bi-chevron-down"></i>
+          </button>
+          <ul class="submenu hidden">
+            <li><a href="#" class="disabled-link" aria-disabled="true">Admission Form</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Student Application Form</a></li>
+          </ul>
+        </li>
+
+        <!-- ✅ STUDENT SERVICES — toggle functional, items enabled for login + signup -->
+        <li class="menu-item">
+          <button class="dropdown-toggle">
+            Student Services <i class="bi bi-chevron-down"></i>
+          </button>
+          <ul class="submenu hidden">
+            <li><a href="#" class="disabled-link" aria-disabled="true">Admissions</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Library</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Scholarship</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Office of the Student Affairs</a></li>
+            <!-- ✅ ENABLED -->
+            <li><a href="login.html" class="drawer-close-link">Login to OEEMS (Student)</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item">
+          <button class="dropdown-toggle disabled-btn" disabled>
+            Alumni Services <i class="bi bi-chevron-down"></i>
+          </button>
+          <ul class="submenu hidden">
+            <li><a href="#" class="disabled-link" aria-disabled="true">Alumni Tracer</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Testimonials</a></li>
+            <li><a href="#" class="disabled-link" aria-disabled="true">Job Offers</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">Contact Us</a></li>
+        <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">About Us</a></li>
+
+        <!-- ✅ Direct link sa drawer -->
+        <li class="menu-item">
+          <a href="signUp.html" class="drawer-close-link">Apply / Register for Entrance Exam</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <main id="home">
+    <div class="grc-hero-bg">
+      <div class="hero-content">
+        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="grc-logo" />
+        <h1>GLOBAL RECIPROCAL COLLEGES</h1>
+        <p>Touching Hearts, Renewing Minds, Transforming Lives</p>
+        <div class="hero-cta-row">
+          <!-- ✅ Original signup button — same color, clickable -->
+          <a href="signUp.html" class="btn-grc-landing">Apply / Register for Entrance Exam</a>
+        </div>
+      </div>
+    </div>
+
+    <section class="mission-vision-section">
+      <div class="mv-container">
+        <div class="mv-card">
+          <h2>Mission</h2>
+          <p>GRC is creating a culture for successful, socially responsible, morally upright skilled workers and highly competent professionals through values-based quality education.</p>
+        </div>
+        <div class="mv-card">
+          <h2>Vision</h2>
+          <p>A global center of excellence in education, innovating for holistic human development and community transformation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-us" class="about-section">
+      <h2 class="about-title">About Us</h2>
+      <p class="about-text">
+        <strong>Global Reciprocal Colleges (GRC)</strong> is committed to providing high-quality and affordable education. Our goal is to mold every student into professional, responsible individuals with strong moral values and social responsibility.
+      </p>
+      <div class="grid-cards about-grid">
+        <div class="card-item about-card">
+          <h4>Excellence</h4>
+          <p>Continuous improvement in the fields of academics and technology.</p>
+        </div>
+        <div class="card-item about-card">
+          <h4>Integrity</h4>
+          <p>Upholding honesty and good character in every endeavor.</p>
+        </div>
+        <div class="card-item about-card">
+          <h4>Service</h4>
+          <p>Serving the community and the nation with all our heart.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="assets/image/grc-logo.png" alt="GRC Logo" />
+        <p>GRC Bldg. 454, 1400 Rizal Ave Ext, East Grace Park, Caloocan, Metro Manila</p>
+        <p>Touching hearts, renewing minds, transforming lives.</p>
+      </div>
+      <div class="footer-links">
+        <h4>QUICK LINKS</h4>
+        <ul>
+          <li><span class="disabled-text">Academics</span></li>
+          <li><span class="disabled-text">Events</span></li>
+          <li><span class="disabled-text">About Us</span></li>
+          <li><span class="disabled-text">Contact Us</span></li>
+        </ul>
+      </div>
+      <div class="footer-connect">
+        <h4>CONNECT</h4>
+        <div class="social-icons">
+          <span class="disabled-text"><i class="bi bi-facebook"></i></span>
+          <span class="disabled-text"><i class="bi bi-instagram"></i></span>
+          <span class="disabled-text"><i class="bi bi-envelope-fill"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Global Reciprocal Colleges. All rights reserved.
+    </div>
+  </footer>
+
+  <script src="js/index.js"></script>
+</body>
+</html>

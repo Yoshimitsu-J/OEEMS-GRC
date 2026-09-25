@@ -1,0 +1,3623 @@
+/* =========================================
+   OEEMS — Admin Portal Stylesheet (FINAL v3)
+   ========================================= */
+
+/* =========================================
+   1. ROOT VARIABLES
+   ========================================= */
+:root {
+  --primary-red: #8B0000;
+  --dark-red: #580000;
+  --bright-red: #a93226;
+  --bg-gray: #f4f5f7;
+  --text-dark: #2c3e50;
+  --border-color: #dcdcdc;
+  --sidebar-width: 240px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body.admin-body {
+  background-color: var(--bg-gray);
+  color: var(--text-dark);
+  min-height: 100vh;
+}
+
+/* =========================================
+   2. TOP STATUS BAR
+   ========================================= */
+.top-status-bar {
+  background-color: var(--primary-red);
+  color: #ffffff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.top-status-left,
+.top-status-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.status-active {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+a.btn-logout-nav,
+.btn-logout-nav {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  padding: 5px 12px !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important;
+  display: inline-block !important;
+  border: none !important;
+}
+
+a.btn-logout-nav:hover {
+  background-color: #222222 !important;
+  color: #ffffff !important;
+}
+
+.mobile-hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+/* =========================================
+   3. LAYOUT CONTAINER
+   ========================================= */
+.admin-container {
+  display: flex;
+  min-height: calc(100vh - 45px);
+}
+
+/* =========================================
+   4. SIDEBAR
+   ========================================= */
+.admin-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--dark-red);
+  color: #ffffff;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex-shrink: 0;
+}
+
+.admin-sidebar-logo {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.admin-sidebar-logo img {
+  height: 45px;
+  object-fit: contain;
+}
+
+.sidebar-group-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #d0d0d0;
+  margin: 10px 0 6px 8px;
+  font-weight: bold;
+}
+
+.sidebar-btn {
+  display: block;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  margin-bottom: 4px;
+  background-color: rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.sidebar-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-btn.active {
+  background-color: var(--primary-red);
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+   5. MAIN CONTENT
+   ========================================= */
+.admin-main-content {
+  flex: 1;
+  padding: 25px;
+  background-color: var(--bg-gray);
+  overflow-x: hidden;
+}
+
+.page-title {
+  color: var(--primary-red);
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* =========================================
+   6. FILTERS
+   ========================================= */
+.filter-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  outline: none;
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.filter-input:focus {
+  border-color: var(--primary-red);
+}
+
+/* =========================================
+   7. TABLE STYLING
+   ========================================= */
+.table-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.admin-table th {
+  background-color: var(--primary-red);
+  color: #ffffff;
+  padding: 12px;
+  text-align: left;
+  font-weight: bold;
+  border: 1px solid #700000;
+}
+
+.admin-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  color: #333333;
+  background-color: #ffffff;
+}
+
+.admin-table tbody tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+.link-img {
+  color: #2980b9;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link-img:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   8. ACTION BUTTONS
+   ========================================= */
+.action-btn-group {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-approve {
+  background-color: #27ae60;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.btn-approve:hover {
+  background-color: #219150;
+}
+
+.btn-decline {
+  background-color: #c0392b;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.btn-decline:hover {
+  background-color: #a93226;
+}
+
+/* =========================================
+   9. ADMIN LOGIN PAGE
+   ========================================= */
+.admin-login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.admin-login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+}
+
+.admin-login-logo {
+  height: 50px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.admin-login-title {
+  color: var(--primary-red);
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.admin-login-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.admin-form-group {
+  margin-bottom: 15px;
+}
+
+.admin-form-group-lg {
+  margin-bottom: 20px;
+}
+
+.admin-login-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.admin-login-input {
+  width: 100%;
+  padding: 10px;
+}
+
+.admin-login-btn {
+  width: 100%;
+  background: var(--primary-red);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.admin-login-message {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+
+.admin-login-footer {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.admin-login-footer a {
+  font-size: 0.85rem;
+  color: var(--primary-red);
+  text-decoration: none;
+}
+
+/* =========================================
+   10. ADMIN PORTAL LANDING
+   ========================================= */
+.admin-portal-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.admin-portal-card {
+  width: 100%;
+  max-width: 500px;
+  padding: 40px;
+  text-align: center;
+}
+
+.admin-portal-logo {
+  height: 70px;
+  object-fit: contain;
+  margin-bottom: 20px;
+}
+
+.admin-portal-title {
+  color: var(--primary-red);
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.admin-portal-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.admin-portal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.admin-portal-link {
+  text-decoration: none;
+  display: block;
+}
+
+.admin-portal-btn-primary {
+  width: 100%;
+  background: var(--primary-red);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.admin-portal-btn-outline {
+  width: 100%;
+  background: #ffffff;
+  color: var(--primary-red);
+  border: 2px solid var(--primary-red);
+  padding: 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.admin-portal-btn-muted {
+  width: 100%;
+  background: #f4f5f7;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* =========================================
+   11. ADMIN LAYOUT HELPERS
+   ========================================= */
+.admin-flex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.admin-cards-mb {
+  margin-bottom: 20px;
+}
+
+.admin-cards-grid-small {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.admin-card-title {
+  font-size: 0.9rem;
+  margin-bottom: 15px;
+  color: var(--primary-red);
+  font-weight: bold;
+}
+
+.admin-card-title-sm {
+  font-size: 0.8rem;
+  color: var(--primary-red);
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.admin-chart-placeholder {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border: 1px dashed #ddd;
+  color: #777;
+  border-radius: 4px;
+}
+
+.admin-chart-placeholder-sm {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.admin-status-card {
+  text-align: center;
+}
+
+.admin-page-title-inline {
+  margin-bottom: 0;
+}
+
+.admin-passing-note {
+  font-size: 0.85rem;
+  color: #c0392b;
+  font-weight: bold;
+}
+
+/* =========================================
+   12. FACILITY CARD
+   ========================================= */
+.admin-facility-card h3 {
+  color: var(--primary-red);
+  font-size: 1rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.admin-facility-card p {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+/* =========================================
+   13. RESULT STATUS COLORS
+   ========================================= */
+.result-passed { color: #27ae60; font-weight: bold; }
+.status-pending { color: #27ae60; font-weight: bold; }
+.status-review { color: #f39c12; font-weight: bold; }
+.status-approved { color: #27ae60; font-weight: bold; }
+
+/* =========================================
+   14. QUESTIONNAIRE PAGE — Legacy styles
+   (see sections 27-34 for the new version)
+   ========================================= */
+.questionnaire-layout {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.questionnaire-categories {
+  width: 280px;
+  flex-shrink: 0;
+}
+
+.questionnaire-cat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.questionnaire-cat-list li {
+  padding: 10px;
+  background: #f1f1f1;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.questionnaire-cat-list li.active {
+  background: var(--primary-red);
+  color: white;
+  font-weight: bold;
+}
+
+.questionnaire-editor {
+  flex: 1;
+  min-width: 300px;
+}
+
+.questionnaire-add-btn {
+  background: #fff;
+  border: 1px solid var(--primary-red);
+  color: var(--primary-red);
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.questionnaire-q-card {
+  border-top: 4px solid var(--primary-red);
+}
+
+.questionnaire-q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.questionnaire-q-id {
+  font-weight: bold;
+  color: var(--primary-red);
+  font-size: 0.85rem;
+}
+
+.questionnaire-delete {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+}
+
+.questionnaire-q-input {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.questionnaire-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================
+   15. SCHEDULE EDIT BUTTON
+   ========================================= */
+.schedule-edit-btn {
+  margin-top: 15px;
+  background: var(--primary-red);
+  color: white;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* =========================================
+   16. QUICK VIEW — CHARTS LAYOUT
+   ========================================= */
+
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.chart-card {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chart-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-subtitle {
+  font-size: 10px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.chart-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.chart-legend-top {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 5px;
+  font-size: 10px;
+  color: #333;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.legend-failed { background: #e63946; }
+.legend-passed { background: #2ecc71; }
+.legend-red { background: #e63946; }
+.legend-green { background: #2ecc71; }
+.legend-orange { background: #f39c12; }
+.legend-dark { background: #555555; }
+
+/* =========================================
+   17. SYSTEM STATUS ROW (Quick View Bottom)
+   ========================================= */
+
+.status-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+}
+
+.status-card-main {
+  padding: 15px;
+}
+
+.status-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.donut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.donut-item {
+  text-align: center;
+  padding: 8px;
+}
+
+.donut-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.donut-wrapper {
+  position: relative;
+  height: 130px;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.donut-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.donut-legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  font-size: 10px;
+  color: #333;
+}
+
+/* =========================================
+   18. USER | ADMISSION PANEL
+   ========================================= */
+
+.user-info-card {
+  padding: 15px;
+  background: #fafafa;
+}
+
+.user-info-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.user-info-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 12px;
+}
+
+.user-info-item:last-child {
+  border-bottom: none;
+}
+
+.user-info-stack {
+  flex-direction: column;
+  gap: 3px;
+}
+
+.user-info-label {
+  font-weight: 700;
+  color: #555;
+  min-width: 85px;
+  flex-shrink: 0;
+}
+
+.user-info-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.user-status-active {
+  color: #2ecc71;
+  font-weight: 700;
+}
+
+/* =========================================
+   19. ADMIN SCHEDULES — 3-Column EQUAL HEIGHT
+   ========================================= */
+
+.schedules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.schedule-col {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 820px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.schedule-section-title {
+  flex-shrink: 0;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #8B0000;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   20. CALENDAR
+   ========================================= */
+
+.calendar-header {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-month-label {
+  font-size: 15px;
+  font-weight: 800;
+  color: #333;
+  letter-spacing: 1px;
+}
+
+.calendar-nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #8B0000;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.calendar-nav-btn:hover {
+  background: #f0f0f0;
+}
+
+.admin-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.admin-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+  min-height: 42px;
+}
+
+.admin-cal-day.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.admin-cal-day.state-unavailable {
+  background: #555555;
+}
+
+.admin-cal-day.state-available {
+  background: #8B0000;
+}
+
+.admin-cal-day.state-selected {
+  background: #ff4444;
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.3);
+  transform: scale(1.05);
+}
+
+.admin-cal-day.state-taken {
+  background: #580000;
+}
+
+.admin-cal-day:hover:not(.empty) {
+  transform: scale(1.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.calendar-note {
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   21. SCHEDULE INFO BOX
+   ========================================= */
+
+.schedule-info-box {
+  background: #fafafa;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: auto;
+  margin-bottom: 12px;
+  border-left: 4px solid #8B0000;
+  flex-shrink: 0;
+}
+
+.schedule-info-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #8B0000;
+  text-align: center;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.schedule-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.schedule-info-row:last-child {
+  border-bottom: none;
+}
+
+.schedule-info-row span:first-child {
+  font-weight: 700;
+  color: #555;
+}
+
+.schedule-info-row span:last-child {
+  font-weight: 600;
+  color: #333;
+}
+
+/* =========================================
+   22. ACTION BUTTONS (Schedule)
+   ========================================= */
+
+.btn-schedule-action {
+  width: 100%;
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s ease;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+.btn-schedule-action:hover {
+  background: #a00000;
+}
+
+.btn-cancel-edit {
+  background: #666 !important;
+  margin-top: 8px;
+}
+
+.btn-cancel-edit:hover {
+  background: #888 !important;
+}
+
+/* =========================================
+   23. PC STATUS GRID (Compact)
+   ========================================= */
+
+.pc-legend {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  background: #fafafa;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.pc-legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.pc-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.pc-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.pc-dot-working { background: #2ecc71; }
+.pc-dot-unavailable { background: #555555; }
+.pc-dot-maintenance { background: #580000; }
+
+.pc-status-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.pc-status-selector label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+}
+
+.pc-status-selector select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 2px solid #8B0000;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pc-status-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.pc-box {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+  min-height: 0;
+  max-height: 62px;
+}
+
+.pc-box.pc-working { background: #2ecc71; }
+.pc-box.pc-unavailable { background: #555555; }
+.pc-box.pc-maintenance { background: #580000; }
+
+.pc-box:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.pc-note {
+  font-size: 10px;
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.schedules-grid .btn-save-pc {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   24. SUMMARY CHARTS (Schedule)
+   ========================================= */
+
+.schedule-chart-block {
+  margin-bottom: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.schedule-chart-block:last-child {
+  margin-bottom: 0;
+}
+
+.schedule-chart-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.schedule-chart-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-chart-wrapper canvas {
+  max-width: 220px !important;
+  max-height: 220px !important;
+  width: 220px !important;
+  height: 220px !important;
+  margin: 0 auto;
+}
+
+/* =========================================
+   25. EDIT SCHEDULE — 3-Column EQUAL HEIGHT
+   ========================================= */
+
+.edit-schedule-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.edit-schedule-grid .schedule-col {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 600px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.edit-schedule-grid .schedule-section-title {
+  flex-shrink: 0;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #8B0000;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.edit-schedule-grid .calendar-header {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.edit-schedule-grid .calendar-month-label {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.edit-schedule-grid .admin-calendar-grid {
+  gap: 6px;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.edit-schedule-grid .admin-cal-day {
+  font-size: 13px;
+  min-height: 42px;
+}
+
+.edit-schedule-grid .calendar-note {
+  margin-top: auto;
+  font-size: 10px;
+  padding-top: 10px;
+}
+
+/* =========================================
+   26. EDIT SCHEDULE — Batch Table
+   ========================================= */
+
+.edit-date-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 10px;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.batch-table {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.batch-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  background: #8B0000;
+  color: #ffffff;
+  padding: 12px 10px;
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.batch-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 14px 10px;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.batch-row:last-child {
+  border-bottom: none;
+}
+
+.batch-row > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.batch-time {
+  width: 100%;
+  padding: 8px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 11px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.batch-time:focus {
+  outline: none;
+  border-color: #8B0000;
+  box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.1);
+}
+
+.btn-add-batch {
+  background: #8B0000;
+  color: #ffffff;
+  border: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.btn-add-batch:hover {
+  transform: scale(1.1);
+  background: #a00000;
+}
+
+.edit-schedule-grid .btn-save-changes {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.edit-schedule-grid .btn-cancel-edit {
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+
+.edit-schedule-grid .btn-schedule-action {
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s ease;
+}
+
+.edit-schedule-grid .schedule-chart-wrapper-large {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.edit-schedule-grid .schedule-chart-wrapper-large canvas {
+  max-width: 280px !important;
+  max-height: 280px !important;
+  width: 280px !important;
+  height: 280px !important;
+  margin: 0 auto;
+}
+
+/* =========================================
+   27. QUESTIONNAIRE PAGE — Uniform Height Layout
+   ========================================= */
+
+.questionnaire-container {
+  display: grid;
+  grid-template-columns: 280px 1fr 260px;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.questionnaire-sidebar {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 750px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.q-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.q-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.q-select,
+.q-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  background: #fff;
+  color: #333;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.q-select:focus,
+.q-input:focus {
+  outline: none;
+  border-color: #8B0000;
+}
+
+.q-add-category-row {
+  display: flex;
+  gap: 6px;
+}
+
+.q-add-btn {
+  width: 36px;
+  height: 36px;
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+
+.q-add-btn:hover {
+  background: #a00000;
+}
+
+.q-categories-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #8B0000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #8B0000;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.q-categories-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 0;
+}
+
+.q-categories-list li {
+  padding: 10px 12px;
+  background: #f1f1f1;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.q-categories-list li:hover {
+  background: #e5e5e5;
+}
+
+.q-categories-list li.active {
+  background: #8B0000;
+  color: #fff;
+  font-weight: 700;
+}
+
+.q-cat-delete {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.q-cat-delete:hover {
+  opacity: 1;
+}
+
+.q-save-btn {
+  width: 100%;
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.q-save-btn:hover {
+  background: #a00000;
+}
+
+.q-note {
+  font-size: 10px;
+  color: #888;
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.q-or-divider {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #888;
+  padding: 4px 0;
+  flex-shrink: 0;
+}
+
+.q-import-btn,
+.q-export-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.q-import-btn {
+  background: #333;
+  color: #fff;
+  border: none;
+}
+
+.q-import-btn:hover {
+  background: #555;
+}
+
+.q-export-btn {
+  background: #8B0000;
+  color: #fff;
+  border: none;
+}
+
+.q-export-btn:hover {
+  background: #a00000;
+}
+
+.q-account-note {
+  font-size: 9px;
+  color: #888;
+  text-align: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.q-account-note strong {
+  color: #8B0000;
+}
+
+/* =========================================
+   28. QUESTIONNAIRE — Questions Editor
+   ========================================= */
+
+.questionnaire-editor-area {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  height: 750px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.q-questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+  flex-shrink: 0;
+}
+
+.q-current-category {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.q-add-question-btn {
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.2s;
+}
+
+.q-add-question-btn:hover {
+  background: #a00000;
+}
+
+.q-questions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
+/* =========================================
+   29. QUESTION CARD
+   ========================================= */
+
+.q-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  transition: all 0.2s ease;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.q-card:hover {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.q-card:active {
+  cursor: grabbing;
+}
+
+.q-card.dragging {
+  opacity: 0.4;
+  transform: scale(0.98);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  cursor: grabbing;
+}
+
+.q-card.drag-over-top {
+  border-top: 4px solid #2ecc71;
+  box-shadow: 0 -4px 12px rgba(46, 204, 113, 0.25);
+}
+
+.q-card.drag-over-bottom {
+  border-bottom: 4px solid #2ecc71;
+  box-shadow: 0 4px 12px rgba(46, 204, 113, 0.25);
+}
+
+.q-card.dragging * {
+  user-select: none;
+  pointer-events: none;
+}
+
+.q-card-header {
+  background: #8B0000;
+  color: #fff;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.q-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.q-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+}
+
+.q-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.q-drag-handle:active {
+  cursor: grabbing;
+}
+
+.q-id {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.q-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.q-icon-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.q-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.q-text-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+}
+
+.q-question-text {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.q-image-btn {
+  color: #666 !important;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.q-image-btn:hover {
+  background: #eee !important;
+  color: #8B0000 !important;
+}
+
+.q-type-badge {
+  font-size: 11px;
+  color: #666;
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.q-image-preview {
+  padding: 12px;
+  background: #f9f9f9;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid #eee;
+}
+
+.q-image-preview img {
+  max-width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.q-remove-img {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e63946;
+  color: #fff;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* =========================================
+   30. QUESTIONNAIRE — Options
+   ========================================= */
+
+.q-options {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.q-option-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.q-radio {
+  width: 18px;
+  height: 18px;
+  accent-color: #8B0000;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.q-option-input {
+  flex: 1;
+  font-size: 12px;
+}
+
+.q-del-opt {
+  color: #999 !important;
+  font-size: 18px;
+  padding: 2px 6px;
+}
+
+.q-del-opt:hover {
+  color: #e63946 !important;
+  background: #f5f5f5 !important;
+}
+
+.q-add-option-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8B0000;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.q-add-option-row:hover {
+  background: #fafafa;
+}
+
+.q-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  margin: auto 0;
+}
+
+.q-empty-state i {
+  font-size: 3rem;
+  color: #ddd;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.q-empty-state p {
+  margin: 6px 0;
+  font-size: 13px;
+}
+
+.q-empty-hint {
+  font-size: 11px !important;
+  color: #bbb !important;
+}
+
+/* =========================================
+   31. QUESTIONNAIRE — Summary Panel
+   ========================================= */
+
+.questionnaire-summary {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  height: 750px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.q-summary-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #8B0000;
+  margin-bottom: 15px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+
+.q-summary-block {
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.q-summary-block:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.q-summary-cat {
+  font-size: 13px;
+  font-weight: 800;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.q-summary-block p {
+  font-size: 12px;
+  color: #666;
+  margin: 3px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.q-summary-block strong {
+  color: #8B0000;
+}
+
+/* =========================================
+   32. APPLICATIONS PAGE — Filters + Table
+   ========================================= */
+
+.applications-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.required-label {
+  color: #8B0000;
+}
+
+.required-note {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  padding: 9px 0;
+}
+
+/* =========================================
+   33. APPLICATIONS TABLE
+   ========================================= */
+
+.applications-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.applications-table th {
+  background: #000000;
+  color: #ffffff;
+  padding: 14px 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid #333;
+}
+
+.applications-table td {
+  padding: 14px 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.applications-table tbody tr:nth-child(even) td {
+  background: #f0f0f0;
+}
+
+.applications-table tbody tr:nth-child(odd) td {
+  background: #ffffff;
+}
+
+.applications-table .col-name {
+  font-weight: 700;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.applications-table .col-doc {
+  text-align: center;
+}
+
+.show-img-link {
+  color: #2980b9;
+  font-weight: 700;
+  text-decoration: underline;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.show-img-link:hover {
+  color: #1a5276;
+}
+
+.to-follow {
+  color: #666;
+  font-style: italic;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.doc-missing {
+  color: #bbb;
+  font-size: 14px;
+}
+
+/* =========================================
+   34. APPLICATIONS — Checkbox Column
+   ========================================= */
+
+.applications-table .col-checkbox {
+  width: 50px;
+  text-align: center;
+  padding: 8px !important;
+}
+
+.table-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #8B0000;
+  vertical-align: middle;
+}
+
+.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.sortable-th:hover {
+  background: #700000 !important;
+}
+
+.sortable-th i {
+  font-size: 11px;
+  margin-left: 4px;
+  opacity: 0.7;
+}
+
+/* =========================================
+   35. APPLICATIONS — Approval Buttons
+   ========================================= */
+
+.applications-table .action-btn-group {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.applications-table .btn-approve,
+.applications-table .btn-decline {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  min-width: 90px;
+}
+
+.applications-table .btn-approve {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+.applications-table .btn-approve:hover {
+  background: #27ae60;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(46, 204, 113, 0.3);
+}
+
+.applications-table .btn-decline {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.applications-table .btn-decline:hover {
+  background: #a93226;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(192, 57, 43, 0.3);
+}
+
+.applications-table tr.row-approved td {
+  opacity: 0.6;
+  background: #eafaf1 !important;
+}
+
+.applications-table tr.row-declined td {
+  opacity: 0.6;
+  background: #fdedec !important;
+}
+
+.applications-empty {
+  text-align: center;
+  padding: 60px 20px !important;
+  color: #999;
+}
+
+.applications-empty i {
+  font-size: 3rem;
+  color: #ddd;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.applications-empty p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.applications-empty .empty-hint {
+  font-size: 12px !important;
+  color: #bbb !important;
+  margin-top: 8px !important;
+}
+
+/* =========================================
+   36. APPLICATIONS — Tabs (Active / Archived)
+   ========================================= */
+
+.applications-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0;
+}
+
+.app-tab {
+  background: transparent;
+  border: none;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #666;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.app-tab:hover {
+  color: #8B0000;
+  background: #fafafa;
+}
+
+.app-tab.active {
+  color: #8B0000;
+  border-bottom-color: #8B0000;
+}
+
+.app-tab i {
+  font-size: 16px;
+}
+
+.tab-badge {
+  background: #8B0000;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.app-tab.active .tab-badge {
+  background: #8B0000;
+}
+
+/* =========================================
+   37. BULK ACTIONS BAR — ALWAYS VISIBLE
+   ========================================= */
+
+.bulk-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 12px rgba(139, 0, 0, 0.25);
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+/* ✅ Recycle Bin bar — PAREHAS NG KULAY NG ACTIVE */
+.bulk-actions-bar.archived-bar {
+  background: linear-gradient(135deg, #8B0000 0%, #a00000 100%);
+  box-shadow: 0 3px 12px rgba(139, 0, 0, 0.25);
+}
+
+.bulk-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #ffffff;
+}
+
+.bulk-select-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+.bulk-select-info i {
+  font-size: 16px;
+}
+
+.bulk-select-info span {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.bulk-clear-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+}
+
+.bulk-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.bulk-right {
+  display: flex;
+  gap: 10px;
+}
+
+.bulk-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  color: #ffffff;
+}
+
+.bulk-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.bulk-btn:active {
+  transform: translateY(0);
+}
+
+.bulk-approve { background: #2ecc71; }
+.bulk-approve:hover { background: #27ae60; }
+
+.bulk-decline { background: #c0392b; }
+.bulk-decline:hover { background: #a93226; }
+
+.bulk-restore { background: #3498db; }
+.bulk-restore:hover { background: #2980b9; }
+
+.bulk-delete { background: #e74c3c; }
+.bulk-delete:hover { background: #c0392b; }
+
+.bulk-btn i {
+  font-size: 14px;
+}
+
+/* =========================================
+   38. ARCHIVED — Status Badges
+   ========================================= */
+
+.archive-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-right: 6px;
+}
+
+.archive-status.approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.archive-status.declined {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.archive-action-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-restore,
+.btn-delete-perm {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-restore {
+  background: #3498db;
+  color: #fff;
+}
+
+.btn-restore:hover {
+  background: #2980b9;
+  transform: scale(1.1);
+}
+
+.btn-delete-perm {
+  background: #e74c3c;
+  color: #fff;
+}
+
+.btn-delete-perm:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+/* =========================================
+   39. TOAST NOTIFICATION
+   ========================================= */
+
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #2c3e50;
+  color: #ffffff;
+  padding: 14px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  z-index: 99999;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  min-width: 250px;
+  border-left: 4px solid #2ecc71;
+}
+
+.toast-notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-notification.toast-success { border-left-color: #2ecc71; }
+.toast-notification.toast-danger { border-left-color: #e74c3c; }
+.toast-notification.toast-info { border-left-color: #3498db; }
+
+/* =========================================
+   40. IMAGE MODAL
+   ========================================= */
+
+.image-modal-card {
+  max-width: 600px;
+  background: #ffffff !important;
+  color: #333 !important;
+  padding: 25px;
+}
+
+.image-modal-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #8B0000;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.image-modal-body {
+  text-align: center;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal-body img {
+  max-width: 100%;
+  max-height: 400px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.btn-close-image {
+  width: 100%;
+  background: #8B0000;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.2s;
+}
+
+.btn-close-image:hover {
+  background: #a00000;
+}
+
+.image-modal-card .close-modal {
+  color: #333 !important;
+}
+
+.image-modal-card .close-modal:hover {
+  color: #8B0000 !important;
+}
+
+/* =========================================
+   41. SYSTEM STATUS PAGE
+   ========================================= */
+
+.status-charts-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.status-chart-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.status-chart-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #8B0000;
+  width: 100%;
+}
+
+.status-legend {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  color: #333;
+  font-weight: 600;
+}
+
+.status-legend .legend-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.status-chart-wrapper {
+  position: relative;
+  height: 180px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.status-chart-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.status-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1.5fr;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.status-info-panel {
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.status-info-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.status-info-title.red-title {
+  color: #8B0000;
+  border-bottom-color: #8B0000;
+}
+
+.status-info-title.mt-20 {
+  margin-top: 25px;
+}
+
+.storage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed #eee;
+}
+
+.storage-row:last-child {
+  border-bottom: none;
+}
+
+.storage-label {
+  font-weight: 700;
+  color: #333;
+}
+
+.storage-value {
+  font-weight: 700;
+  color: #555;
+}
+
+.available-value {
+  color: #2ecc71;
+}
+
+.device-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.device-row:last-child {
+  border-bottom: none;
+}
+
+.device-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+
+.device-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.status-online {
+  color: #2ecc71;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-online i {
+  font-size: 16px;
+}
+
+.user-panel {
+  background: #fafafa;
+}
+
+.user-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e5e5;
+  font-size: 13px;
+}
+
+.user-row:last-child {
+  border-bottom: none;
+}
+
+.user-row-stack {
+  flex-direction: column;
+  gap: 3px;
+}
+
+.user-label {
+  font-weight: 800;
+  color: #333;
+  min-width: 100px;
+  flex-shrink: 0;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+.user-value {
+  font-weight: 600;
+  color: #555;
+  word-break: break-word;
+}
+
+.user-active {
+  color: #2ecc71;
+  font-weight: 800;
+}
+
+/* =========================================
+   42. FACILITIES PAGE — Grid Layout
+   ========================================= */
+
+.facilities-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 15px;
+  align-items: stretch;
+}
+
+.facilities-chart-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.facilities-bar-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.facilities-bar-legend .legend-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.facilities-bar-wrapper {
+  position: relative;
+  height: 200px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.facilities-bar-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.facilities-pie-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #000;
+  text-align: center;
+  margin-bottom: 15px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.facilities-pie-wrapper {
+  position: relative;
+  height: 280px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.facilities-pie-wrapper canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.comlab-card {
+  padding: 18px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.comlab-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #000;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.comlab-dots {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  padding: 15px 10px;
+  margin-bottom: 20px;
+  flex: 1;
+  align-content: center;
+}
+
+.comlab-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
+
+.comlab-dot:hover {
+  transform: scale(1.2);
+}
+
+.comlab-dot.dot-working { background: #2ecc71; }
+.comlab-dot.dot-unavailable { background: #e63946; }
+.comlab-dot.dot-maintenance { background: #f4d03f; }
+
+.comlab-footer {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.comlab-info {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.comlab-label {
+  font-weight: 800;
+  color: #333;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+.comlab-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+}
+
+.comlab-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.comlab-occupation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.occupation-dot {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid;
+  background: transparent;
+}
+
+.occupation-low {
+  border-color: #f4d03f;
+  background: #f4d03f;
+  box-shadow: inset 0 0 0 3px #f5f5f5;
+}
+
+.occupation-full {
+  border-color: #2ecc71;
+  background: #2ecc71;
+  box-shadow: inset 0 0 0 3px #f5f5f5;
+}
+
+.comlab-floor {
+  font-size: 14px;
+  font-weight: 800;
+  color: #333;
+  letter-spacing: 0.5px;
+}
+
+.no-pc-data {
+  grid-column: span 5;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.chart-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  background: #fafafa;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+}
+
+.chart-fallback i {
+  font-size: 2.5rem;
+  color: #f39c12;
+  margin-bottom: 12px;
+}
+
+.chart-fallback p {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.chart-fallback small {
+  font-size: 10px;
+  color: #999;
+}
+
+/* =========================================
+   43. RESULTS PAGE
+   ========================================= */
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.results-header-info {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.results-hint {
+  color: #555;
+  font-weight: 600;
+}
+
+.results-hint i {
+  color: #3498db;
+}
+
+.results-passing {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.results-passing strong {
+  color: #8B0000;
+  font-size: 13px;
+}
+
+.results-note {
+  color: #333;
+  font-weight: 700;
+}
+
+.results-note i {
+  color: #8B0000;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.results-table th {
+  background: #000000;
+  color: #ffffff;
+  padding: 14px 10px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid #333;
+}
+
+.results-table th small {
+  display: block;
+  font-size: 10px;
+  opacity: 0.8;
+  text-transform: none;
+  font-weight: 400;
+}
+
+.results-table td {
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.results-table tbody tr:nth-child(even) td {
+  background: #f0f0f0;
+}
+
+.results-table tbody tr:nth-child(odd) td {
+  background: #ffffff;
+}
+
+.results-table .col-name {
+  text-align: left;
+  padding-left: 20px;
+  font-weight: 700;
+}
+
+.hoverable-name {
+  cursor: help;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.hoverable-name:hover {
+  background: #fffacd !important;
+}
+
+.name-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.name-info-icon {
+  font-size: 12px;
+  color: #3498db;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.hoverable-name:hover .name-info-icon {
+  opacity: 1;
+}
+
+.result-passed {
+  color: #27ae60;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.result-failed {
+  color: #e74c3c;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.results-table .action-btn-group {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.results-table .btn-approve,
+.results-table .btn-decline {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  min-width: 80px;
+}
+
+.results-table .btn-approve {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+.results-table .btn-approve:hover {
+  background: #27ae60;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(46, 204, 113, 0.3);
+}
+
+.results-table .btn-decline {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.results-table .btn-decline:hover {
+  background: #a93226;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(192, 57, 43, 0.3);
+}
+
+.results-table tr.row-approved td {
+  background: #eafaf1 !important;
+}
+
+.results-table tr.row-declined td {
+  background: #fdedec !important;
+}
+
+/* =========================================
+   44. SCORE TOOLTIP
+   ========================================= */
+
+.score-tooltip {
+  position: fixed;
+  background: #ffffff;
+  border: 2px solid #8B0000;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 99999;
+  pointer-events: none;
+  min-width: 260px;
+  max-width: 320px;
+  transition: opacity 0.15s ease;
+}
+
+.score-tooltip.hidden {
+  display: none !important;
+}
+
+.tooltip-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #eee;
+}
+
+.tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  font-size: 12px;
+}
+
+.tooltip-row span {
+  color: #666;
+  font-weight: 600;
+}
+
+.tooltip-row strong {
+  color: #333;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* =========================================
+   45. RESPONSIVE — Desktop (1400px)
+   ========================================= */
+
+@media (max-width: 1400px) {
+  .schedules-grid,
+  .edit-schedule-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .schedule-col,
+  .edit-schedule-grid .schedule-col {
+    height: auto;
+    min-height: 650px;
+  }
+  .schedule-col:last-child,
+  .edit-schedule-grid .schedule-col:last-child {
+    grid-column: span 2;
+    min-height: 450px;
+  }
+  .schedule-chart-wrapper canvas,
+  .edit-schedule-grid .schedule-chart-wrapper-large canvas {
+    max-width: 240px !important;
+    max-height: 240px !important;
+    width: 240px !important;
+    height: 240px !important;
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+  .donut-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .applications-filters {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .questionnaire-container {
+    grid-template-columns: 250px 1fr;
+  }
+  .questionnaire-summary {
+    grid-column: span 2;
+    height: auto;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .q-summary-title {
+    position: static;
+  }
+  #summaryContent {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .q-summary-block {
+    margin-bottom: 0;
+    padding: 10px;
+    background: #fafafa;
+    border-radius: 6px;
+    border-bottom: none;
+  }
+  .status-charts-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .status-info-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .user-panel {
+    grid-column: span 2;
+  }
+  .facilities-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .facilities-chart-card:first-child {
+    grid-column: span 2;
+  }
+  .facilities-chart-card:nth-child(4) {
+    grid-column: span 2;
+  }
+  .facilities-bar-wrapper {
+    height: 180px;
+  }
+  .facilities-pie-wrapper {
+    height: 280px;
+  }
+}
+
+/* =========================================
+   46. RESPONSIVE — Tablet (991px)
+   ========================================= */
+
+@media (max-width: 991px) {
+  .mobile-hamburger-btn {
+    display: inline-block !important;
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    height: 100vh;
+    z-index: 9999;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+  }
+
+  .admin-sidebar.show-mobile {
+    left: 0 !important;
+  }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+  }
+
+  .sidebar-overlay.show-mobile {
+    display: block !important;
+  }
+
+  .schedules-grid,
+  .edit-schedule-grid {
+    grid-template-columns: 1fr;
+  }
+  .schedule-col,
+  .edit-schedule-grid .schedule-col {
+    height: auto;
+    min-height: auto;
+  }
+  .schedule-col:last-child,
+  .edit-schedule-grid .schedule-col:last-child {
+    grid-column: auto;
+  }
+  .applications-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .applications-table {
+    font-size: 12px;
+  }
+  .applications-table th,
+  .applications-table td {
+    padding: 10px 8px;
+  }
+  .applications-table .btn-approve,
+  .applications-table .btn-decline {
+    padding: 8px 12px;
+    font-size: 11px;
+    min-width: 70px;
+  }
+  .questionnaire-container {
+    grid-template-columns: 1fr;
+  }
+  .questionnaire-summary {
+    grid-column: auto;
+  }
+  .questionnaire-sidebar,
+  .questionnaire-editor-area,
+  .questionnaire-summary {
+    height: auto;
+    max-height: none;
+  }
+  .q-questions-container {
+    max-height: none;
+  }
+  .results-header {
+    flex-direction: column;
+  }
+  .results-header-info {
+    gap: 15px;
+    font-size: 11px;
+  }
+  .results-table th,
+  .results-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+  .results-table .btn-approve,
+  .results-table .btn-decline {
+    padding: 8px 10px;
+    font-size: 10px;
+    min-width: 60px;
+  }
+}
+
+/* =========================================
+   47. RESPONSIVE — Mobile (768px)
+   ========================================= */
+
+@media (max-width: 768px) {
+  .chart-wrapper {
+    height: 160px;
+  }
+  .donut-wrapper {
+    height: 120px;
+  }
+  .donut-grid {
+    grid-template-columns: 1fr;
+  }
+  .schedule-chart-wrapper {
+    min-height: 200px;
+  }
+  .schedule-chart-wrapper canvas {
+    max-width: 200px !important;
+    max-height: 200px !important;
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .edit-schedule-grid .schedule-chart-wrapper-large {
+    min-height: 250px;
+  }
+  .batch-header,
+  .batch-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 10px 8px;
+    font-size: 10px;
+  }
+  .batch-time {
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+  .applications-filters {
+    grid-template-columns: 1fr;
+  }
+  .applications-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .applications-table .btn-approve,
+  .applications-table .btn-decline {
+    display: block;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  .applications-table .action-btn-group {
+    flex-direction: column;
+  }
+  .applications-tabs {
+    flex-direction: column;
+    border-bottom: none;
+    gap: 6px;
+  }
+  .app-tab {
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #f5f5f5;
+    border-radius: 6px;
+  }
+  .app-tab.active {
+    background: #8B0000;
+    color: #fff;
+    border-left-color: #8B0000;
+  }
+  .app-tab.active .tab-badge {
+    background: #fff;
+    color: #8B0000;
+  }
+  .bulk-actions-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .bulk-left,
+  .bulk-right {
+    justify-content: center;
+  }
+  .bulk-right {
+    flex-direction: column;
+  }
+  .bulk-btn {
+    justify-content: center;
+    padding: 12px;
+  }
+  .toast-notification {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    min-width: auto;
+  }
+  .status-charts-row {
+    grid-template-columns: 1fr;
+  }
+  .status-info-row {
+    grid-template-columns: 1fr;
+  }
+  .user-panel {
+    grid-column: auto;
+  }
+  .status-chart-wrapper {
+    height: 160px;
+  }
+  .user-label {
+    min-width: 80px;
+    font-size: 11px;
+  }
+  .user-value {
+    font-size: 12px;
+  }
+  .facilities-grid {
+    grid-template-columns: 1fr;
+  }
+  .facilities-chart-card:first-child,
+  .facilities-chart-card:nth-child(4) {
+    grid-column: auto;
+  }
+  .comlab-dots {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+  .comlab-title {
+    font-size: 18px;
+  }
+  .facilities-pie-title {
+    font-size: 15px;
+  }
+  .results-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .results-table .action-btn-group {
+    flex-direction: column;
+  }
+  .results-table .btn-approve,
+  .results-table .btn-decline {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+}
+
+/* =========================================
+   48. RESPONSIVE — Small Mobile (600px)
+   ========================================= */
+
+@media (max-width: 600px) {
+  .q-text-row {
+    flex-wrap: wrap;
+  }
+  .q-type-badge {
+    width: 100%;
+    justify-content: center;
+  }
+  .q-option-row {
+    gap: 5px;
+  }
+  .q-card {
+    cursor: default;
+  }
+  .q-drag-handle {
+    display: none;
+  }
+}

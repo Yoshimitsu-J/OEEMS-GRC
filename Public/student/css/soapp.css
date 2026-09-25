@@ -1,0 +1,218 @@
+/* =========================================
+   STATEMENT OF APPLICATION
+   ========================================= */
+
+body {
+  background-color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.soapp-container {
+  background: #ffffff;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 4px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  color: #000;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.soapp-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 25px;
+}
+
+.soapp-logo {
+  height: 60px;
+  object-fit: contain;
+}
+
+.soapp-header-text h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.soapp-header-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #444;
+}
+
+.soapp-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.soapp-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.soapp-applicant-id {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.red-bold {
+  color: #8B0000;
+  font-weight: 700;
+}
+
+.soapp-qr-section {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 25px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #eee;
+}
+
+.soapp-info-left {
+  flex: 1;
+}
+
+.soapp-info-left p {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.soapp-qr-right {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.qr-code-box {
+  text-align: center;
+}
+
+.qr-code-placeholder {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: #000;
+}
+
+.qr-scan-label {
+  font-size: 11px;
+  margin-top: 5px;
+  font-weight: 700;
+}
+
+.qr-instruction {
+  font-size: 11px;
+  max-width: 180px;
+  line-height: 1.5;
+}
+
+.red-text {
+  color: #8B0000;
+}
+
+.soapp-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.soapp-section h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.soapp-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.soapp-row p:first-child {
+  color: #444;
+  min-width: 150px;
+}
+
+.soapp-row p:last-child {
+  font-weight: 500;
+}
+
+.soapp-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 30px;
+  padding-top: 20px;
+}
+
+.soapp-applicant-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.soapp-applicant-number {
+  color: #8B0000;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.soapp-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+}
+
+.btn-back {
+  background: #666;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.btn-download {
+  background: #8B0000;
+  color: #fff;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+@media print {
+  .soapp-buttons {
+    display: none;
+  }
+  body {
+    background: #fff;
+    padding: 0;
+  }
+  .soapp-container {
+    box-shadow: none;
+  }
+}

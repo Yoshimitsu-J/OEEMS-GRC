@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEEMS - Admin Quick View</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <!-- TOP STATUS BAR -->
+  <div class="top-status-bar">
+    <div class="top-status-left">
+      <button class="mobile-hamburger-btn" onclick="toggleMobileSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="hide-on-mobile"><strong>PC No.:</strong> 1</span>
+      <span class="hide-on-mobile"><strong>Session Time:</strong> 00:00:03</span>
+      <span><strong>Status:</strong> <span class="status-active">Active</span></span>
+    </div>
+    <div class="top-status-right">
+      <span class="hide-on-mobile"><strong>Time:</strong> 09:01 PM</span>
+      <span class="hide-on-mobile"><strong>Day:</strong> Monday</span>
+      <span class="hide-on-mobile"><strong>Date:</strong> 08/24/2026</span>
+      <a href="adminLoginPage.html" class="btn-logout-nav">LOG-OUT</a>
+      <span><i class="bi bi-person-circle"></i> <span class="hide-on-mobile">Dr. Esguerra / Admin</span></span>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">
+        <img src="../assets/image/grc-logo.png" alt="Logo">
+      </div>
+      <div>
+        <div class="sidebar-group-title">Main Controls</div>
+        <a href="adminQuickView.html" class="sidebar-btn active">Quick View</a>
+        <a href="adminSchedules.html" class="sidebar-btn">Schedules</a>
+        <a href="adminQuestionnaire.html" class="sidebar-btn">Questionnaire</a>
+        <a href="applicationPage.html" class="sidebar-btn">Applications</a>
+        <a href="adminSystemStatus.html" class="sidebar-btn">System Status</a>
+      </div>
+      <div>
+        <div class="sidebar-group-title">Summaries</div>
+        <a href="adminFacilities.html" class="sidebar-btn">Facilities</a>
+        <a href="adminResults.html" class="sidebar-btn">Results</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main-content">
+      <h2 class="page-title">QUICK VIEW | SUMMARY</h2>
+
+      <!-- =========================================
+           ROW 1: 3 CHARTS
+           ========================================= -->
+      <div class="charts-row">
+
+        <!-- PIE CHART: Examination Facilities -->
+        <div class="table-card chart-card">
+          <h4 class="chart-title">EXAMINATION FACILITIES</h4>
+          <div class="chart-wrapper">
+            <canvas id="facilitiesChart"></canvas>
+          </div>
+        </div>
+
+        <!-- BAR CHART: Examination Results Category -->
+        <div class="table-card chart-card">
+          <h4 class="chart-title">EXAMINATION RESULTS CATEGORY</h4>
+          <p class="chart-subtitle">S.Y. 2025-2026</p>
+          <div class="chart-wrapper">
+            <canvas id="resultsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- LINE CHART: Examiners Result -->
+        <div class="table-card chart-card">
+          <h4 class="chart-title">EXAMINERS RESULT</h4>
+          <div class="chart-legend-top">
+            <span><span class="legend-dot legend-failed"></span> Failed</span>
+            <span><span class="legend-dot legend-passed"></span> Passed</span>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="examinersChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- =========================================
+           ROW 2: SYSTEM STATUS + USER PANEL
+           ========================================= -->
+      <div class="status-row">
+
+        <!-- LEFT: 3 DONUT CHARTS -->
+        <div class="table-card status-card-main">
+          <h3 class="status-section-title">SYSTEM STATUS</h3>
+
+          <div class="donut-grid">
+
+            <!-- Student Results Storage -->
+            <div class="donut-item">
+              <h5 class="donut-title">STUDENT RESULTS STORAGE</h5>
+              <div class="donut-wrapper">
+                <canvas id="studentResultsChart"></canvas>
+              </div>
+              <div class="donut-legend">
+                <span><span class="legend-dot legend-red"></span> Used</span>
+                <span><span class="legend-dot legend-green"></span> Available</span>
+              </div>
+            </div>
+
+            <!-- Accounts Storage -->
+            <div class="donut-item">
+              <h5 class="donut-title">ACCOUNTS STORAGE</h5>
+              <div class="donut-wrapper">
+                <canvas id="accountsChart"></canvas>
+              </div>
+              <div class="donut-legend">
+                <span><span class="legend-dot legend-orange"></span> Created</span>
+                <span><span class="legend-dot legend-green"></span> Available</span>
+              </div>
+            </div>
+
+            <!-- OEES Users -->
+            <div class="donut-item">
+              <h5 class="donut-title">OEES USERS</h5>
+              <div class="donut-wrapper">
+                <canvas id="oeesUsersChart"></canvas>
+              </div>
+              <div class="donut-legend">
+                <span><span class="legend-dot legend-dark"></span> Offline</span>
+                <span><span class="legend-dot legend-green"></span> Online</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: USER | ADMISSION PANEL -->
+        <div class="table-card user-info-card">
+          <h3 class="user-info-title">USER | Admission</h3>
+
+          <div class="user-info-item">
+            <span class="user-info-label">NAME:</span>
+            <span class="user-info-value">Juan Antonio Delacruz</span>
+          </div>
+
+          <div class="user-info-item">
+            <span class="user-info-label">STATUS:</span>
+            <span class="user-info-value user-status-active">Active</span>
+          </div>
+
+          <div class="user-info-item">
+            <span class="user-info-label">LOGGED IN:</span>
+            <span class="user-info-value">1 hour ago</span>
+          </div>
+
+          <div class="user-info-item">
+            <span class="user-info-label">ACCOUNT ID:</span>
+            <span class="user-info-value">123456</span>
+          </div>
+
+          <div class="user-info-item user-info-stack">
+            <span class="user-info-label">CONTACT:</span>
+            <span class="user-info-value">+63912-345-6789 | juandelacruz@gmail.com</span>
+          </div>
+
+          <div class="user-info-item">
+            <span class="user-info-label">ROLE:</span>
+            <span class="user-info-value">Coordinator</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/adminCommon.js"></script>
+  <script src="js/adminQuickView.js"></script>
+</body>
+</html>

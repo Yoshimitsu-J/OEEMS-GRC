@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Documents - Global Reciprocal Colleges</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+
+  <header class="top-header">
+    <div class="brand">
+      <button class="toggle-btn" id="toggleSidebar">&#9776;</button>
+      <h1>Global Reciprocal Colleges</h1>
+    </div>
+    <div class="header-actions">
+      <button class="header-icon-btn" title="Notifications"><i class="bi bi-bell"></i><span class="notification-badge">2</span></button>
+      <div class="profile-dropdown-wrapper">
+        <button class="user-profile" id="profileToggle"><i class="bi bi-person-circle"></i></button>
+        <div class="profile-dropdown hidden" id="profileDropdown">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
+            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
+            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+          <ul class="profile-dropdown-menu">
+            <li><a href="studentInformation.html"><i class="bi bi-person-vcard"></i><span>My Profile</span></a></li>
+            <li><a href="mailto:admissions@grc.edu.ph?subject=Report%20a%20Problem"><i class="bi bi-envelope"></i><span>Report a problem</span></a></li>
+          </ul>
+          <div class="profile-dropdown-divider"></div>
+          <a href="../login.html" class="profile-dropdown-logout"><i class="bi bi-box-arrow-right"></i><span>Log Out</span></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar">
+      <nav>
+        <div class="admin-container">
+          <div class="admin-sidebar">
+            <div class="admin-sidebar-logo"><img src="../assets/image/grc-logo.png" alt="Logo"></div>
+            <ul>
+              <li><a href="index.html" data-page="dashboard"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+              <li><a href="studentInformation.html" data-page="studentInfo"><i class="bi bi-person-vcard"></i><span>Student Information</span></a></li>
+              <li><a href="myApplication.html" data-page="myApplication"><i class="bi bi-file-earmark-text"></i><span>My Application</span></a></li>
+              <li><a href="scheduleExam.html" data-page="scheduleExam"><i class="bi bi-calendar-event"></i><span>Schedule Exam</span></a></li>
+              <li><a href="uploadDocuments.html" data-page="uploadDocuments"><i class="bi bi-cloud-arrow-up"></i><span>Upload Documents</span></a></li>
+              <li><a href="applicationSummary.html" data-page="applicationSummary"><i class="bi bi-clipboard-check"></i><span>Application Summary</span></a></li>
+              <li><a href="examResult.html" data-page="examResult"><i class="bi bi-trophy"></i><span>Exam Result</span></a></li>
+            </ul>
+            <div class="sidebar-logout-container">
+              <a href="../login.html" class="btn-primary logout-btn-black"><i class="bi bi-box-arrow-right"></i><span>LOG-OUT</span></a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <h1 class="card-title">Upload Documents</h1>
+      <p class="upload-note">In this page, please fill all the information needed to book an entrance exam.</p>
+      <p class="upload-required">Required: Please make sure the images are clear and readable.</p>
+
+      <div class="card">
+        <div class="file-upload-item">
+          <p>1) Please attach the Form 138 (Grade 12 Report Card):</p>
+          <div class="upload-controls">
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <span class="upload-status">No file selected</span>
+          </div>
+          <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
+        </div>
+
+        <div class="file-upload-item">
+          <p>2) Please attach the current Good Moral:</p>
+          <div class="upload-controls">
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <span class="upload-status">No file selected</span>
+          </div>
+          <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
+        </div>
+
+        <div class="file-upload-item">
+          <p>3) Please attach a current 2x2 Picture:</p>
+          <div class="upload-controls">
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <span class="upload-status">No file selected</span>
+          </div>
+          <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
+        </div>
+      </div>
+
+      <div class="card info-card">
+        <strong class="title">TO BE FOLLOWED:</strong>
+        <ol>
+          <li><strong>Please bring the Form 137</strong> — Submit your physical Form 137 at the Admission Office</li>
+          <li><strong>Please bring the PSA Birth Certificate</strong> — Submit your physical PSA Birth Certificate at the Admission Office</li>
+        </ol>
+      </div>
+
+      <div class="upload-form-wrapper">
+        <button class="btn-primary" id="applyUploadBtn">APPLY</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/applicantGuard.js"></script>
+  <script src="js/applicantCommon.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/applicantUpload.js"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+/* =========================================
+   SET-UP ACCOUNT PAGE
+   ========================================= */
+
+.setup-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px);
+  padding: 30px 20px;
+  margin-top: 60px;
+  background: #f0f0f0;
+}
+
+.setup-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 40px 35px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.setup-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #8B0000;
+  text-align: center;
+  margin-bottom: 30px;
+  letter-spacing: 0.5px;
+}
+
+.form-group-setup {
+  margin-bottom: 20px;
+}
+
+.form-group-setup label {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #8B0000;
+  margin-bottom: 8px;
+}
+
+.setup-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  font-size: 15px;
+  color: #000;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.setup-input:focus {
+  outline: none;
+  border-color: #8B0000;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .setup-input {
+  padding-right: 45px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.btn-next {
+  width: 100%;
+  background-color: #8B0000;
+  color: #ffffff;
+  border: none;
+  padding: 14px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 0 4px 10px rgba(139, 0, 0, 0.3);
+  transition: background 0.2s ease;
+}
+
+.btn-next:hover {
+  background-color: #a00000;
+}
+
+.setUp-message {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 13px;
+  min-height: 18px;
+}
+/* =========================================
+   HEADER LOGO FIX
+   ========================================= */
+
+.header-logo {
+  height: 40px !important;
+  width: auto !important;
+  max-width: 45px !important;
+  object-fit: contain;
+  display: block;
+}
+
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 60px;
+  background-color: #8B0000;
+  color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.top-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-header .brand h1 {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1;
+}
+/* =========================================
+   TERMS & CONDITIONS MODAL
+   ========================================= */
+
+.terms-modal-card {
+  background: #ffffff !important;
+  color: #333 !important;
+  max-width: 650px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 30px;
+  text-align: left;
+}
+
+.terms-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #8B0000;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.terms-subtitle {
+  font-size: 13px;
+  color: #666;
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.terms-body {
+  margin-bottom: 20px;
+}
+
+.terms-body h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #8B0000;
+  margin-top: 18px;
+  margin-bottom: 6px;
+}
+
+.terms-body h3:first-child {
+  margin-top: 0;
+}
+
+.terms-body p {
+  font-size: 13px;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.terms-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+  position: sticky;
+  bottom: 0;
+  background: #ffffff;
+}
+
+.terms-actions .btn-approve,
+.terms-actions .btn-decline {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.terms-actions .btn-approve {
+  background: #2ecc71;
+  color: #ffffff;
+}
+
+.terms-actions .btn-approve:hover {
+  background: #27ae60;
+  transform: translateY(-1px);
+}
+
+.terms-actions .btn-decline {
+  background: #c0392b;
+  color: #ffffff;
+}
+
+.terms-actions .btn-decline:hover {
+  background: #a93226;
+  transform: translateY(-1px);
+}
+
+.terms-modal-card .close-modal {
+  color: #333 !important;
+  font-size: 28px;
+}
+
+.terms-modal-card .close-modal:hover {
+  color: #8B0000 !important;
+}
+
+/* =========================================
+   DISABLED SELECT STYLING
+   ========================================= */
+
+select.setup-input:disabled {
+  background-color: #f0f0f0;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+select.setup-input:not(:disabled) {
+  background-color: #ffffff;
+  cursor: pointer;
+}

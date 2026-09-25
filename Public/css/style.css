@@ -1,0 +1,1078 @@
+/* =========================================
+   OEEMS — Main Stylesheet
+   ========================================= */
+
+/* =========================================
+   1. ROOT VARIABLES
+   ========================================= */
+:root {
+  --primary-red: #8B0000;
+  --dark-red: #4A0000;
+  --bright-red: #990000;
+  --bg-gray: #F4F4F9;
+  --text-dark: #333333;
+  --border-color: #CCCCCC;
+  --navbar-bg-color: #ab0a0a;
+  --grc-maroon: #400505;
+  --grc-bright-red: #ff3131;
+  --grc-unavailable-color: #737373;
+  --grc-black: #000000;
+  --grc-white: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html, body {
+  scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--text-dark);
+}
+
+/* ✅ CRITICAL: .hidden class must actually hide */
+.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* =========================================
+   2. LANDING NAVBAR
+   ========================================= */
+.navbar-grc {
+  background-color: var(--primary-red);
+  padding: 0 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 65px;
+  position: relative;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  width: 100%;
+}
+
+.brand-logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.desktop-nav > li {
+  position: relative;
+  display: inline-block;
+}
+
+.desktop-nav a {
+  color: #ffffff !important;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 20px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.desktop-nav a:hover {
+  color: #ffcccc !important;
+}
+
+.desktop-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: var(--dark-red);
+  min-width: 230px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: none;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-radius: 0 0 4px 4px;
+  z-index: 1100;
+}
+
+.desktop-dropdown li a {
+  padding: 12px 16px;
+  font-size: 0.83rem;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: block;
+}
+
+.desktop-dropdown li a:hover {
+  background-color: var(--primary-red);
+}
+
+.desktop-nav > li:hover .desktop-dropdown {
+  display: flex !important;
+}
+
+.hamburger-landing {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0 10px;
+}
+
+/* =========================================
+   3. MOBILE DRAWER
+   ========================================= */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer-overlay.hidden {
+  display: none !important;
+}
+
+.drawer-container {
+  width: 100%;
+  max-width: 320px;
+  background-color: #ffffff;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 2001;
+}
+
+.drawer-header {
+  background-color: var(--primary-red);
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+}
+
+.drawer-logo {
+  height: 38px;
+  object-fit: contain;
+}
+
+.btn-close-drawer {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.drawer-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-item {
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.menu-item a,
+.dropdown-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  color: #333333;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-toggle i {
+  font-size: 1.1rem;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-toggle.active i {
+  transform: rotate(180deg);
+}
+
+.submenu {
+  list-style: none;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+.submenu.hidden {
+  display: none !important;
+}
+
+.submenu li {
+  border-top: 1px solid #eeeeee;
+}
+
+.submenu a {
+  padding: 10px 20px 10px 35px;
+  font-size: 0.9rem;
+  color: #444444;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.highlight-link {
+  background-color: #e5e5e5 !important;
+  font-weight: 600 !important;
+  color: #111111 !important;
+}
+
+/* =========================================
+   4. HERO
+   ========================================= */
+.grc-hero-bg {
+  width: 100%;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(103, 0, 0, 0.78), rgba(20, 0, 0, 0.88)),
+    url('../assets/image/grc-campus.png');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-content {
+  color: #ffffff;
+  padding: 30px;
+  max-width: 750px;
+  width: 90%;
+}
+
+.grc-logo {
+  width: 110px;
+  height: auto;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+}
+
+.hero-content h1 {
+  font-size: 2.3rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.hero-content p {
+  font-size: 1.15rem;
+  color: #f0f0f0;
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.hero-cta-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-grc-landing {
+  background-color: #ffffff;
+  color: #670000;
+  padding: 14px 36px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  display: inline-block;
+}
+
+.btn-grc-landing:hover {
+  background-color: #ffe6e6;
+  transform: translateY(-3px);
+}
+
+/* =========================================
+   5. MISSION & VISION
+   ========================================= */
+.mission-vision-section {
+  width: 100%;
+  background-color: var(--bg-gray);
+  padding: 60px 20px;
+  color: var(--text-dark);
+}
+
+.mv-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.mv-card {
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-top: 5px solid var(--primary-red);
+  transition: transform 0.3s ease;
+}
+
+.mv-card:hover {
+  transform: translateY(-5px);
+}
+
+.mv-card h2 {
+  color: var(--primary-red);
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.mv-card p {
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #444444;
+}
+
+/* =========================================
+   6. ABOUT US
+   ========================================= */
+.about-section {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 40px;
+}
+
+.about-title {
+  color: #b70909;
+  text-align: center;
+  margin-top: 0;
+}
+
+.about-text {
+  text-align: center;
+  line-height: 1.6;
+  color: #555;
+}
+
+.about-grid {
+  margin-top: 30px;
+  margin-bottom: 0;
+}
+
+.about-card {
+  border-left: 4px solid #b70909;
+  background: #fdfdfd;
+}
+
+.about-card h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.about-card p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0;
+}
+
+.grid-cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card-item {
+  flex: 1;
+  min-width: 280px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* =========================================
+   7. FOOTER
+   ========================================= */
+.site-footer {
+  background-color: #0c0c0c;
+  color: #ffffff;
+  padding: 40px 20px 20px 20px;
+}
+
+.footer-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #222;
+}
+
+.footer-brand {
+  max-width: 320px;
+}
+
+.footer-brand img {
+  height: 50px;
+  margin-bottom: 15px;
+}
+
+.footer-brand p {
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 5px 0;
+}
+
+.footer-links h4,
+.footer-connect h4 {
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.footer-links a:hover {
+  color: #fff;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.social-icons a {
+  color: #fff;
+  font-size: 1.3rem;
+  text-decoration: none;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 20px;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+/* =========================================
+   8. MODALS (OTP / Register / Login)
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+.modal-card {
+  background: #2a2a2a;
+  color: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.modal-card h2 {
+  color: #c0392b;
+  margin-bottom: 10px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #fff;
+  line-height: 1;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.otp-box {
+  width: 50px;
+  height: 55px;
+  font-size: 1.5rem;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #111;
+  color: #fff;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.otp-help {
+  font-size: 14px;
+  margin-top: 5px;
+  color: #ccc;
+}
+
+.otp-demo {
+  font-size: 12px;
+  color: #ff3131;
+  margin-top: 4px;
+}
+
+.otp-message {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+/* =========================================
+   9. LOGIN PAGE
+   ========================================= */
+body.login-body {
+  font-family: Arial, sans-serif;
+  background-color: var(--grc-black);
+  margin: 0;
+  min-height: 100vh;
+}
+
+.grc-navbar {
+  background: var(--navbar-bg-color);
+  padding: 0 25px;
+}
+
+.grc-navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 65px;
+}
+
+.grc-navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--grc-white);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.grc-navbar-logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.grc-navbar-nav {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.grc-navbar-nav a {
+  color: var(--grc-white);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 65px);
+  padding: 20px;
+}
+
+.login-box {
+  background: #2a2a2a;
+  padding: 40px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  color: white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.login-box h2 {
+  color: #c0392b;
+  text-align: center;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.login-box label {
+  display: block;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #ddd;
+}
+
+.login-box input {
+  width: 100%;
+  padding: 11px 12px;
+  margin-top: 6px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--grc-unavailable-color);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+.toggle-password:hover {
+  color: var(--grc-white);
+}
+
+.forgot-pass-container {
+  text-align: right;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+.forgot-pass-container a {
+  color: var(--grc-bright-red);
+  text-decoration: none;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background: #c0392b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.btn-login:hover {
+  background: #a93226;
+}
+
+.signup-link-container {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+.signup-link-container a {
+  color: var(--grc-bright-red);
+  text-decoration: none;
+}
+
+#message {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.error { color: #ff6b6b; }
+.success { color: #4dd08a; }
+
+/* =========================================
+   10. SIGNUP PAGE
+   ========================================= */
+body.signup-body {
+  font-family: Arial, sans-serif;
+  background-color: var(--grc-black);
+  margin: 0;
+  min-height: 100vh;
+}
+
+.signup-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 65px);
+  padding: 20px;
+}
+
+.box {
+  background: var(--grc-maroon);
+  padding: 35px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 420px;
+  color: var(--grc-white);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.box h2 {
+  color: var(--grc-bright-red);
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
+}
+
+.box label {
+  display: block;
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.box input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 5px;
+  border-radius: 4px;
+  border: 1px solid var(--grc-unavailable-color);
+  background: var(--grc-black);
+  color: var(--grc-white);
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.box input:focus {
+  outline: 2px solid var(--grc-bright-red);
+}
+
+.pw-rules {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--grc-unavailable-color);
+  list-style: none;
+  padding: 0;
+}
+
+.pw-rules li {
+  margin-bottom: 3px;
+}
+
+.pw-rules li::before {
+  content: "○  ";
+}
+
+.pw-rules li.valid {
+  color: #4dd08a;
+}
+
+.pw-rules li.valid::before {
+  content: "✔  ";
+}
+
+.box button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  margin-top: 22px;
+  background: var(--navbar-bg-color);
+  color: var(--grc-white);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.box button[type="submit"]:hover {
+  background: var(--grc-bright-red);
+}
+
+.box button[type="submit"]:disabled {
+  background: var(--grc-unavailable-color);
+  cursor: not-allowed;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+}
+
+.switch-link a {
+  color: var(--grc-bright-red);
+  text-decoration: none;
+}
+
+/* =========================================
+   11. CONTACT PAGE
+   ========================================= */
+.grc-header {
+  background-color: var(--navbar-bg-color);
+}
+
+.contact-logo {
+  height: 40px;
+  object-fit: contain;
+}
+/* =========================================
+   FORGOT PASSWORD MODAL
+   ========================================= */
+.forgot-step {
+  display: block;
+}
+
+.forgot-step.hidden {
+  display: none !important;
+}
+
+.modal-label {
+  display: block;
+  font-size: 13px;
+  color: #ddd;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #ffffff;
+  color: #000;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  outline: 2px solid #ff3131;
+}
+
+.forgot-message {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  min-height: 18px;
+}
+
+/* Password wrapper inside modal */
+.modal-card .password-wrapper {
+  position: relative;
+}
+
+.modal-card .password-wrapper input {
+  padding-right: 40px;
+}
+
+.modal-card .toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+.modal-card .toggle-password:hover {
+  color: #ffffff;
+}
+
+/* Improve OTP box sizing in modal */
+.modal-card .otp-box {
+  width: 50px;
+  height: 55px;
+  font-size: 1.5rem;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #111;
+  color: #fff;
+}
+
+.modal-card .otp-box:focus {
+  outline: 2px solid #ff3131;
+}
+
+/* Modal button spacing */
+.modal-card .btn-primary {
+  margin-top: 18px;
+}
+
+/* =========================================
+   12. REDIRECT PAGE
+   ========================================= */
+.redirect-link-wrapper {
+  margin-top: 20px;
+}
+
+/* =========================================
+   13. RESPONSIVE
+   ========================================= */
+@media (max-width: 991px) {
+  .desktop-nav { display: none !important; }
+  .hamburger-landing { display: flex !important; }
+  .navbar-grc { padding: 10px 20px; }
+}
+
+@media (min-width: 992px) {
+  .drawer-overlay { display: none !important; }
+}
+
+@media (max-width: 600px) {
+  .hero-content h1 { font-size: 1.6rem; }
+  .hero-content p { font-size: 0.95rem; }
+  .grc-logo { width: 85px; }
+}
+
+@media (max-width: 480px) {
+  .login-box, .box { padding: 25px 20px; }
+  .grc-navbar-brand span { font-size: 14px; }
+}
+/* =========================================
+   DISABLED LINKS — LANDING PAGE
+   ========================================= */
+
+/* Disabled links — grayed out, un-clickable */
+.disabled-link,
+a.disabled-link {
+  color: #B0B0B0 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+  opacity: 0.65;
+  user-select: none;
+  text-decoration: none !important;
+}
+
+/* Disabled text (spans sa footer) */
+.disabled-text {
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.7;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.disabled-text i {
+  color: #999;
+}
+
+/* Disabled drawer buttons */
+.dropdown-toggle.disabled-btn,
+button.dropdown-toggle[disabled] {
+  color: #B0B0B0 !important;
+  cursor: not-allowed !important;
+  opacity: 0.65;
+  pointer-events: none !important;
+  background: transparent;
+}
+
+/* Brand logo — huwag clickable */
+.brand-link-disabled {
+  cursor: default;
+  pointer-events: none;
+  text-decoration: none;
+}

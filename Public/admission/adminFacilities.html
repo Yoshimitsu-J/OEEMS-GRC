@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OEEMS - Admin Facilities</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="admin-body">
+
+  <!-- TOP STATUS BAR -->
+  <div class="top-status-bar">
+    <div class="top-status-left">
+      <button class="mobile-hamburger-btn" onclick="toggleMobileSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="hide-on-mobile"><strong>PC No.:</strong> 1</span>
+      <span class="hide-on-mobile"><strong>Session Time:</strong> 00:00:03</span>
+      <span><strong>Status:</strong> <span class="status-active">Active</span></span>
+    </div>
+    <div class="top-status-right">
+      <span class="hide-on-mobile"><strong>Time:</strong> 09:01 PM</span>
+      <span class="hide-on-mobile"><strong>Day:</strong> Monday</span>
+      <span class="hide-on-mobile"><strong>Date:</strong> 08/24/2026</span>
+      <a href="adminLoginPage.html" class="btn-logout-nav">LOG-OUT</a>
+      <span><i class="bi bi-person-circle"></i> <span class="hide-on-mobile">Dr. Esguerra / Admin</span></span>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar-logo">
+        <img src="../assets/image/grc-logo.png" alt="Logo">
+      </div>
+      <div>
+        <div class="sidebar-group-title">Main Controls</div>
+        <a href="adminQuickView.html" class="sidebar-btn">Quick View</a>
+        <a href="adminSchedules.html" class="sidebar-btn">Schedules</a>
+        <a href="adminQuestionnaire.html" class="sidebar-btn">Questionnaire</a>
+        <a href="applicationPage.html" class="sidebar-btn">Applications</a>
+        <a href="adminSystemStatus.html" class="sidebar-btn">System Status</a>
+      </div>
+      <div>
+        <div class="sidebar-group-title">Summaries</div>
+        <a href="adminFacilities.html" class="sidebar-btn active">Facilities</a>
+        <a href="adminResults.html" class="sidebar-btn">Results</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="admin-main-content">
+      <h2 class="page-title">FACILITIES | SUMMARY</h2>
+
+      <div class="facilities-grid">
+
+        <!-- ========== TOP LEFT: BAR CHART ========== -->
+        <div class="table-card facilities-chart-card">
+          <div class="facilities-bar-legend">
+            <span class="legend-dot legend-green"></span>
+            <span>Overall Dashboard</span>
+          </div>
+          <div class="facilities-bar-wrapper">
+            <canvas id="overallDashboardChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ========== COMLAB 1 ========== -->
+        <div class="table-card comlab-card">
+          <h3 class="comlab-title">COMLAB 1</h3>
+          <div class="comlab-dots" id="comlab1Dots"></div>
+          <div class="comlab-footer">
+            <div class="comlab-info">
+              <span class="comlab-label">FACILITATOR :</span>
+              <span class="comlab-value" data-comlab="1" data-field="facilitator">Juan Delacruz, Jay Clark</span>
+            </div>
+            <div class="comlab-info-row">
+              <div class="comlab-occupation">
+                <span class="comlab-label">OCCUPATION</span>
+                <span class="occupation-dot occupation-low" data-comlab="1" data-field="occupation"></span>
+              </div>
+              <div class="comlab-floor" data-comlab="1" data-field="floor">FLOOR 2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== COMLAB 2 ========== -->
+        <div class="table-card comlab-card">
+          <h3 class="comlab-title">COMLAB 2</h3>
+          <div class="comlab-dots" id="comlab2Dots"></div>
+          <div class="comlab-footer">
+            <div class="comlab-info">
+              <span class="comlab-label">FACILITATOR :</span>
+              <span class="comlab-value" data-comlab="2" data-field="facilitator">Maria Dela Cruz</span>
+            </div>
+            <div class="comlab-info-row">
+              <div class="comlab-occupation">
+                <span class="comlab-label">OCCUPATION</span>
+                <span class="occupation-dot occupation-full" data-comlab="2" data-field="occupation"></span>
+              </div>
+              <div class="comlab-floor" data-comlab="2" data-field="floor">FLOOR 2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== BOTTOM LEFT: PIE CHART ========== -->
+        <div class="table-card facilities-chart-card">
+          <h3 class="facilities-pie-title">OVERALL PC's STATUS</h3>
+          <div class="facilities-pie-wrapper">
+            <canvas id="overallPCStatusChart"></canvas>
+          </div>
+        </div>
+
+        <!-- ========== COMLAB 3 ========== -->
+        <div class="table-card comlab-card">
+          <h3 class="comlab-title">COMLAB 3</h3>
+          <div class="comlab-dots" id="comlab3Dots"></div>
+          <div class="comlab-footer">
+            <div class="comlab-info">
+              <span class="comlab-label">FACILITATOR :</span>
+              <span class="comlab-value" data-comlab="3" data-field="facilitator">Jose Reyes</span>
+            </div>
+            <div class="comlab-info-row">
+              <div class="comlab-occupation">
+                <span class="comlab-label">OCCUPATION</span>
+                <span class="occupation-dot occupation-low" data-comlab="3" data-field="occupation"></span>
+              </div>
+              <div class="comlab-floor" data-comlab="3" data-field="floor">FLOOR 2</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== COMLAB 4 ========== -->
+        <div class="table-card comlab-card">
+          <h3 class="comlab-title">COMLAB 4</h3>
+          <div class="comlab-dots" id="comlab4Dots"></div>
+          <div class="comlab-footer">
+            <div class="comlab-info">
+              <span class="comlab-label">FACILITATOR :</span>
+              <span class="comlab-value" data-comlab="4" data-field="facilitator">Mario Conception</span>
+            </div>
+            <div class="comlab-info-row">
+              <div class="comlab-occupation">
+                <span class="comlab-label">OCCUPATION</span>
+                <span class="occupation-dot occupation-full" data-comlab="4" data-field="occupation"></span>
+              </div>
+              <div class="comlab-floor" data-comlab="4" data-field="floor">FLOOR 4</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="js/adminCommon.js"></script>
+  <script src="js/adminFacilities.js"></script>
+</body>
+</html>

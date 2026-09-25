@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OEEMS - Admin Log-In</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="admin-body admin-login-wrapper">
+
+  <div class="table-card admin-login-card">
+    <div class="admin-sidebar-logo">
+      <img src="../assets/image/grc-logo.png" alt="Logo" class="admin-login-logo">
+      <h2 class="admin-login-title">ADMIN LOGIN</h2>
+      <p class="admin-login-subtitle">Online Entrance Examination Management System</p>
+    </div>
+
+    <form id="adminLoginForm">
+      <div class="admin-form-group">
+        <label class="admin-login-label">Admin ID / Username</label>
+        <input type="text" id="adminUsername" class="filter-input admin-login-input" placeholder="Enter admin username" required>
+      </div>
+      <div class="admin-form-group-lg">
+        <label class="admin-login-label">Password</label>
+        <input type="password" id="adminPassword" class="filter-input admin-login-input" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="admin-login-btn">LOG IN</button>
+    </form>
+
+    <p id="adminMessage" class="admin-login-message"></p>
+    <div class="admin-login-footer">
+      <a href="../index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <script src="js/adminLogin.js"></script>
+</body>
+</html>

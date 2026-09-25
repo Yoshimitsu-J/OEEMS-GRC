@@ -1,0 +1,87 @@
+/* =========================================
+   EXAM-SPECIFIC STYLES
+   ========================================= */
+
+.exam-top-bar {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.exam-timer {
+  color: #FFD700;
+}
+
+.exam-layout {
+  margin-top: 60px;
+}
+
+.exam-main {
+  margin-left: 0;
+  padding-top: 40px;
+}
+
+.exam-meta {
+  max-width: 700px;
+  margin: 0 auto 10px auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.exam-category-tag {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.exam-question-count {
+  font-size: 13px;
+  color: #666;
+}
+
+.exam-card {
+  max-width: 700px;
+}
+
+.exam-question {
+  margin-bottom: 20px;
+}
+
+.exam-next-btn {
+  margin-top: 20px;
+}
+
+.option-item {
+  border: 1px solid #CCC;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.option-item:hover {
+  background-color: #F9F9F9;
+}
+
+.exam-result-card {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.exam-result-card p {
+  color: #666;
+  font-size: 14px;
+  margin: 20px 0;
+}
+
+.exam-result-back-btn {
+  width: auto;
+  padding: 10px 30px;
+}
