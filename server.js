@@ -17,10 +17,21 @@ app.use('/api', routes);
 registerSocketHandlers(io);
 
 async function startServer() {
-	httpServer.listen(port, host, () => {
-		console.log(`OEEMS is running at http://localhost:${port}`);
-		console.log(`LAN access: http://<host-machine-ip>:${port}`);
-	});
+	try {
+		await new Promise((resolve, reject) => {
+			httpServer.once('error', reject);
+			httpServer.listen(port, host, resolve);
+		});
+	} catch (error) {
+		if (error.code === 'EADDRINUSE') {
+			throw new Error(`Port ${port} is already in use. Stop the existing OEEMS server before starting another one.`);
+		}
+
+		throw error;
+	}
+
+	console.log(`OEEMS is running at http://localhost:${port}`);
+	console.log(`LAN access: http://<host-machine-ip>:${port}`);
 
 	try {
 		await connectToMongoDB();
@@ -29,7 +40,26 @@ async function startServer() {
 	}
 }
 
+async function shutdown(signal) {
+	console.log(`\n${signal} received. Shutting down OEEMS...`);
+	io.close();
+
+	await new Promise((resolve) => {
+		httpServer.close(() => resolve());
+	});
+
+	console.log('OEEMS server stopped.');
+}
+
+process.once('SIGINT', () => {
+	shutdown('SIGINT').then(() => process.exit(0));
+});
+
+process.once('SIGTERM', () => {
+	shutdown('SIGTERM').then(() => process.exit(0));
+});
+
 startServer().catch((error) => {
-	console.error('OEEMS failed to start:', error.message);
-	process.exitCode = 1;
+	console.error(`OEEMS failed to start: ${error.message}`);
+	process.exit(1);
 });

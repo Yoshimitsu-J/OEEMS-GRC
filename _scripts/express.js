@@ -27,6 +27,20 @@ function createExpressApp() {
 		}
 	}));
 
+	const pageRoutes = {
+		'/login': 'login.html',
+		'/signup': 'signUp.html',
+		'/student': path.join('student', 'index.html'),
+		'/admission': path.join('admission', 'index.html'),
+		'/admission/login': path.join('admission', 'adminLoginPage.html')
+	};
+
+	Object.entries(pageRoutes).forEach(([route, page]) => {
+		app.get([route, `${route}/`], (request, response) => {
+			response.sendFile(path.join(publicPath, page));
+		});
+	});
+
 	app.use(express.static(publicPath));
 	app.get('/', (request, response) => response.sendFile(path.join(publicPath, 'index.html')));
 
