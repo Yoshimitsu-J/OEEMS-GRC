@@ -1,6 +1,10 @@
 # Sensitive Data
 _confidentials/
+node_modules/
 
 # System Files
 *.ini
 .DS_Store
+
+# Sensitive Files
+mongodb_connection.js
