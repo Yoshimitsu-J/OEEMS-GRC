@@ -11,7 +11,9 @@ const routes = require('./_routes/routes');
 
 const port = Number(process.env.PORT) || 3000;
 const host = process.env.HOST || '0.0.0.0';
-const app = createExpressApp();
+const app = createExpressApp({
+	rootPage: path.join(__dirname, 'mode_select.html')
+});
 const httpServer = http.createServer(app);
 const io = new Server(httpServer);
 

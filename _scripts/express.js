@@ -8,7 +8,7 @@ const { readMongoUri } = require('./mongodb_connection');
 const publicPath = path.join(__dirname, '..', 'public');
 const sessionSecretPath = path.join(__dirname, '..', '_confidentials', 'session_secret.txt');
 
-function createExpressApp() {
+function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.html') } = {}) {
 	const app = express();
 	const sessionSecret = process.env.SESSION_SECRET || fs.readFileSync(sessionSecretPath, 'utf8').trim();
 
@@ -50,6 +50,7 @@ function createExpressApp() {
 	const pageRoutes = {
 		'/login': 'login.html',
 		'/signup': 'signUp.html',
+		'/signUp.html': 'signUp.html',
 		'/student': path.join('student', 'index.html'),
 		'/admission': path.join('admission', 'index.html'),
 		'/admission/login': path.join('admission', 'adminLoginPage.html')
@@ -61,8 +62,15 @@ function createExpressApp() {
 		});
 	});
 
+	app.get('/public/index.html', (request, response) => {
+		response.sendFile(path.join(publicPath, 'index.html'));
+	});
+	app.get('/public/admission/index.html', (request, response) => {
+		response.sendFile(path.join(publicPath, 'admission', 'index.html'));
+	});
+	app.get('/', (request, response) => response.sendFile(rootPage));
+	app.use('/public', express.static(publicPath));
 	app.use(express.static(publicPath));
-	app.get('/', (request, response) => response.sendFile(path.join(publicPath, 'index.html')));
 
 	return app;
 }
