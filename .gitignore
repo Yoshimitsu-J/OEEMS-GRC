@@ -2,6 +2,7 @@
 _confidentials/
 node_modules/
 .env
+.env.example
 
 # System Files
 *.ini
