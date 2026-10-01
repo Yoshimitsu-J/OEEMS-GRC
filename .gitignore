@@ -1,6 +1,7 @@
 # Sensitive Data
 _confidentials/
 node_modules/
+.env
 
 # System Files
 *.ini

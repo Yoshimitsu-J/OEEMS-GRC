@@ -5,6 +5,10 @@ const mongoose = require('mongoose');
 const credentialsPath = path.join(__dirname, '..', '_confidentials', 'mongoDB_Credentials.txt');
 
 function readMongoUri() {
+	if (process.env.MONGODB_URI) {
+		return process.env.MONGODB_URI;
+	}
+
 	const credentials = fs.readFileSync(credentialsPath, 'utf8');
 	const match = credentials.match(/SRV Connection String:\s*(mongodb\+srv:\S+)/i);
 
@@ -25,5 +29,6 @@ async function connectToMongoDB() {
 }
 
 module.exports = {
-	connectToMongoDB
+	connectToMongoDB,
+	readMongoUri
 };

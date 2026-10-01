@@ -6,6 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('loginForm');
   const messageEl = document.getElementById('message');
 
+  const oauthErrors = {
+    google_sign_in_cancelled: 'Google sign-in was cancelled.',
+    account_not_found: 'No account was found. Use Sign Up to create one.',
+    google_auth_failed: 'Google sign-in failed. Please try again.'
+  };
+  const oauthError = new URLSearchParams(window.location.search).get('error');
+  if (messageEl && oauthErrors[oauthError]) {
+    messageEl.textContent = oauthErrors[oauthError];
+    messageEl.className = 'error';
+  }
+
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
