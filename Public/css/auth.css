@@ -1,0 +1,55 @@
+:root {
+  --auth-maroon: #800000;
+  --auth-maroon-dark: #400505;
+  --auth-ink: #261b1b;
+  --auth-muted: #625656;
+  --auth-line: #ddd4d4;
+  --auth-surface: #fff;
+  --auth-canvas: #f5f3f3;
+}
+
+.auth-page {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--auth-canvas);
+  color: var(--auth-ink);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.auth-page-shell { width: min(100% - 2rem, 34rem); margin: 0 auto; padding: 1.25rem 0 2.5rem; }
+.auth-back-link, .auth-forgot, .auth-footer a { color: var(--auth-maroon); font-weight: 700; }
+.auth-back-link { display: inline-block; margin: 0.25rem 0 1.25rem; }
+.auth-card { padding: clamp(1.4rem, 5vw, 2.2rem); border: 1px solid var(--auth-line); border-top: 5px solid var(--auth-maroon); background: var(--auth-surface); box-shadow: 0 14px 40px rgba(64, 5, 5, 0.09); }
+.auth-eyebrow { margin: 0 0 0.65rem; color: var(--auth-maroon); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.auth-card h1, .auth-dialog h2 { margin: 0; color: var(--auth-maroon-dark); font-size: clamp(1.55rem, 5vw, 2rem); line-height: 1.18; }
+.auth-subtitle { margin: 0.55rem 0 1.5rem; color: var(--auth-muted); }
+.auth-form { display: grid; gap: 1rem; }
+.auth-field { display: grid; gap: 0.42rem; font-size: 0.92rem; font-weight: 700; }
+.auth-field input { width: 100%; min-height: 2.9rem; padding: 0.7rem 0.8rem; border: 1px solid #a99b9b; border-radius: 4px; background: #fff; color: var(--auth-ink); font: inherit; font-weight: 400; }
+.auth-field input:focus-visible, .otp-digit:focus-visible { border-color: var(--auth-maroon); outline: 3px solid rgba(128, 0, 0, 0.16); }
+.password-rules { display: grid; gap: 0.35rem; margin: -0.25rem 0 0; padding-left: 1.2rem; color: var(--auth-muted); font-size: 0.86rem; }
+.password-rules li.valid { color: #24613c; }
+.auth-primary, .auth-google { display: flex; width: 100%; min-height: 2.9rem; align-items: center; justify-content: center; gap: 0.55rem; border-radius: 4px; font: inherit; font-weight: 750; text-decoration: none; }
+.auth-primary { border: 1px solid var(--auth-maroon); background: var(--auth-maroon); color: #fff; cursor: pointer; }
+.auth-primary:hover:not(:disabled) { background: #650000; }
+.auth-primary:disabled { cursor: not-allowed; opacity: 0.55; }
+.auth-google { border: 1px solid #aaa0a0; background: #fff; color: #292020; }
+.auth-google:hover { border-color: var(--auth-maroon); background: #faf7f7; }
+.auth-google i { color: #4285f4; }
+.auth-forgot { justify-self: end; font-size: 0.88rem; }
+.auth-divider { display: flex; align-items: center; gap: 0.8rem; margin: 1rem 0; color: var(--auth-muted); font-size: 0.85rem; }
+.auth-divider::before, .auth-divider::after { height: 1px; flex: 1; background: var(--auth-line); content: ""; }
+.auth-footer { margin: 1.1rem 0 0; color: var(--auth-muted); text-align: center; }
+.auth-message { min-height: 1.25rem; margin: 0; color: var(--auth-maroon); font-size: 0.9rem; }
+.auth-message.error { color: #a10d0d; }
+.auth-message.success { color: #24613c; }
+.auth-message.warning { color: #754300; }
+.auth-dialog { position: fixed; width: min(calc(100% - 2rem), 29rem); max-width: none; max-height: min(90vh, 48rem); padding: clamp(1.4rem, 5vw, 2.1rem); overflow-y: auto; border: 1px solid var(--auth-line); border-top: 5px solid var(--auth-maroon); background: #fff; color: var(--auth-ink); box-shadow: 0 24px 72px rgba(30, 10, 10, 0.24); }
+.auth-dialog::backdrop { background: rgba(24, 14, 14, 0.58); }
+.auth-dialog h2 { padding-right: 1.4rem; font-size: 1.55rem; }
+.auth-dialog h3 { margin: 1.15rem 0; color: var(--auth-muted); font-size: 1.05rem; }
+.auth-dialog-close { position: absolute; top: 0.6rem; right: 0.7rem; width: 2rem; height: 2rem; border: 0; background: transparent; color: var(--auth-muted); font-size: 1.7rem; cursor: pointer; }
+.otp-digit-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
+.otp-digit { width: 100%; min-width: 0; height: 3.3rem; border: 1px solid #a99b9b; border-radius: 4px; background: #fff; color: var(--auth-ink); font: inherit; font-size: 1.35rem; font-variant-numeric: tabular-nums; text-align: center; }
+@media (max-width: 370px) { .otp-digit-row { gap: 0.3rem; } .otp-digit { height: 3rem; font-size: 1.2rem; } }

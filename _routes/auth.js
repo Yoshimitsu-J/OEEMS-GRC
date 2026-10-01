@@ -203,8 +203,8 @@ router.post('/signup', requireSameOrigin, authLimiter, async (request, response)
 	try {
 		const email = normalizeEmail(request.body.email);
 		const password = request.body.password;
-		if (!isValidEmail(email) || typeof password !== 'string' || password.length < 12 || password.length > 128) {
-			return response.status(400).json({ error: 'Enter a valid email and a password of 12 to 128 characters.' });
+		if (!isValidEmail(email) || typeof password !== 'string' || password.length < 8 || password.length > 128) {
+			return response.status(400).json({ error: 'Enter a valid email and a password of 8 to 128 characters.' });
 		}
 
 		let user = await User.findOne({ email });
@@ -382,8 +382,8 @@ router.post('/password-reset/confirm', requireSameOrigin, authLimiter, async (re
 	const email = normalizeEmail(request.body.email);
 	const code = typeof request.body.code === 'string' ? request.body.code.trim() : '';
 	const password = request.body.password;
-	if (!isValidEmail(email) || !/^\d{6}$/.test(code) || typeof password !== 'string' || password.length < 12 || password.length > 128) {
-		return response.status(400).json({ error: 'Enter a valid email, six-digit code, and a 12 to 128 character password.' });
+	if (!isValidEmail(email) || !/^\d{6}$/.test(code) || typeof password !== 'string' || password.length < 8 || password.length > 128) {
+		return response.status(400).json({ error: 'Enter a valid email, six-digit code, and an 8 to 128 character password.' });
 	}
 
 	try {

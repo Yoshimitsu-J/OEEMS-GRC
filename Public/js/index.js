@@ -9,6 +9,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeDrawerBtn = document.getElementById('closeDrawerBtn');
   const navDrawerOverlay = document.getElementById('navDrawerOverlay');
   const drawerCloseLinks = document.querySelectorAll('.drawer-close-link');
+  const loginModal = document.getElementById('login-modal');
+  const closeLoginButtons = document.querySelectorAll('[data-close-login]');
+
+  function openLoginModal() {
+    if (loginModal && !loginModal.open) loginModal.showModal();
+  }
+
+  document.querySelectorAll('[data-open-login]').forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (navDrawerOverlay) navDrawerOverlay.classList.add('hidden');
+      openLoginModal();
+    });
+  });
+
+  closeLoginButtons.forEach((button) => {
+    button.addEventListener('click', () => loginModal?.close());
+  });
+
+  if (loginModal) {
+    loginModal.addEventListener('click', (event) => {
+      if (event.target === loginModal) loginModal.close();
+    });
+    if (window.location.hash === '#login-modal') openLoginModal();
+  }
 
   if (openDrawerBtn && navDrawerOverlay) {
     openDrawerBtn.addEventListener('click', () => {

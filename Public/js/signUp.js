@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Signup JS Initialized.');
 
   const signupForm = document.getElementById('signupForm');
+  const emailInput = document.getElementById('email');
   const passwordInput = document.getElementById('password');
-  const confirmInput = document.getElementById('confirmPassword');
   const submitBtn = document.getElementById('submitBtn');
   const message = document.getElementById('message');
 
@@ -17,54 +17,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const ruleNumber = document.getElementById('rule-number');
   const ruleSpecial = document.getElementById('rule-special');
 
-  // --- PASSWORD VALIDATION ---
+  let isSubmitting = false;
+
   function validatePassword() {
     const val = passwordInput.value;
-    let valid = true;
-
-    if (val.length >= 12) ruleLength.classList.add('valid');
-    else { ruleLength.classList.remove('valid'); valid = false; }
-
-    if (/[a-z]/.test(val) && /[A-Z]/.test(val)) ruleCase.classList.add('valid');
-    else { ruleCase.classList.remove('valid'); valid = false; }
-
-    if (/\d/.test(val)) ruleNumber.classList.add('valid');
-    else { ruleNumber.classList.remove('valid'); valid = false; }
-
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(val)) ruleSpecial.classList.add('valid');
-    else { ruleSpecial.classList.remove('valid'); valid = false; }
-
-    submitBtn.disabled = !(confirmInput.value && confirmInput.value === val && valid);
+    const checks = [
+      [ruleLength, val.length >= 8],
+      [ruleCase, /[a-z]/.test(val) && /[A-Z]/.test(val)],
+      [ruleNumber, /\d/.test(val)],
+      [ruleSpecial, /[_\/@#!]/.test(val)]
+    ];
+    checks.forEach(([rule, passes]) => rule.classList.toggle('valid', passes));
+    submitBtn.disabled = isSubmitting || !emailInput.validity.valid || checks.some(([, passes]) => !passes);
   }
 
+  emailInput.addEventListener('input', validatePassword);
   if (passwordInput) passwordInput.addEventListener('input', validatePassword);
-  if (confirmInput) confirmInput.addEventListener('input', validatePassword);
-
-  // --- TOGGLE PASSWORD ---
-  const togglePassword = document.getElementById('togglePassword');
-  const eyeIconPassword = document.getElementById('eyeIconPassword');
-  if (togglePassword && passwordInput) {
-    togglePassword.addEventListener('click', () => {
-      const type = passwordInput.type === 'password' ? 'text' : 'password';
-      passwordInput.type = type;
-      eyeIconPassword.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-    });
-  }
-
-  const toggleConfirm = document.getElementById('toggleConfirmPassword');
-  const eyeIconConfirm = document.getElementById('eyeIconConfirm');
-  if (toggleConfirm && confirmInput) {
-    toggleConfirm.addEventListener('click', () => {
-      const type = confirmInput.type === 'password' ? 'text' : 'password';
-      confirmInput.type = type;
-      eyeIconConfirm.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
-    });
-  }
 
   // --- CREATE ACCOUNT AND REQUEST EMAIL OTP ---
   if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      isSubmitting = true;
       submitBtn.disabled = true;
       message.textContent = '';
       try {
@@ -79,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Could not create your account.');
 
-        const pendingEmail = document.getElementById('email').value.trim();
+        const pendingEmail = emailInput.value.trim();
         message.textContent = result.isDevMode
           ? 'Development Mode: OTP logged to server terminal.'
           : result.message;
@@ -94,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         message.textContent = error.message;
         message.className = 'error';
       } finally {
+        isSubmitting = false;
         validatePassword();
       }
     });

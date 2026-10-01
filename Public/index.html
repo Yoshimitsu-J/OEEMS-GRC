@@ -6,6 +6,7 @@
   <title>Global Reciprocal Colleges - Entrance Exam Portal</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
 
@@ -44,8 +45,7 @@
             <li><a href="#" class="disabled-link" aria-disabled="true">Library</a></li>
             <li><a href="#" class="disabled-link" aria-disabled="true">Scholarship</a></li>
             <li><a href="#" class="disabled-link" aria-disabled="true">Office of the Student Affairs</a></li>
-            <!-- ✅ ENABLED -->
-            <li><a href="login.html">Login to OEEMS (Student)</a></li>
+            <li><a href="#login-modal" data-open-login>Entrance Exam</a></li>
           </ul>
         </li>
 
@@ -114,8 +114,7 @@
             <li><a href="#" class="disabled-link" aria-disabled="true">Library</a></li>
             <li><a href="#" class="disabled-link" aria-disabled="true">Scholarship</a></li>
             <li><a href="#" class="disabled-link" aria-disabled="true">Office of the Student Affairs</a></li>
-            <!-- ✅ ENABLED -->
-            <li><a href="login.html" class="drawer-close-link">Login to OEEMS (Student)</a></li>
+            <li><a href="#login-modal" class="drawer-close-link" data-open-login>Entrance Exam</a></li>
           </ul>
         </li>
 
@@ -133,10 +132,6 @@
         <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">Contact Us</a></li>
         <li class="menu-item"><a href="#" class="drawer-close-link disabled-link" aria-disabled="true">About Us</a></li>
 
-        <!-- ✅ Direct link sa drawer -->
-        <li class="menu-item">
-          <a href="signUp.html" class="drawer-close-link">Apply / Register for Entrance Exam</a>
-        </li>
       </ul>
     </div>
   </div>
@@ -144,13 +139,8 @@
   <main id="home">
     <div class="grc-hero-bg">
       <div class="hero-content">
-        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="grc-logo" />
         <h1>GLOBAL RECIPROCAL COLLEGES</h1>
         <p>Touching Hearts, Renewing Minds, Transforming Lives</p>
-        <div class="hero-cta-row">
-          <!-- ✅ Original signup button — same color, clickable -->
-          <a href="signUp.html" class="btn-grc-landing">Apply / Register for Entrance Exam</a>
-        </div>
       </div>
     </div>
 
@@ -219,6 +209,30 @@
     </div>
   </footer>
 
+  <dialog class="auth-dialog" id="login-modal" aria-labelledby="loginModalTitle">
+    <button class="auth-dialog-close" type="button" aria-label="Close login dialog" data-close-login>&times;</button>
+    <p class="auth-eyebrow">Global Reciprocal Colleges</p>
+    <h2 id="loginModalTitle">Apply for Entrance Examination</h2>
+    <h3>Log-In</h3>
+    <form id="loginForm" class="auth-form">
+      <label class="auth-field" for="email">
+        <span>Email Address</span>
+        <input id="email" name="email" type="email" autocomplete="email" placeholder="Registered Email Address" required>
+      </label>
+      <label class="auth-field" for="password">
+        <span>Password</span>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password you have created during sign-up" required>
+      </label>
+      <a class="auth-forgot" href="/login#forgotPasswordModal">Forgot Password?</a>
+      <button class="auth-primary" type="submit">Login</button>
+      <p class="auth-message" id="message" role="status" aria-live="polite"></p>
+    </form>
+    <div class="auth-divider"><span>or</span></div>
+    <a class="auth-google" href="/api/auth/google?intent=login"><i class="bi bi-google" aria-hidden="true"></i> Continue with Google</a>
+    <p class="auth-footer">Don't have an account? <a href="/public/signUp.html">Sign Up</a></p>
+  </dialog>
+
   <script src="js/index.js"></script>
+  <script src="js/login.js"></script>
 </body>
 </html>

@@ -82,6 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (n === 3 && step3) step3.classList.remove('hidden');
   }
 
+  if (forgotModal && window.location.hash === '#forgotPasswordModal') {
+    forgotModal.classList.remove('hidden');
+    showStep(1);
+  }
+
   if (sendCodeBtn) {
     sendCodeBtn.addEventListener('click', async () => {
       const email = document.getElementById('forgotEmail').value.trim();
@@ -167,8 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const newPass = newPasswordInput.value;
       const confirmPass = confirmNewInput.value;
       const code = Array.from(otpBoxes).map((input) => input.value).join('');
-      if (newPass.length < 12 || newPass.length > 128) {
-        forgotMessage3.textContent = 'Password must be 12 to 128 characters.';
+      if (newPass.length < 8 || newPass.length > 128) {
+        forgotMessage3.textContent = 'Password must be 8 to 128 characters.';
         forgotMessage3.style.color = '#ff6b6b';
         return;
       }

@@ -1,69 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OEEMS - Sign Up</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#800000">
+  <title>Sign Up | OEEMS</title>
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
-<body class="signup-body">
+<body class="auth-page">
+  <main class="auth-page-shell">
+    <a class="auth-back-link" href="/public/index.html">&larr; Cancel and back to homepage</a>
+    <section class="auth-card auth-signup-card" aria-labelledby="signupTitle">
+      <p class="auth-eyebrow">Global Reciprocal Colleges</p>
+      <h1 id="signupTitle">Welcome to GRC's Entrance Examination!</h1>
+      <p class="auth-subtitle">Let's setup your account first!</p>
 
-  <nav class="grc-navbar">
-    <div class="grc-navbar-inner">
-      <a class="grc-navbar-brand" href="index.html">
-        <img src="assets/image/grc-logo.png" alt="GRC Logo" class="grc-navbar-logo" />
-        <span>Global Reciprocal Colleges</span>
-      </a>
-      <ul class="grc-navbar-nav">
-        <li><a href="index.html">Home</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="signup-wrapper">
-    <div class="box">
-      <h2>SIGN UP</h2>
-      <form id="signupForm">
-        <!-- WALANG First Name -->
-        <!-- WALANG Last Name -->
-
-        <label for="email">Email:</label>
-        <input type="email" id="email" placeholder="e.g. juandelacruz@gmail.com" required />
-
-        <label for="password">Password:</label>
-        <div class="password-wrapper">
-          <input type="password" id="password" required />
-          <button type="button" class="toggle-password" id="togglePassword" aria-label="Show password">
-            <i class="bi bi-eye" id="eyeIconPassword"></i>
-          </button>
-        </div>
-
-        <ul class="pw-rules" id="pwRules">
-          <li id="rule-length">At least 12 characters</li>
-          <li id="rule-case">Uppercase and lowercase letters</li>
-          <li id="rule-number">At least one number</li>
-          <li id="rule-special">At least one special character</li>
+      <form id="signupForm" class="auth-form">
+        <label class="auth-field" for="email">
+          <span>Email Address</span>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="Enter your valid email address" required>
+        </label>
+        <label class="auth-field" for="password">
+          <span>Password</span>
+          <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+        </label>
+        <ul class="password-rules" aria-label="Password requirements">
+          <li id="rule-length">At least 8 characters</li>
+          <li id="rule-case">Contains uppercase and lowercase letters</li>
+          <li id="rule-number">At least 1 number</li>
+          <li id="rule-special">At least 1 special character: _ / ! @ #</li>
         </ul>
-
-        <label for="confirmPassword">Confirm Password:</label>
-        <div class="password-wrapper">
-          <input type="password" id="confirmPassword" required />
-          <button type="button" class="toggle-password" id="toggleConfirmPassword" aria-label="Show password">
-            <i class="bi bi-eye" id="eyeIconConfirm"></i>
-          </button>
-        </div>
-
-        <button type="submit" id="submitBtn" disabled>Create Account &amp; Send OTP</button>
+        <button class="auth-primary" type="submit" id="submitBtn" disabled>Confirm and verify with OTP Code</button>
+        <p class="auth-message" id="message" role="status" aria-live="polite"></p>
       </form>
 
-      <a class="btn-primary btn-block google-auth-button" href="/api/auth/google?intent=signup">Continue with Google</a>
-
-      <p id="message"></p>
-      <p class="switch-link">Already have an account? <a href="login.html">Log in</a></p>
-    </div>
-  </div>
-
+      <div class="auth-divider"><span>or</span></div>
+      <a class="auth-google" href="/api/auth/google?intent=signup"><i class="bi bi-google" aria-hidden="true"></i> Continue with Google</a>
+      <p class="auth-footer">Already have an account? <a href="/public/index.html#login-modal">Login</a></p>
+    </section>
+  </main>
   <script src="js/signUp.js"></script>
 </body>
 </html>
