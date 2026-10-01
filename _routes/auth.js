@@ -29,7 +29,6 @@ const authLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false
 });
-const OTP_EXPIRATION_MS = 10 * 60 * 1000;
 const OTP_RESEND_DELAY_MS = 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 
@@ -99,22 +98,23 @@ async function issueOtp(user, purpose, allowDevFallback) {
 	}, { $set: { consumedAt: now } });
 
 	const code = crypto.randomInt(0, 1000000).toString().padStart(6, '0');
+	const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 	const otpRequest = await OtpRequest.create({
 		userId: user._id,
 		purpose,
 		codeHash: hashOtp(code),
-		expiresAt: new Date(now.getTime() + OTP_EXPIRATION_MS)
+		expiresAt
 	});
 
 	try {
 		if (!isSmtpConfigured()) {
 			if (!allowDevFallback) throw new Error('SMTP is not configured for production OTP delivery.');
 			console.info(`[DEV MODE] Generated OTP for ${user.email}: ${code}`);
-			return { isDevMode: true };
+			return { isDevMode: true, expiresAt };
 		}
 
 		await sendOtp(user.email, code, purpose);
-		return { isDevMode: false };
+		return { isDevMode: false, expiresAt };
 	} catch (error) {
 		await OtpRequest.updateOne({ _id: otpRequest._id }, { $set: { consumedAt: new Date() } });
 		console.error('OTP email delivery failed:', error.code || error.message);
@@ -125,30 +125,38 @@ async function issueOtp(user, purpose, allowDevFallback) {
 }
 
 async function consumeOtp(userId, purpose, code) {
-	const now = new Date();
 	const otpRequest = await OtpRequest.findOne({
 		userId,
 		purpose,
 		consumedAt: null,
-		expiresAt: { $gt: now },
 		attemptCount: { $lt: OTP_MAX_ATTEMPTS }
 	}).select('+codeHash').sort({ createdAt: -1 });
-	if (!otpRequest) return false;
+	if (!otpRequest) return { ok: false, expired: true };
 
-	const attempt = await OtpRequest.findOneAndUpdate({
-		_id: otpRequest._id,
-		consumedAt: null,
-		attemptCount: { $lt: OTP_MAX_ATTEMPTS }
-	}, { $inc: { attemptCount: 1 } }, { new: true });
-	if (!attempt || !compareOtp(code, otpRequest.codeHash)) return false;
+	const expiresAt = otpRequest.expiresAt.getTime();
+	if (Date.now() > expiresAt) return { ok: false, expired: true };
+
+	if (!compareOtp(code, otpRequest.codeHash)) {
+		await OtpRequest.updateOne({
+			_id: otpRequest._id,
+			consumedAt: null,
+			attemptCount: { $lt: OTP_MAX_ATTEMPTS }
+		}, { $inc: { attemptCount: 1 } });
+		return { ok: false, expired: false };
+	}
+	if (Date.now() > expiresAt) return { ok: false, expired: true };
 
 	const consumed = await OtpRequest.findOneAndUpdate({
 		_id: otpRequest._id,
 		consumedAt: null,
-		expiresAt: { $gt: new Date() },
-		attemptCount: { $lte: OTP_MAX_ATTEMPTS }
-	}, { $set: { consumedAt: new Date() } }, { new: true });
-	return Boolean(consumed);
+		attemptCount: { $lt: OTP_MAX_ATTEMPTS }
+	}, {
+		$set: { consumedAt: new Date() },
+		$inc: { attemptCount: 1 }
+	}, { new: true });
+	return consumed
+		? { ok: true, expired: false }
+		: { ok: false, expired: Date.now() > expiresAt };
 }
 
 async function findOrCreateGoogleUser(profile) {
@@ -233,6 +241,8 @@ router.post('/signup', requireSameOrigin, authLimiter, async (request, response)
 		response.status(202).json({
 			ok: true,
 			isDevMode: delivery.isDevMode,
+			expiresAt: delivery.expiresAt.toISOString(),
+			expiresInMs: Math.max(0, delivery.expiresAt.getTime() - Date.now()),
 			message: delivery.isDevMode
 				? 'Development Mode: OTP logged to server terminal.'
 				: 'A verification code was sent to your email.'
@@ -249,6 +259,40 @@ router.post('/signup', requireSameOrigin, authLimiter, async (request, response)
 	}
 });
 
+router.post('/resend-otp', requireSameOrigin, authLimiter, async (request, response) => {
+	const email = normalizeEmail(request.body.email);
+	if (!isValidEmail(email)) {
+		return response.status(400).json({ error: 'Enter a valid email address.' });
+	}
+
+	try {
+		const user = await User.findOne({ email, emailVerified: false, accountStatus: 'pending' });
+		if (!user) {
+			return response.status(404).json({ error: 'No pending verification was found for that email.' });
+		}
+
+		const delivery = await issueOtp(user, 'signup_verification', isLocalDevelopment(request));
+		response.status(202).json({
+			ok: true,
+			isDevMode: delivery.isDevMode,
+			expiresAt: delivery.expiresAt.toISOString(),
+			expiresInMs: Math.max(0, delivery.expiresAt.getTime() - Date.now()),
+			message: delivery.isDevMode
+				? 'Development Mode: OTP logged to server terminal.'
+				: 'A new verification code was sent to your email.'
+		});
+	} catch (error) {
+		if (error.status === 429) {
+			return response.status(429).json({ error: error.message });
+		}
+		if (error.isEmailDeliveryError) {
+			return response.status(503).json({ error: 'Could not send a new verification email. Please try again.' });
+		}
+		console.error('OTP resend failed:', error.code || error.message);
+		response.status(500).json({ error: 'Could not create a new verification code.' });
+	}
+});
+
 router.post('/verify-otp', requireSameOrigin, authLimiter, async (request, response) => {
 	const email = normalizeEmail(request.body.email);
 	const code = typeof request.body.code === 'string' ? request.body.code.trim() : '';
@@ -262,8 +306,12 @@ router.post('/verify-otp', requireSameOrigin, authLimiter, async (request, respo
 			return response.status(400).json({ error: 'This verification request is invalid or already used.' });
 		}
 
-		if (!(await consumeOtp(user._id, 'signup_verification', code))) {
-			return response.status(400).json({ error: 'The verification code is no longer valid. Request a new one.' });
+		const verification = await consumeOtp(user._id, 'signup_verification', code);
+		if (!verification.ok) {
+			return response.status(400).json({
+				error: verification.expired ? 'The verification code expired. Request a new one.' : 'The verification code is incorrect.',
+				expired: verification.expired
+			});
 		}
 
 		user.emailVerified = true;
@@ -340,7 +388,8 @@ router.post('/password-reset/confirm', requireSameOrigin, authLimiter, async (re
 
 	try {
 		const user = await User.findOne({ email, emailVerified: true, accountStatus: 'active' });
-		if (!user || !(await consumeOtp(user._id, 'password_reset', code))) {
+		const verification = user ? await consumeOtp(user._id, 'password_reset', code) : { ok: false };
+		if (!user || !verification.ok) {
 			return response.status(400).json({ error: 'The reset code is incorrect, expired, or already used.' });
 		}
 		user.passwordHash = await hashPassword(password);

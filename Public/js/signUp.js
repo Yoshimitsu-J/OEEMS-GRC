@@ -84,8 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
           ? 'Development Mode: OTP logged to server terminal.'
           : result.message;
         message.className = result.isDevMode ? 'warning' : 'success';
+        sessionStorage.setItem('pendingOtpEmail', pendingEmail);
         window.setTimeout(() => {
-          window.location.assign(`/verify-otp?email=${encodeURIComponent(pendingEmail)}`);
+          const remainingMs = Math.max(0, result.expiresInMs - 900);
+          const devParam = result.isDevMode ? '&dev=1' : '';
+          window.location.assign(`/verify-otp?remainingMs=${remainingMs}${devParam}`);
         }, 900);
       } catch (error) {
         message.textContent = error.message;

@@ -3,25 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f4f2f2">
   <title>Verify Email | OEEMS</title>
-  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: #271b1b;
+      background: #f4f2f2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      display: grid;
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1.25rem;
+      place-items: center;
+      background: radial-gradient(ellipse at 90% 0%, rgba(128, 0, 0, 0.09), transparent 36rem), #f4f2f2;
+    }
+
+    .verify-panel {
+      width: min(100%, 29rem);
+      padding: clamp(1.5rem, 6vw, 2.25rem);
+      border: 1px solid #ded5d5;
+      border-top: 5px solid #800000;
+      background: #fff;
+      box-shadow: 0 16px 44px rgba(53, 20, 20, 0.09);
+    }
+
+    h1 {
+      margin: 0 0 0.65rem;
+      color: #400505;
+      font-size: 1.8rem;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0 0 1.6rem;
+      color: #554747;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .dev-note {
+      margin: -0.8rem 0 1.25rem;
+      color: #754300;
+      font-size: 0.9rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    #code {
+      width: 100%;
+      min-height: 3.5rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid #9b8d8d;
+      border-radius: 4px;
+      background: #fff;
+      color: #221717;
+      font: inherit;
+      font-size: 1.45rem;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.2em;
+      text-align: center;
+    }
+
+    #code:focus-visible {
+      border-color: #800000;
+      outline: 3px solid rgba(128, 0, 0, 0.18);
+    }
+
+    #countdown {
+      min-height: 1.5rem;
+      margin: 0.7rem 0 1rem;
+      color: #554747;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .actions { display: grid; gap: 0.75rem; }
+
+    button {
+      min-height: 2.8rem;
+      border: 0;
+      border-radius: 4px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #verifyButton {
+      background: #800000;
+      color: #fff;
+    }
+
+    #verifyButton:hover:not(:disabled) { background: #600000; }
+
+    #resendButton {
+      background: #eee8e8;
+      color: #500000;
+    }
+
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+    #message {
+      min-height: 1.5rem;
+      margin: 0.9rem 0 0;
+      color: #a10d0d;
+      line-height: 1.4;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+    }
+  </style>
 </head>
-<body class="signup-body">
-  <main class="signup-wrapper">
-    <section class="box" aria-labelledby="verifyTitle">
-      <h1 id="verifyTitle">Verify your email</h1>
-      <p class="otp-help">Enter the six-digit code sent to your email. In local development, find it in the server terminal.</p>
-      <form id="verifyOtpForm">
-        <label for="email">Email address</label>
-        <input id="email" name="email" type="email" autocomplete="email" required>
+<body>
+  <main class="verify-panel">
+    <h1>Verify your email</h1>
+    <p class="subtitle">OTP Verification code sent to <span id="emailDisplay"></span>.</p>
+    <p class="dev-note" id="devNote" hidden>Development Mode: OTP logged to server terminal.</p>
 
-        <label for="code">Six-digit verification code</label>
-        <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
-
+    <form id="verifyOtpForm">
+      <label for="code">Six-digit verification code</label>
+      <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+      <p id="countdown" aria-live="polite">Code expires in 02:00</p>
+      <div class="actions">
         <button type="submit" id="verifyButton">Verify email</button>
-      </form>
-      <p id="verifyMessage" role="status" aria-live="polite"></p>
-    </section>
+        <button type="button" id="resendButton" hidden>Resend OTP</button>
+      </div>
+    </form>
+    <p id="message" role="status" aria-live="polite"></p>
   </main>
   <script src="js/verifyOtp.js"></script>
 </body>
