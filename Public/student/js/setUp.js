@@ -210,10 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      localStorage.setItem('accountInfo', JSON.stringify({
-        lastName, givenName, middleName
-      }));
-
       setUpMessage.textContent = 'Info saved! Proceeding...';
       setUpMessage.style.color = '#4dd08a';
 
@@ -391,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // STUDENT INFO FORM SUBMIT
   // =========================================
   if (studentInfoForm) {
-    studentInfoForm.addEventListener('submit', (e) => {
+    studentInfoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const sex = document.querySelector('input[name="sex"]:checked')?.value;
@@ -406,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const guardianPhone = document.getElementById('guardianPhone').value;
       const termsAccepted = document.getElementById('termsCheck').checked;
 
-      if (!sex || !birthday || !country || !region || !city || !barangay || !streetAddress || !guardianName || !guardianPhone) {
+      if (!sex || !birthday || !phone || !country || !region || !city || !barangay || !streetAddress || !guardianName || !guardianPhone) {
         studentInfoMessage.textContent = 'Please fill in all required fields.';
         studentInfoMessage.style.color = '#ff6b6b';
         return;
@@ -418,27 +414,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Save student info
-      localStorage.setItem('studentInfo', JSON.stringify({
-        sex, birthday, phone, country, region, city, barangay,
-        streetAddress, guardianName, guardianPhone
-      }));
+      const submitButton = studentInfoForm.querySelector('[type="submit"]');
+      if (submitButton) submitButton.disabled = true;
+      studentInfoMessage.textContent = 'Saving your profile...';
+      studentInfoMessage.style.color = '';
 
-      // Combine
-      const accountInfo = JSON.parse(localStorage.getItem('accountInfo') || '{}');
-      const fullData = {
-        ...accountInfo,
-        sex, birthday, phone, country, region, city, barangay,
-        streetAddress, guardianName, guardianPhone
-      };
-      localStorage.setItem('applicantData', JSON.stringify(fullData));
-
-      studentInfoMessage.textContent = 'Registration complete! Redirecting...';
-      studentInfoMessage.style.color = '#4dd08a';
-
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1500);
+      try {
+        const response = await fetch('/api/student/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lastName: document.getElementById('lastName').value.trim(),
+            givenName: document.getElementById('givenName').value.trim(),
+            middleName: document.getElementById('middleName').value.trim(),
+            sex: sex.toLowerCase(),
+            birthday,
+            phone,
+            address: { country, region, city, barangay, street: streetAddress },
+            guardian: { name: guardianName, phone: guardianPhone },
+            termsAccepted
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not save the profile.');
+        studentInfoMessage.textContent = 'Profile saved. Opening your dashboard...';
+        studentInfoMessage.style.color = '#4dd08a';
+        window.location.assign(result.redirectUrl);
+      } catch (error) {
+        studentInfoMessage.textContent = error.message;
+        studentInfoMessage.style.color = '#ff6b6b';
+      } finally {
+        if (submitButton) submitButton.disabled = false;
+      }
     });
   }
 });

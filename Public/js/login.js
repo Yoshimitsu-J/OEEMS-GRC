@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const oauthErrors = {
     google_sign_in_cancelled: 'Google sign-in was cancelled.',
     account_not_found: 'No account was found. Use Sign Up to create one.',
+    account_disabled: 'This account cannot sign in. Contact support.',
     google_auth_failed: 'Google sign-in failed. Please try again.'
   };
   const oauthError = new URLSearchParams(window.location.search).get('error');
@@ -18,42 +19,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      if (username === 'admin' && password === 'admin123') {
-        const userSession = {
-          id: '1', name: 'Admin User', role: 'Admin',
-          token: 'demo-token-' + Date.now()
-        };
-        localStorage.setItem('userSession', JSON.stringify(userSession));
+      const submitButton = loginForm.querySelector('[type="submit"]');
+      if (submitButton) submitButton.disabled = true;
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not sign in.');
+        window.location.assign(result.redirectUrl);
+      } catch (error) {
         if (messageEl) {
-          messageEl.textContent = 'Login successful! Redirecting...';
-          messageEl.className = 'success';
-        }
-        setTimeout(() => {
-          window.location.href = 'admission/index.html';
-        }, 1000);
-      } else if (username === 'student' && password === 'student123') {
-        const userSession = {
-          id: '2', name: 'Juan Dela Cruz', role: 'Student',
-          token: 'demo-token-' + Date.now()
-        };
-        localStorage.setItem('userSession', JSON.stringify(userSession));
-        if (messageEl) {
-          messageEl.textContent = 'Login successful! Redirecting...';
-          messageEl.className = 'success';
-        }
-        setTimeout(() => {
-          window.location.href = 'student/index.html';
-        }, 1000);
-      } else {
-        if (messageEl) {
-          messageEl.textContent = 'Invalid credentials. Try admin/admin123 or student/student123';
+          messageEl.textContent = error.message;
           messageEl.className = 'error';
         }
+      } finally {
+        if (submitButton) submitButton.disabled = false;
       }
     });
   }
@@ -95,24 +83,38 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (sendCodeBtn) {
-    sendCodeBtn.addEventListener('click', () => {
+    sendCodeBtn.addEventListener('click', async () => {
       const email = document.getElementById('forgotEmail').value.trim();
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         forgotMessage1.textContent = 'Please enter a valid email.';
         forgotMessage1.style.color = '#ff6b6b';
         return;
       }
-      forgotMessage1.textContent = 'Code sent! Check your inbox.';
-      forgotMessage1.style.color = '#4dd08a';
-      setTimeout(() => {
+      sendCodeBtn.disabled = true;
+      try {
+        const response = await fetch('/api/auth/password-reset/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not request a reset code.');
+        forgotMessage1.textContent = result.message;
+        forgotMessage1.style.color = '#4dd08a';
         showStep(2);
         if (otpBoxes.length > 0) otpBoxes[0].focus();
-      }, 600);
+      } catch (error) {
+        forgotMessage1.textContent = error.message;
+        forgotMessage1.style.color = '#ff6b6b';
+      } finally {
+        sendCodeBtn.disabled = false;
+      }
     });
   }
 
   otpBoxes.forEach((input, index) => {
     input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '').slice(-1);
       if (input.value.length === 1 && index < otpBoxes.length - 1) {
         otpBoxes[index + 1].focus();
       }
@@ -127,12 +129,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (verifyCodeBtn) {
     verifyCodeBtn.addEventListener('click', () => {
       const entered = Array.from(otpBoxes).map((i) => i.value).join('');
-      if (entered === '1234') {
-        forgotMessage2.textContent = 'Verified!';
+      if (/^\d{6}$/.test(entered)) {
+        forgotMessage2.textContent = 'Enter your new password, then submit the code.';
         forgotMessage2.style.color = '#4dd08a';
         setTimeout(() => showStep(3), 500);
       } else {
-        forgotMessage2.textContent = 'Invalid code. Try 1234.';
+        forgotMessage2.textContent = 'Enter all six digits from the email.';
         forgotMessage2.style.color = '#ff6b6b';
       }
     });
@@ -164,8 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
     resetPasswordBtn.addEventListener('click', () => {
       const newPass = newPasswordInput.value;
       const confirmPass = confirmNewInput.value;
-      if (newPass.length < 8) {
-        forgotMessage3.textContent = 'Password must be at least 8 characters.';
+      const code = Array.from(otpBoxes).map((input) => input.value).join('');
+      if (newPass.length < 12 || newPass.length > 128) {
+        forgotMessage3.textContent = 'Password must be 12 to 128 characters.';
         forgotMessage3.style.color = '#ff6b6b';
         return;
       }
@@ -174,12 +177,33 @@ document.addEventListener('DOMContentLoaded', () => {
         forgotMessage3.style.color = '#ff6b6b';
         return;
       }
-      forgotMessage3.textContent = 'Password reset successfully!';
-      forgotMessage3.style.color = '#4dd08a';
-      setTimeout(() => {
-        forgotModal.classList.add('hidden');
-        resetAllFields();
-      }, 1500);
+      resetPasswordBtn.disabled = true;
+      fetch('/api/auth/password-reset/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('forgotEmail').value.trim(),
+          code,
+          password: newPass
+        })
+      })
+        .then(async (response) => {
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'Could not reset the password.');
+          forgotMessage3.textContent = result.message;
+          forgotMessage3.style.color = '#4dd08a';
+          setTimeout(() => {
+            forgotModal.classList.add('hidden');
+            resetAllFields();
+          }, 1200);
+        })
+        .catch((error) => {
+          forgotMessage3.textContent = error.message;
+          forgotMessage3.style.color = '#ff6b6b';
+        })
+        .finally(() => {
+          resetPasswordBtn.disabled = false;
+        });
     });
   }
 

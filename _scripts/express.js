@@ -4,6 +4,7 @@ const MongoStore = require('connect-mongo');
 const fs = require('node:fs');
 const path = require('node:path');
 const { readMongoUri } = require('./mongodb_connection');
+const { requireAuthenticated, requireCompletedProfile } = require('../_middleware/studentAccess');
 
 const publicPath = path.join(__dirname, '..', 'public');
 const sessionSecretPath = path.join(__dirname, '..', '_confidentials', 'session_secret.txt');
@@ -28,6 +29,7 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 		saveUninitialized: false,
 		store: MongoStore.create({
 			mongoUrl: readMongoUri(),
+			dbName: 'OEEMS_Student',
 			collectionName: 'sessions',
 			ttl: 60 * 60 * 8
 		}),
@@ -39,12 +41,15 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 		}
 	}));
 
-	app.use('/student', (request, response, next) => {
-		if (request.session.user?.role !== 'Student') {
-			return response.redirect('/login');
-		}
-
-		next();
+	app.use(['/student', '/public/student'], (request, response, next) => {
+		const requestPath = request.path.toLowerCase();
+		const setupPage = requestPath.endsWith('/setupaccount.html');
+		const staticAsset = /\.(?:css|js|png|jpe?g|webp|svg|ico|woff2?)$/i.test(requestPath);
+		const nextGuard = setupPage || staticAsset ? next : (error) => {
+			if (error) return next(error);
+			requireCompletedProfile(request, response, next);
+		};
+		requireAuthenticated(request, response, nextGuard);
 	});
 
 	const pageRoutes = {
@@ -58,6 +63,22 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 
 	Object.entries(pageRoutes).forEach(([route, page]) => {
 		app.get([route, `${route}/`], (request, response) => {
+			response.sendFile(path.join(publicPath, page));
+		});
+	});
+	app.get('/account-setup.html', requireAuthenticated, (request, response) => {
+		response.sendFile(path.join(publicPath, 'student', 'setUpAccount.html'));
+	});
+	app.get('/verify-otp', (request, response) => {
+		response.sendFile(path.join(publicPath, 'verifyOtp.html'));
+	});
+	const guardedPages = {
+		'/dashboard': path.join('student', 'index.html'),
+		'/application': path.join('student', 'myApplication.html'),
+		'/exam': path.join('student', 'takeExam.html')
+	};
+	Object.entries(guardedPages).forEach(([route, page]) => {
+		app.get([route, `${route}/`], requireAuthenticated, requireCompletedProfile, (request, response) => {
 			response.sendFile(path.join(publicPath, page));
 		});
 	});

@@ -21,7 +21,7 @@ function readMongoUri() {
 
 async function connectToMongoDB() {
 	await mongoose.connect(readMongoUri(), {
-		dbName: 'OEEMS',
+		dbName: 'OEEMS_Student',
 		serverSelectionTimeoutMS: 5000
 	});
 

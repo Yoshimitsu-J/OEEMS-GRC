@@ -40,7 +40,7 @@
         </div>
 
         <ul class="pw-rules" id="pwRules">
-          <li id="rule-length">At least 8 characters</li>
+          <li id="rule-length">At least 12 characters</li>
           <li id="rule-case">Uppercase and lowercase letters</li>
           <li id="rule-number">At least one number</li>
           <li id="rule-special">At least one special character</li>
@@ -61,25 +61,6 @@
 
       <p id="message"></p>
       <p class="switch-link">Already have an account? <a href="login.html">Log in</a></p>
-    </div>
-  </div>
-
-  <div id="otpModal" class="modal-overlay hidden">
-    <div class="modal-card text-center">
-      <span class="close-modal" id="closeOtpBtn">&times;</span>
-      <h2>Email Verification</h2>
-      <p class="otp-help">Enter the 4-digit code sent to your email.</p>
-      <p class="otp-demo">(Demo Mode: Type <strong>1234</strong> to verify)</p>
-
-      <div class="otp-inputs">
-        <input type="text" maxlength="1" class="otp-box" />
-        <input type="text" maxlength="1" class="otp-box" />
-        <input type="text" maxlength="1" class="otp-box" />
-        <input type="text" maxlength="1" class="otp-box" />
-      </div>
-
-      <button id="verifyOtpBtn" class="btn-primary btn-block">Verify Code &amp; Go to Dashboard</button>
-      <p id="otpMessage" class="otp-message"></p>
     </div>
   </div>
 

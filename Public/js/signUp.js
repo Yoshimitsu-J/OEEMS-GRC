@@ -10,11 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordInput = document.getElementById('password');
   const confirmInput = document.getElementById('confirmPassword');
   const submitBtn = document.getElementById('submitBtn');
-  const otpModal = document.getElementById('otpModal');
-  const closeOtpBtn = document.getElementById('closeOtpBtn');
-  const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-  const otpInputs = document.querySelectorAll('.otp-box');
-  const otpMessage = document.getElementById('otpMessage');
+  const message = document.getElementById('message');
 
   const ruleLength = document.getElementById('rule-length');
   const ruleCase = document.getElementById('rule-case');
@@ -26,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const val = passwordInput.value;
     let valid = true;
 
-    if (val.length >= 8) ruleLength.classList.add('valid');
+    if (val.length >= 12) ruleLength.classList.add('valid');
     else { ruleLength.classList.remove('valid'); valid = false; }
 
     if (/[a-z]/.test(val) && /[A-Z]/.test(val)) ruleCase.classList.add('valid');
@@ -65,56 +61,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- FORM SUBMIT → SHOW OTP ---
-  if (signupForm && otpModal) {
-    signupForm.addEventListener('submit', (e) => {
+  // --- CREATE ACCOUNT AND REQUEST EMAIL OTP ---
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      submitBtn.disabled = true;
+      message.textContent = '';
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value.trim(),
+            password: passwordInput.value
+          })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not create your account.');
 
-      // Save email lang (walang fname/lname)
-      const email = document.getElementById('email').value.trim();
-      localStorage.setItem('signupEmail', email);
-
-      otpModal.classList.remove('hidden');
-      if (otpInputs.length > 0) otpInputs[0].focus();
-    });
-  }
-
-  // --- OTP AUTO-TAB ---
-  otpInputs.forEach((input, index) => {
-    input.addEventListener('input', () => {
-      if (input.value.length === 1 && index < otpInputs.length - 1) {
-        otpInputs[index + 1].focus();
-      }
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !input.value && index > 0) {
-        otpInputs[index - 1].focus();
-      }
-    });
-  });
-
-  // --- CLOSE OTP ---
-  if (closeOtpBtn && otpModal) {
-    closeOtpBtn.addEventListener('click', () => {
-      otpModal.classList.add('hidden');
-    });
-  }
-
-  // --- VERIFY OTP ---
-  if (verifyOtpBtn) {
-    verifyOtpBtn.addEventListener('click', () => {
-      const entered = Array.from(otpInputs).map((i) => i.value).join('');
-      if (entered === '1234') {
-        otpMessage.textContent = 'Verified! Redirecting...';
-        otpMessage.style.color = '#4dd08a';
-
-        setTimeout(() => {
-          window.location.href = 'student/congratulations.html';
-        }, 800);
-      } else {
-        otpMessage.textContent = 'Invalid code. Try 1234.';
-        otpMessage.style.color = '#ff6b6b';
+        const pendingEmail = document.getElementById('email').value.trim();
+        message.textContent = result.isDevMode
+          ? 'Development Mode: OTP logged to server terminal.'
+          : result.message;
+        message.className = result.isDevMode ? 'warning' : 'success';
+        window.setTimeout(() => {
+          window.location.assign(`/verify-otp?email=${encodeURIComponent(pendingEmail)}`);
+        }, 900);
+      } catch (error) {
+        message.textContent = error.message;
+        message.className = 'error';
+      } finally {
+        validatePassword();
       }
     });
   }
+
 });

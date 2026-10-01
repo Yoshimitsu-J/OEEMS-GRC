@@ -103,6 +103,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropdownNameEl)  dropdownNameEl.textContent  = fullName;
   if (dropdownEmailEl) dropdownEmailEl.textContent = email;
 
+  fetch('/api/auth/me')
+    .then((response) => {
+      if (!response.ok) throw new Error('Could not load the signed-in student profile.');
+      return response.json();
+    })
+    .then(({ user, profile }) => {
+      const serverFullName = `${profile.givenName} ${profile.middleName ? `${profile.middleName} ` : ''}${profile.lastName}`.trim();
+      const serverWelcomeName = document.getElementById('welcomeName');
+      const serverApplicantId = document.getElementById('bannerApplicantId');
+      const serverDropdownName = document.getElementById('dropdownName');
+      const serverDropdownEmail = document.getElementById('dropdownEmail');
+      if (serverWelcomeName) serverWelcomeName.textContent = serverFullName;
+      if (serverApplicantId) serverApplicantId.textContent = profile.applicantId;
+      if (serverDropdownName) serverDropdownName.textContent = serverFullName;
+      if (serverDropdownEmail) serverDropdownEmail.textContent = user.email;
+    })
+    .catch((error) => console.error(error.message));
+
   // AUTO-ACTIVE SIDEBAR
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.sidebar nav ul li a').forEach((link) => {

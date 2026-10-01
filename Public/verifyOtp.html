@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email | OEEMS</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="signup-body">
+  <main class="signup-wrapper">
+    <section class="box" aria-labelledby="verifyTitle">
+      <h1 id="verifyTitle">Verify your email</h1>
+      <p class="otp-help">Enter the six-digit code sent to your email. In local development, find it in the server terminal.</p>
+      <form id="verifyOtpForm">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+
+        <label for="code">Six-digit verification code</label>
+        <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+
+        <button type="submit" id="verifyButton">Verify email</button>
+      </form>
+      <p id="verifyMessage" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+  <script src="js/verifyOtp.js"></script>
+</body>
+</html>
