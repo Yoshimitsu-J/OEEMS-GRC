@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loginModal.addEventListener('click', (event) => {
       if (event.target === loginModal) loginModal.close();
     });
-    if (window.location.hash === '#login-modal' || new URLSearchParams(window.location.search).has('error')) {
+    const query = new URLSearchParams(window.location.search);
+    if (window.location.hash === '#login-modal' || query.has('error') || query.get('openLogin') === 'true') {
       openLoginModal();
     }
   }

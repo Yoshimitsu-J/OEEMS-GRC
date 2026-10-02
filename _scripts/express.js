@@ -24,6 +24,7 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: false }));
 	app.use(session({
+		name: process.env.SESSION_COOKIE_NAME || 'connect.sid',
 		secret: sessionSecret,
 		resave: false,
 		saveUninitialized: false,

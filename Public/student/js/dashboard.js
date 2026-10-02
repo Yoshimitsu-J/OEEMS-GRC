@@ -5,6 +5,54 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Dashboard JS Initialized.');
 
+  let logoutPending = false;
+  const clearClientState = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+  };
+
+  document.querySelectorAll('a[href="/api/auth/logout"]').forEach((logoutLink) => {
+    logoutLink.addEventListener('click', async (event) => {
+      event.preventDefault();
+      if (logoutPending) return;
+      logoutPending = true;
+      logoutLink.setAttribute('aria-disabled', 'true');
+
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        if (!response.ok) throw new Error('Server logout failed.');
+      } catch (error) {
+        console.error('Logout request failed; following server logout link.', error);
+        clearClientState();
+        window.location.replace('/api/auth/logout');
+        return;
+      }
+
+      clearClientState();
+      window.location.replace('/public/index.html');
+    });
+  });
+
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    fetch('/api/auth/me', { credentials: 'same-origin', cache: 'no-store' })
+      .then((response) => {
+        if (!response.ok) {
+          clearClientState();
+          window.location.replace('/public/index.html?openLogin=true');
+        }
+      })
+      .catch(() => {
+        clearClientState();
+        window.location.replace('/public/index.html?openLogin=true');
+      });
+  });
+
   const EXAM_DATE_ISO = '2026-04-15T07:30:00';
   const DEFAULT_APPLICANT_ID = '012345';
 

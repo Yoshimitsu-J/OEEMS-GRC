@@ -24,10 +24,16 @@ function unauthenticated(request, response) {
 	if (request.originalUrl.startsWith('/api/')) {
 		return response.status(401).json({ error: 'Authentication required.' });
 	}
-	return response.redirect('/login');
+	return response.redirect('/public/index.html?openLogin=true');
 }
 
 async function requireAuthenticated(request, response, next) {
+	response.set({
+		'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+		Pragma: 'no-cache',
+		Expires: '0'
+	});
+
 	try {
 		const userId = request.session?.user?.id;
 		if (!userId) return unauthenticated(request, response);

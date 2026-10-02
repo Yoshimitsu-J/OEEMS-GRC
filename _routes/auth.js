@@ -494,16 +494,16 @@ router.get('/google/callback', async (request, response) => {
 router.post('/logout', requireSameOrigin, (request, response, next) => {
 	request.session.destroy((error) => {
 		if (error) return next(error);
-		response.clearCookie('connect.sid');
-		response.json({ ok: true, redirectUrl: '/login' });
+		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
+		response.json({ ok: true, redirectUrl: '/public/index.html' });
 	});
 });
 
 router.get('/logout', (request, response, next) => {
 	request.session.destroy((error) => {
 		if (error) return next(error);
-		response.clearCookie('connect.sid');
-		response.redirect('/login');
+		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
+		response.redirect('/public/index.html');
 	});
 });
 
