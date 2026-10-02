@@ -3,6 +3,8 @@ const path = require('node:path');
 const mongoose = require('mongoose');
 
 const credentialsPath = path.join(__dirname, '..', '_confidentials', 'mongoDB_Credentials.txt');
+const databaseNames = ['OEEMS', 'OEEMS_Admission', 'OEEMS_Student'];
+const databaseConnections = new Map();
 
 function readMongoUri() {
 	if (process.env.MONGODB_URI) {
@@ -20,15 +22,41 @@ function readMongoUri() {
 }
 
 async function connectToMongoDB() {
-	await mongoose.connect(readMongoUri(), {
-		dbName: 'OEEMS_Student',
-		serverSelectionTimeoutMS: 5000
-	});
+	if (mongoose.connection.readyState !== 1) {
+		await mongoose.connect(readMongoUri(), {
+			dbName: 'OEEMS_Student',
+			serverSelectionTimeoutMS: 5000
+		});
+	}
 
-	console.log(`MongoDB connected: ${mongoose.connection.name}`);
+	for (const databaseName of databaseNames) {
+		const connection = databaseName === 'OEEMS_Student'
+			? mongoose.connection
+			: mongoose.connection.useDb(databaseName, { useCache: true });
+		await connection.db.command({ ping: 1 });
+		databaseConnections.set(databaseName, connection);
+	}
+
+	console.log(`MongoDB connected: ${databaseNames.join(', ')}`);
+	return Object.fromEntries(databaseConnections);
+}
+
+function getDatabaseConnection(databaseName) {
+	const connection = databaseConnections.get(databaseName);
+	if (!connection) {
+		throw new Error(`MongoDB database is not initialized: ${databaseName}`);
+	}
+	return connection;
+}
+
+async function disconnectFromMongoDB() {
+	databaseConnections.clear();
+	await mongoose.disconnect();
 }
 
 module.exports = {
 	connectToMongoDB,
-	readMongoUri
+	readMongoUri,
+	getDatabaseConnection,
+	disconnectFromMongoDB
 };

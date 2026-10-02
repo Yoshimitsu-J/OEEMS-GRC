@@ -69,6 +69,12 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 	app.get('/account-setup.html', requireAuthenticated, (request, response) => {
 		response.sendFile(path.join(publicPath, 'student', 'setUpAccount.html'));
 	});
+	app.get('/public/setup-account.html', requireAuthenticated, (request, response) => {
+		response.sendFile(path.join(publicPath, 'student', 'setUpAccount.html'));
+	});
+	app.get('/public/student-dashboard.html', requireAuthenticated, requireCompletedProfile, (request, response) => {
+		response.redirect('/student/');
+	});
 	app.get('/verify-otp', (request, response) => {
 		response.sendFile(path.join(publicPath, 'verifyOtp.html'));
 	});

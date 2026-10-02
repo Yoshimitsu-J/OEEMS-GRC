@@ -5,7 +5,7 @@ const path = require('node:path');
 const { Server } = require('socket.io');
 
 const { createExpressApp } = require('./_scripts/express');
-const { connectToMongoDB } = require('./_scripts/mongodb_connection');
+const { connectToMongoDB, disconnectFromMongoDB } = require('./_scripts/mongodb_connection');
 const { registerSocketHandlers } = require('./_scripts/socketIO');
 const routes = require('./_routes/routes');
 
@@ -21,6 +21,8 @@ app.use('/api', routes);
 registerSocketHandlers(io);
 
 async function startServer() {
+	await connectToMongoDB();
+
 	try {
 		await new Promise((resolve, reject) => {
 			httpServer.once('error', reject);
@@ -36,12 +38,6 @@ async function startServer() {
 
 	console.log(`OEEMS is running at http://localhost:${port}`);
 	console.log(`LAN access: http://<host-machine-ip>:${port}`);
-
-	try {
-		await connectToMongoDB();
-	} catch (error) {
-		console.error('MongoDB connection failed; HTTP server remains available:', error.message);
-	}
 }
 
 async function shutdown(signal) {
@@ -51,6 +47,7 @@ async function shutdown(signal) {
 	await new Promise((resolve) => {
 		httpServer.close(() => resolve());
 	});
+	await disconnectFromMongoDB();
 
 	console.log('OEEMS server stopped.');
 }

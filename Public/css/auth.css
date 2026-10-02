@@ -45,7 +45,7 @@
 .auth-message.error { color: #a10d0d; }
 .auth-message.success { color: #24613c; }
 .auth-message.warning { color: #754300; }
-.auth-dialog { position: fixed; width: min(calc(100% - 2rem), 29rem); max-width: none; max-height: min(90vh, 48rem); padding: clamp(1.4rem, 5vw, 2.1rem); overflow-y: auto; border: 1px solid var(--auth-line); border-top: 5px solid var(--auth-maroon); background: #fff; color: var(--auth-ink); box-shadow: 0 24px 72px rgba(30, 10, 10, 0.24); }
+.auth-dialog { position: fixed; inset: 50% auto auto 50%; width: min(calc(100% - 2rem), 29rem); max-width: none; max-height: min(90vh, 48rem); margin: 0; padding: clamp(1.4rem, 5vw, 2.1rem); transform: translate(-50%, -50%); overflow-y: auto; border: 1px solid var(--auth-line); border-top: 5px solid var(--auth-maroon); background: #fff; color: var(--auth-ink); box-shadow: 0 24px 72px rgba(30, 10, 10, 0.24); }
 .auth-dialog::backdrop { background: rgba(24, 14, 14, 0.58); }
 .auth-dialog h2 { padding-right: 1.4rem; font-size: 1.55rem; }
 .auth-dialog h3 { margin: 1.15rem 0; color: var(--auth-muted); font-size: 1.05rem; }

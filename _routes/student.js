@@ -71,7 +71,7 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 							termsAcceptedAt: new Date()
 						}
 					},
-					{ new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+					{ returnDocument: 'after', upsert: true, runValidators: true, setDefaultsOnInsert: true }
 				);
 				break;
 			} catch (error) {
@@ -80,7 +80,7 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 					savedProfile = await StudentProfile.findOneAndUpdate(
 						{ userId },
 						{ $set: profile },
-						{ new: true, runValidators: true }
+						{ returnDocument: 'after', runValidators: true }
 					);
 					break;
 				}
@@ -90,7 +90,7 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 		response.json({
 			ok: true,
 			applicantId: savedProfile.applicantId,
-			redirectUrl: '/dashboard'
+			redirectUrl: '/public/student-dashboard.html'
 		});
 	} catch (error) {
 		console.error('Student profile save failed:', error.message);

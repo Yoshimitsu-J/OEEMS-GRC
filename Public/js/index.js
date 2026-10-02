@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loginModal.addEventListener('click', (event) => {
       if (event.target === loginModal) loginModal.close();
     });
-    if (window.location.hash === '#login-modal') openLoginModal();
+    if (window.location.hash === '#login-modal' || new URLSearchParams(window.location.search).has('error')) {
+      openLoginModal();
+    }
   }
 
   if (openDrawerBtn && navDrawerOverlay) {

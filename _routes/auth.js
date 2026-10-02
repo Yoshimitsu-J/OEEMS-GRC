@@ -17,11 +17,9 @@ const {
 } = require('../_scripts/authSecurity');
 
 const router = express.Router();
-const callbackUrl = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback';
 const googleClient = new OAuth2Client(
 	process.env.GOOGLE_CLIENT_ID,
-	process.env.GOOGLE_CLIENT_SECRET,
-	callbackUrl
+	process.env.GOOGLE_CLIENT_SECRET
 );
 const authLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
@@ -74,7 +72,22 @@ async function establishSession(request, user) {
 
 async function profileRedirect(userId) {
 	const profile = await StudentProfile.findOne({ userId }).lean();
-	return isProfileComplete(profile) ? '/dashboard' : '/account-setup.html';
+	return isProfileComplete(profile) ? '/public/student-dashboard.html' : '/public/setup-account.html';
+}
+
+function googleRedirectUri(request) {
+	const callbackPath = '/api/auth/google/callback';
+	if (process.env.NODE_ENV !== 'production' && ['localhost', '127.0.0.1', '::1'].includes(request.hostname)) {
+		return `http://${request.get('host')}${callbackPath}`;
+	}
+	return process.env.GOOGLE_REDIRECT_URI || null;
+}
+
+function matchesOAuthState(expectedState, actualState) {
+	if (typeof expectedState !== 'string' || typeof actualState !== 'string') return false;
+	const expected = Buffer.from(expectedState);
+	const actual = Buffer.from(actualState);
+	return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
 }
 
 async function issueOtp(user, purpose, allowDevFallback) {
@@ -153,7 +166,7 @@ async function consumeOtp(userId, purpose, code) {
 	}, {
 		$set: { consumedAt: new Date() },
 		$inc: { attemptCount: 1 }
-	}, { new: true });
+	}, { returnDocument: 'after' });
 	return consumed
 		? { ok: true, expired: false }
 		: { ok: false, expired: Date.now() > expiresAt };
@@ -170,7 +183,8 @@ async function findOrCreateGoogleUser(profile) {
 				studentId: createStudentId(),
 				email,
 				googleId: profile.sub,
-				emailVerified: true,
+				isEmailVerified: true,
+				authProvider: 'google',
 				accountStatus: 'active'
 			});
 		} catch (error) {
@@ -193,6 +207,7 @@ async function findOrCreateGoogleUser(profile) {
 
 	user.googleId = profile.sub;
 	user.emailVerified = true;
+	user.authProvider = 'google';
 	user.accountStatus = 'active';
 	user.lastLoginAt = new Date();
 	await user.save();
@@ -413,36 +428,49 @@ router.get('/me', requireAuthenticated, async (request, response) => {
 	});
 });
 
-router.get('/google', (request, response) => {
-	if (!hasGoogleConfiguration()) {
-		return response.status(503).send('Google sign-in is not configured.');
-	}
+router.get('/google', async (request, response) => {
+	try {
+		if (!hasGoogleConfiguration()) throw new Error('Google OAuth credentials are not configured.');
+		const redirectUri = googleRedirectUri(request);
+		if (!redirectUri) throw new Error('GOOGLE_REDIRECT_URI must be configured in production.');
 
-	const state = crypto.randomBytes(32).toString('hex');
-	request.session.googleOAuthState = state;
-	response.redirect(googleClient.generateAuthUrl({
-		access_type: 'online',
-		prompt: 'select_account',
-		scope: ['openid', 'email', 'profile'],
-		state
-	}));
+		const state = crypto.randomBytes(32).toString('hex');
+		request.session.googleOAuthState = state;
+		request.session.googleOAuthRedirectUri = redirectUri;
+		await saveSession(request);
+		response.redirect(googleClient.generateAuthUrl({
+			access_type: 'online',
+			prompt: 'select_account',
+			scope: ['openid', 'email', 'profile'],
+			redirect_uri: redirectUri,
+			state
+		}));
+	} catch (error) {
+		console.error('Google OAuth initialization failed:', error.message);
+		response.redirect('/public/index.html?error=google_auth_failed');
+	}
 });
 
 router.get('/google/callback', async (request, response) => {
-	const expectedState = request.session.googleOAuthState;
-	delete request.session.googleOAuthState;
-	if (!expectedState || typeof request.query.state !== 'string' || expectedState !== request.query.state) {
-		return response.status(400).send('Invalid OAuth state. Please try signing in again.');
-	}
-	if (request.query.error || typeof request.query.code !== 'string') {
-		return response.redirect('/login?error=google_sign_in_cancelled');
-	}
-	if (!hasGoogleConfiguration()) {
-		return response.status(503).send('Google sign-in is not configured.');
-	}
-
 	try {
-		const { tokens } = await googleClient.getToken(request.query.code);
+		const expectedState = request.session?.googleOAuthState;
+		const redirectUri = request.session?.googleOAuthRedirectUri;
+		delete request.session.googleOAuthState;
+		delete request.session.googleOAuthRedirectUri;
+		if (!matchesOAuthState(expectedState, request.query.state)) {
+			throw new Error('Google OAuth state validation failed.');
+		}
+		if (request.query.error || typeof request.query.code !== 'string') {
+			throw new Error('Google OAuth authorization was cancelled or did not return a code.');
+		}
+		if (!hasGoogleConfiguration() || !redirectUri) {
+			throw new Error('Google OAuth configuration is incomplete.');
+		}
+
+		const { tokens } = await googleClient.getToken({
+			code: request.query.code,
+			redirect_uri: redirectUri
+		});
 		if (!tokens.id_token) throw new Error('Google did not return an identity token.');
 
 		const ticket = await googleClient.verifyIdToken({
@@ -459,7 +487,7 @@ router.get('/google/callback', async (request, response) => {
 		response.redirect(await profileRedirect(user._id));
 	} catch (error) {
 		console.error('Google OAuth callback failed:', error.message);
-		response.redirect(`/login?error=${error.status === 403 ? 'account_disabled' : 'google_auth_failed'}`);
+		response.redirect('/public/index.html?error=google_auth_failed');
 	}
 });
 
