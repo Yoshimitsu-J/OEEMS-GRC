@@ -105,7 +105,7 @@
           </h1>
           <p class="banner-subtext">
             Applicant ID: <strong id="bannerApplicantId">#012345</strong> &nbsp;•&nbsp;
-            Application Status: <span class="banner-status">In Progress</span>
+            Application Status: <span class="banner-status" id="applicationStatus">Loading...</span>
           </p>
         </div>
         <div class="banner-right">
@@ -120,7 +120,7 @@
           <div class="stat-icon stat-icon-red"><i class="bi bi-file-earmark-text"></i></div>
           <div class="stat-info">
             <p class="stat-label">Application</p>
-            <p class="stat-value">Step 2 of 4</p>
+            <p class="stat-value" id="applicationStep">Loading progress...</p>
           </div>
         </div>
         <div class="stat-card">
@@ -134,7 +134,7 @@
           <div class="stat-icon stat-icon-green"><i class="bi bi-cloud-arrow-up"></i></div>
           <div class="stat-info">
             <p class="stat-label">Documents</p>
-            <p class="stat-value">2 of 3 Uploaded</p>
+            <p class="stat-value" id="documentsProgress">Loading documents...</p>
           </div>
         </div>
         <div class="stat-card">
@@ -149,10 +149,10 @@
       <div class="card progress-card">
         <div class="card-header-row">
           <h3 class="card-title-small">Application Progress</h3>
-          <span class="progress-percent">50% Complete</span>
+          <span class="progress-percent" id="progressPercent">0% Complete</span>
         </div>
         <div class="progress-bar-wrapper">
-          <div class="progress-bar-fill" style="width: 50%;"></div>
+          <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
         </div>
         <div class="stepper">
           <div class="step completed">
@@ -169,7 +169,7 @@
           </div>
           <div class="step">
             <div class="step-circle">4</div>
-            <p class="step-label">Take Exam</p>
+            <p class="step-label">Application Summary</p>
           </div>
         </div>
       </div>
@@ -180,12 +180,9 @@
             <i class="bi bi-lightning-charge-fill"></i>
             <h3>Next Step</h3>
           </div>
-          <p class="next-step-desc">
-            Kailangan mo pang i-upload ang <strong>1 document</strong> (PSA Birth Certificate)
-            para makumpleto ang application mo.
-          </p>
-          <a href="uploadDocuments.html" class="btn-primary next-step-btn">
-            Upload Now <i class="bi bi-arrow-right"></i>
+          <p class="next-step-desc" id="nextStepDescription">Loading your next step...</p>
+          <a href="scheduleExam.html" class="btn-primary next-step-btn" id="nextStepAction">
+            Proceed Now <i class="bi bi-arrow-right"></i>
           </a>
         </div>
 
@@ -226,6 +223,7 @@
 
   <script src="js/applicantGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
 </html>

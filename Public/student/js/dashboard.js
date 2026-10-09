@@ -53,26 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   });
 
-  const EXAM_DATE_ISO = '2026-04-15T07:30:00';
-  const DEFAULT_APPLICANT_ID = '012345';
-
-  const applicantData = JSON.parse(localStorage.getItem('applicantData') || '{}');
-  const accountInfo   = JSON.parse(localStorage.getItem('accountInfo')   || '{}');
-
-  const firstName  = applicantData.givenName  || accountInfo.givenName  || 'Juan';
-  const middleName = applicantData.middleName || accountInfo.middleName || '';
-  const lastName   = applicantData.lastName   || accountInfo.lastName   || 'Dela Cruz';
-  const applicantId = applicantData.applicantId || DEFAULT_APPLICANT_ID;
-  const email       = applicantData.email       || 'juandelacruz@gmail.com';
-  const fullName    = `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim();
-
-  // DYNAMIC NAME / ID
-  const welcomeNameEl = document.getElementById('welcomeName');
-  if (welcomeNameEl) welcomeNameEl.textContent = fullName;
-
-  const applicantIdEl = document.getElementById('bannerApplicantId');
-  if (applicantIdEl) applicantIdEl.textContent = `#${applicantId}`;
-
   // TIME-BASED GREETING
   const greetingEl = document.getElementById('bannerGreeting');
   if (greetingEl) {
@@ -83,46 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (hour >= 18 && hour < 22) greeting = 'Good evening';
     else                              greeting = 'Hello';
     greetingEl.textContent = `${greeting},`;
-  }
-
-  // LIVE COUNTDOWN
-  const countdownEl    = document.getElementById('examCountdown');
-  const scheduleTextEl = document.getElementById('examScheduleText');
-
-  if (countdownEl) {
-    const examDate = new Date(EXAM_DATE_ISO);
-    const now = new Date();
-    const daysLeft = Math.ceil((examDate - now) / (1000 * 60 * 60 * 24));
-
-    if (isNaN(examDate.getTime())) {
-      countdownEl.textContent = 'No schedule';
-    } else if (daysLeft < 0) {
-      countdownEl.textContent = 'Exam done';
-      countdownEl.style.color = '#2e7d32';
-    } else if (daysLeft === 0) {
-      countdownEl.textContent = 'Today!';
-      countdownEl.style.color = '#d32f2f';
-      countdownEl.style.fontWeight = '800';
-    } else if (daysLeft === 1) {
-      countdownEl.textContent = 'Tomorrow';
-      countdownEl.style.color = '#d32f2f';
-      countdownEl.style.fontWeight = '800';
-    } else if (daysLeft <= 7) {
-      countdownEl.textContent = `${daysLeft} days left`;
-      countdownEl.style.color = '#ef6c00';
-      countdownEl.style.fontWeight = '700';
-    } else {
-      countdownEl.textContent = `${daysLeft} days left`;
-    }
-  }
-
-  if (scheduleTextEl) {
-    const examDate = new Date(EXAM_DATE_ISO);
-    if (!isNaN(examDate.getTime())) {
-      scheduleTextEl.textContent = examDate.toLocaleDateString('en-US', {
-        year: 'numeric', month: 'long', day: 'numeric'
-      });
-    }
   }
 
   // PROFILE DROPDOWN
@@ -146,28 +86,113 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  const dropdownNameEl  = document.getElementById('dropdownName');
-  const dropdownEmailEl = document.getElementById('dropdownEmail');
-  if (dropdownNameEl)  dropdownNameEl.textContent  = fullName;
-  if (dropdownEmailEl) dropdownEmailEl.textContent = email;
+  const formatSchedule = (schedule) => {
+    if (!schedule) return "Unavailable, please proceed to Step 2: 'Schedule Exam' first";
+    const date = new Date(schedule.examDate).toLocaleDateString('en-PH', {
+      year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Manila'
+    });
+    return `${date} | ${schedule.batch.replace(/^batch_/, 'Batch ')} | ${schedule.startTime} - ${schedule.endTime} | ${schedule.facilityId || 'Facility pending'}`;
+  };
 
-  fetch('/api/auth/me')
-    .then((response) => {
-      if (!response.ok) throw new Error('Could not load the signed-in student profile.');
-      return response.json();
-    })
-    .then(({ user, profile }) => {
-      const serverFullName = `${profile.givenName} ${profile.middleName ? `${profile.middleName} ` : ''}${profile.lastName}`.trim();
-      const serverWelcomeName = document.getElementById('welcomeName');
-      const serverApplicantId = document.getElementById('bannerApplicantId');
-      const serverDropdownName = document.getElementById('dropdownName');
-      const serverDropdownEmail = document.getElementById('dropdownEmail');
-      if (serverWelcomeName) serverWelcomeName.textContent = serverFullName;
-      if (serverApplicantId) serverApplicantId.textContent = profile.applicantId;
-      if (serverDropdownName) serverDropdownName.textContent = serverFullName;
-      if (serverDropdownEmail) serverDropdownEmail.textContent = user.email;
-    })
-    .catch((error) => console.error(error.message));
+  const updateDashboard = async () => {
+    if (!document.getElementById('welcomeName')) return;
+    const [profileResponse, statusResponse] = await Promise.all([
+      fetch('/api/student/profile', { credentials: 'same-origin', cache: 'no-store' }),
+      fetch('/api/student/application-status', { credentials: 'same-origin', cache: 'no-store' })
+    ]);
+    if (!profileResponse.ok || !statusResponse.ok) {
+      if (profileResponse.status === 401 || statusResponse.status === 401) {
+        window.location.replace('/public/index.html?openLogin=true');
+        return;
+      }
+      throw new Error('Could not load student dashboard data.');
+    }
+
+    const { profile, email } = await profileResponse.json();
+    const status = await statusResponse.json();
+    const fullName = `${profile.givenName} ${profile.middleName ? `${profile.middleName} ` : ''}${profile.lastName}`.trim();
+    document.getElementById('welcomeName').textContent = fullName;
+    document.getElementById('bannerApplicantId').textContent = profile.applicantId;
+    document.getElementById('dropdownName').textContent = fullName;
+    document.getElementById('dropdownEmail').textContent = email;
+    document.getElementById('applicationStatus').textContent = status.applicationStatus;
+    document.getElementById('applicationStep').textContent = status.isSubmitted
+      ? 'Application submitted'
+      : `Step ${status.nextStep?.number || 1} of 4`;
+    document.getElementById('documentsProgress').textContent = `${status.documentCount} of ${status.documentTotal} Uploaded`;
+
+    document.getElementById('progressPercent').textContent = `${status.progressPercent}% Complete`;
+    document.getElementById('progressBar').style.width = `${status.progressPercent}%`;
+
+    const hasSchedule = Boolean(status.schedule);
+    const documentsComplete = status.documentCount === status.documentTotal;
+    const stepElements = document.querySelectorAll('.stepper .step');
+    const completeSteps = [true, hasSchedule, documentsComplete, status.isSubmitted];
+    const activeStep = status.isSubmitted ? -1 : Math.max(0, (status.nextStep?.number || 1) - 1);
+    stepElements.forEach((step, index) => {
+      step.classList.toggle('completed', completeSteps[index]);
+      step.classList.toggle('active', index === activeStep && !completeSteps[index]);
+      const circle = step.querySelector('.step-circle');
+      if (circle) circle.innerHTML = completeSteps[index] ? '<i class="bi bi-check-lg"></i>' : String(index + 1);
+    });
+
+    const scheduleText = document.getElementById('examScheduleText');
+    const scheduleDisplay = formatSchedule(status.schedule);
+    if (scheduleText) scheduleText.textContent = scheduleDisplay;
+    const countdown = document.getElementById('examCountdown');
+    if (countdown) {
+      if (!status.schedule) countdown.textContent = 'No schedule';
+      else {
+        const daysLeft = Math.ceil((new Date(status.schedule.examDate) - new Date()) / 86400000);
+        countdown.textContent = daysLeft < 0 ? 'Exam date passed' : daysLeft === 0 ? 'Today' : `${daysLeft} days left`;
+      }
+    }
+
+    const description = document.getElementById('nextStepDescription');
+    const action = document.getElementById('nextStepAction');
+    if (status.workflowStatus === 'approved') {
+      description.textContent = 'Your application is approved. Proceed to your scheduled entrance examination.';
+      action.href = 'takeExam.html';
+      action.textContent = 'Proceed Now';
+      action.hidden = false;
+    } else if (status.workflowStatus === 'result_released') {
+      description.textContent = 'Your examination result is available.';
+      action.href = 'examResult.html';
+      action.textContent = 'View Result';
+      action.hidden = false;
+    } else if (status.isSubmitted) {
+      description.textContent = status.applicationStatus === 'Completed'
+        ? 'Your application has been reviewed. Check your exam or result status for the next update.'
+        : 'Your application has been submitted and is pending review by the Admissions Department.';
+      action.hidden = true;
+    } else if (status.nextStep) {
+      description.textContent = status.nextStep.title === 'Schedule Exam'
+        ? 'Your exam appointment is not yet scheduled.'
+        : status.nextStep.title === 'Upload Documents'
+          ? `Upload the remaining ${status.documentTotal - status.documentCount} required document(s).`
+          : 'Your required documents are ready. Review and submit your application.';
+      action.href = status.nextStep.href;
+      action.hidden = false;
+    }
+
+    if (status.workflowStatus === 'under_review') {
+      document.querySelectorAll('.sidebar nav ul li a').forEach((link) => {
+        const target = link.getAttribute('href');
+        link.closest('li').hidden = !['index.html', 'studentInformation.html'].includes(target);
+      });
+    }
+  };
+
+  updateDashboard().catch((error) => console.error(error.message));
+  if (typeof window.io === 'function') {
+    const socket = window.io();
+    ['student:profile-updated', 'student:application-updated', 'student:application-submitted'].forEach((eventName) => {
+      socket.on(eventName, (detail) => {
+        updateDashboard().catch((error) => console.error(error.message));
+        window.dispatchEvent(new CustomEvent('oeems:student-update', { detail }));
+      });
+    });
+  }
 
   // AUTO-ACTIVE SIDEBAR
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';

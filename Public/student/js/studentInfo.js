@@ -5,68 +5,77 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Student Info JS Initialized.');
 
-  const applicantData = JSON.parse(localStorage.getItem('applicantData') || '{}');
-  const accountInfo   = JSON.parse(localStorage.getItem('accountInfo')   || '{}');
-
-  const data = {
-    applicantId: applicantData.applicantId || accountInfo.applicantId || '012345',
-    firstName:  applicantData.givenName  || accountInfo.givenName  || 'Juan',
-    lastName:   applicantData.lastName   || accountInfo.lastName   || 'Dela Cruz',
-    middleName: applicantData.middleName || accountInfo.middleName || '',
-    email:      applicantData.email      || 'juandelacruz1@gmail.com',
-    sex:        applicantData.sex        || 'Male',
-    birthday:   applicantData.birthday   || '2006-01-15',
-    phone:      applicantData.phone      || '9123456789',
-    country:    applicantData.country    || 'Philippines',
-    region:     applicantData.region     || 'NCR',
-    city:       applicantData.city       || 'Caloocan',
-    barangay:   applicantData.barangay   || 'Barangay 81',
-    street:     applicantData.streetAddress || '81 10th Avenue, Ext. Cor. Grace Park',
-    guardianName:  applicantData.guardianName  || 'Maria D. Bee',
-    guardianPhone: applicantData.guardianPhone || '9987654321'
+  const setText = (id, value) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value || '—';
   };
 
-  const fullName = `${data.firstName} ${data.middleName ? data.middleName + ' ' : ''}${data.lastName}`;
+  Promise.all([
+    fetch('/api/student/profile', { credentials: 'same-origin', cache: 'no-store' }).then((response) => {
+      if (!response.ok) throw new Error('Could not load student profile.');
+      return response.json();
+    }),
+    fetch('/api/student/application-status', { credentials: 'same-origin', cache: 'no-store' }).then((response) => {
+      if (!response.ok) throw new Error('Could not load application status.');
+      return response.json();
+    })
+  ]).then(([profileResult, status]) => {
+    const profile = profileResult.profile;
+    const data = {
+      applicantId: profile.applicantId,
+      firstName: profile.givenName,
+      middleName: profile.middleName,
+      lastName: profile.lastName,
+      email: profileResult.email,
+      sex: profile.sex,
+      birthday: profile.birthday,
+      phone: profile.phone,
+      country: profile.address.country,
+      region: profile.address.region,
+      city: profile.address.city,
+      barangay: profile.address.barangay,
+      street: profile.address.streetAddress,
+      guardianName: profile.guardian.name,
+      guardianPhone: profile.guardian.phone
+    };
+    const fullName = `${data.firstName} ${data.middleName ? `${data.middleName} ` : ''}${data.lastName}`.trim();
 
-  document.getElementById('applicantId').textContent = data.applicantId;
-  document.getElementById('studentName').textContent = fullName;
-  document.getElementById('studentEmail').textContent = data.email;
-  document.getElementById('studentStatus').textContent = 'Application Submitted';
+    setText('applicantId', data.applicantId);
+    setText('studentName', fullName);
+    setText('studentEmail', data.email);
+    setText('studentStatus', status.applicationStatus);
+    setText('infoSex', data.sex);
+    setText('infoBirthday', formatDate(data.birthday));
+    setText('infoPhone', data.phone);
+    setText('infoCountry', data.country);
+    setText('infoRegion', data.region);
+    setText('infoCity', data.city);
+    setText('infoBarangay', data.barangay);
+    setText('infoStreet', data.street);
+    setText('infoGuardianName', data.guardianName);
+    setText('infoGuardianPhone', data.guardianPhone);
+    generateRealQRCode(data);
+  }).catch((error) => {
+    console.error(error.message);
+  });
 
-  document.getElementById('infoSex').textContent = data.sex;
-  document.getElementById('infoBirthday').textContent = formatDate(data.birthday);
-  document.getElementById('infoPhone').textContent = '+63 ' + formatPhone(data.phone);
-  document.getElementById('infoCountry').textContent = data.country;
-
-  document.getElementById('infoRegion').textContent = data.region;
-  document.getElementById('infoCity').textContent = data.city + ' City';
-  document.getElementById('infoBarangay').textContent = data.barangay;
-  document.getElementById('infoStreet').textContent = data.street;
-
-  document.getElementById('infoGuardianName').textContent = data.guardianName;
-  document.getElementById('infoGuardianPhone').textContent = '+63 ' + formatPhone(data.guardianPhone);
-
-  const studentPhoto = document.getElementById('studentPhoto');
-  const savedPhoto = localStorage.getItem('studentPhoto');
-  if (savedPhoto && studentPhoto) studentPhoto.src = savedPhoto;
-
-  // GENERATE REAL QR
-  generateRealQRCode(data);
+  window.addEventListener('oeems:student-update', async () => {
+    try {
+      const response = await fetch('/api/student/application-status', {
+        credentials: 'same-origin',
+        cache: 'no-store'
+      });
+      if (response.ok) setText('studentStatus', (await response.json()).applicationStatus);
+    } catch (error) {
+      console.error('Could not refresh student status:', error.message);
+    }
+  });
 
   function formatDate(dateStr) {
     if (!dateStr) return '—';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
-  function formatPhone(phone) {
-    if (!phone) return '—';
-    const cleaned = phone.replace(/\D/g, '');
-    if (cleaned.length === 10) {
-      return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6)}`;
-    }
-    return phone;
+    return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Manila' });
   }
 
   function generateRealQRCode(data) {
@@ -81,17 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     qrContainer.innerHTML = '';
 
-    const qrData = JSON.stringify({
-      type: 'GRC_APPLICANT',
-      applicantId: data.applicantId,
-      name: `${data.lastName}, ${data.firstName}${data.middleName ? ' ' + data.middleName : ''}`,
-      email: data.email,
-      phone: data.phone,
-      examDate: '2026-04-15',
-      examTime: '07:30',
-      examFacility: 'COMLAB1 2F',
-      verifyUrl: `https://grc.edu.ph/verify/${data.applicantId}`
-    });
+    const qrData = JSON.stringify({ type: 'OEEMS_APPLICANT', applicantId: data.applicantId });
 
     try {
       new QRCode(qrContainer, {

@@ -6,149 +6,62 @@
 (function () {
   'use strict';
 
-  console.log('Applicant Guard Initialized.');
+  let currentStatus = null;
 
-  // =========================================
-  // PROGRESS STATE — basa sa localStorage
-  // =========================================
-  function getProgress() {
-    const applicantData = JSON.parse(localStorage.getItem('applicantData') || '{}');
-    const examSchedule  = JSON.parse(localStorage.getItem('examSchedule')  || 'null');
-    const uploadedDocs  = JSON.parse(localStorage.getItem('uploadedDocuments') || 'null');
-    const approved      = localStorage.getItem('applicationApproved') === 'true';
-    const examDone      = localStorage.getItem('examCompleted') === 'true';
-
-    return {
-      hasAccount:      !!applicantData.givenName,
-      hasSchedule:     !!examSchedule,
-      hasDocuments:    !!uploadedDocs && uploadedDocs.count >= 3,
-      isApproved:      approved,
-      isExamCompleted: examDone
-    };
+  async function loadStatus() {
+    const response = await fetch('/api/student/application-status', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+    if (!response.ok) return null;
+    currentStatus = await response.json();
+    return currentStatus;
   }
 
-  // =========================================
-  // PAGE REQUIREMENTS
-  // =========================================
-  const PAGE_RULES = {
-    'scheduleExam.html': {
-      check: (p) => p.hasAccount,
-      redirect: 'setUpAccount.html',
-      message: 'Kailangan mo munang i-setup ang iyong account.'
-    },
-    'uploadDocuments.html': {
-      check: (p) => p.hasSchedule,
-      redirect: 'scheduleExam.html',
-      message: 'Kailangan mo munang pumili ng schedule ng exam.'
-    },
-    'applicationSummary.html': {
-      check: (p) => p.hasDocuments,
-      redirect: 'uploadDocuments.html',
-      message: 'Kailangan mo munang i-upload ang lahat ng required documents.'
-    },
-    'takeExam.html': {
-      check: (p) => p.isApproved,
-      redirect: 'applicationSummary.html',
-      message: 'Hindi ka pa na-a-approve ng Admission. Maghintay muna.'
-    },
-    'examResult.html': {
-      check: (p) => p.isExamCompleted,
-      redirect: 'takeExam.html',
-      message: 'Kailangan mo munang tapusin ang exam.'
-    }
-  };
-
-  // =========================================
-  // CHECK CURRENT PAGE
-  // =========================================
-  function guardCurrentPage() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const rule = PAGE_RULES[currentPage];
-
-    if (!rule) return;   // walang requirement — okay lang
-
-    const progress = getProgress();
-
-    if (!rule.check(progress)) {
-      console.warn(`🔒 Blocked: ${currentPage} — ${rule.message}`);
-
-      // Ipakita ang alert (pwedeng palitan ng toast)
-      alert(`🔒 Access Denied\n\n${rule.message}\n\nRedirecting...`);
-
-      // Redirect
-      setTimeout(() => {
-        window.location.href = rule.redirect;
-      }, 300);
-    }
+  function showPreviousStepMessage() {
+    if (new URLSearchParams(window.location.search).get('access') !== 'previous-step') return;
+    window.alert('Please complete the previous step first.');
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // =========================================
-  // MARK SIDEBAR ITEMS AS LOCKED
-  // =========================================
-  function markSidebarLocks() {
-    const progress = getProgress();
-
-    const sidebarRules = {
-      'uploadDocuments.html':   progress.hasSchedule,
-      'applicationSummary.html': progress.hasDocuments,
-      'takeExam.html':           progress.isApproved,
-      'examResult.html':         progress.isExamCompleted
+  function syncSidebar(status) {
+    const pendingReview = status.workflowStatus === 'under_review';
+    const unlocked = {
+      'scheduleExam.html': !status.isSubmitted,
+      'uploadDocuments.html': Boolean(status.schedule) && !status.isSubmitted,
+      'applicationSummary.html': status.documentCount === status.documentTotal && !status.isSubmitted,
+      'myApplication.html': !pendingReview,
+      'takeExam.html': status.workflowStatus === 'approved',
+      'examResult.html': status.workflowStatus === 'result_released'
     };
 
     document.querySelectorAll('.sidebar nav ul li a').forEach((link) => {
       const href = link.getAttribute('href');
-      if (!href) return;
-
-      const isLocked = sidebarRules.hasOwnProperty(href) && !sidebarRules[href];
-
-      if (isLocked) {
-        link.classList.add('locked');
-        link.setAttribute('data-locked', 'true');
-
-        // Prevent navigation
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const messages = {
-            'uploadDocuments.html':    'Pumili muna ng schedule ng exam.',
-            'applicationSummary.html': 'I-upload muna ang lahat ng documents.',
-            'takeExam.html':           'Kailangan mo munang ma-approve ng Admission.',
-            'examResult.html':         'Tapusin muna ang exam.'
-          };
-
-          alert(`🔒 Locked\n\n${messages[href] || 'Hindi pa available ang page na ito.'}`);
-        });
+      if (!Object.hasOwn(unlocked, href)) return;
+      const allowed = unlocked[href];
+      link.closest('li').hidden = pendingReview && !['index.html', 'studentInformation.html'].includes(href);
+      link.setAttribute('aria-disabled', String(!allowed));
+      if (!allowed) {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          window.alert('Please complete the previous step first.');
+        }, { once: true });
       }
     });
   }
 
-  // =========================================
-  // INIT — pagkatapos ng DOM load
-  // =========================================
-  document.addEventListener('DOMContentLoaded', () => {
-    guardCurrentPage();
-    markSidebarLocks();
+  document.addEventListener('DOMContentLoaded', async () => {
+    showPreviousStepMessage();
+    try {
+      const status = await loadStatus();
+      if (status) syncSidebar(status);
+    } catch (error) {
+      console.error('Could not check application progress:', error.message);
+    }
   });
 
-  // =========================================
-  // EXPOSE HELPERS (para magamit ng ibang JS)
-  // =========================================
   window.ApplicantGuard = {
-    getProgress,
-    markStepComplete(step) {
-      const validSteps = [
-        'hasSchedule',
-        'hasDocuments',
-        'isApproved',
-        'isExamCompleted'
-      ];
-      if (!validSteps.includes(step)) {
-        console.warn('Invalid step:', step);
-        return;
-      }
-      // Handled through localStorage keys sa ibang pages
-      console.log(`Step marked complete: ${step}`);
-    }
+    loadStatus,
+    getProgress: () => currentStatus
   };
 })();

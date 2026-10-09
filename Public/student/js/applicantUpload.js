@@ -5,51 +5,76 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Applicant Upload JS Initialized.');
 
-  const uploaded = {
-    form138: false,
-    goodMoral: false,
-    picture: false
-  };
-
+  const documentTypes = ['form138', 'good_moral', 'picture_2x2'];
+  const uploaded = new Set();
   const fileInputs = document.querySelectorAll('.btn-upload input[type="file"]');
+  const applyBtn = document.getElementById('applyUploadBtn');
+
+  async function readProgress() {
+    const response = await fetch('/api/student/application-status', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    });
+    if (!response.ok) throw new Error('Could not load saved document status.');
+    const status = await response.json();
+    status.documentStatuses.forEach((document) => {
+      if (['submitted', 'under_review', 'accepted'].includes(document.verificationStatus)) {
+        uploaded.add(document.documentType);
+        const index = documentTypes.indexOf(document.documentType);
+        const statusEl = fileInputs[index]?.closest('.upload-controls')?.querySelector('.upload-status');
+        if (statusEl) statusEl.textContent = document.originalName || 'Uploaded';
+      }
+    });
+  }
 
   fileInputs.forEach((input, index) => {
-    input.addEventListener('change', (e) => {
-      const fileName = e.target.files[0]?.name || 'No file selected';
-      const statusEl = e.target.closest('.upload-controls')?.querySelector('.upload-status');
-      if (statusEl) statusEl.textContent = fileName;
+    input.accept = '.jpg,.jpeg,.png,image/jpeg,image/png';
+    input.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const documentType = documentTypes[index];
+      const statusEl = input.closest('.upload-controls')?.querySelector('.upload-status');
+      if (statusEl) statusEl.textContent = 'Uploading...';
 
-      // Mark as uploaded
-      const keys = ['form138', 'goodMoral', 'picture'];
-      if (keys[index]) uploaded[keys[index]] = !!e.target.files[0];
-
-      // I-save sa localStorage
-      const uploadedCount = Object.values(uploaded).filter(Boolean).length;
-      localStorage.setItem('uploadedDocuments', JSON.stringify({
-        ...uploaded,
-        count: uploadedCount,
-        updatedAt: new Date().toISOString()
-      }));
-
-      console.log('Uploaded:', uploadedCount, 'of 3');
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const response = await fetch(`/api/student/documents/${documentType}`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not upload this file.');
+        uploaded.add(documentType);
+        if (statusEl) statusEl.textContent = result.originalName;
+      } catch (error) {
+        if (statusEl) statusEl.textContent = error.message;
+      }
     });
   });
 
-  // =========================================
-  // CHECK APPLY BUTTON — kailangan kumpleto
-  // =========================================
-  const applyBtn = document.querySelector('.upload-form-wrapper .btn-primary');
   if (applyBtn) {
-    applyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const uploadedCount = Object.values(uploaded).filter(Boolean).length;
-
-      if (uploadedCount < 3) {
-        alert(`⚠️ Please upload all 3 required documents.\n\nNaka-upload: ${uploadedCount} of 3`);
+    applyBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
+      try {
+        await readProgress();
+      } catch (error) {
+        window.alert(error.message);
+        return;
+      }
+      if (uploaded.size !== documentTypes.length) {
+        window.alert(`Please upload all ${documentTypes.length} required documents. Uploaded: ${uploaded.size} of ${documentTypes.length}.`);
         return;
       }
 
-      window.location.href = 'applicationSummary.html';
+      window.location.assign('applicationSummary.html');
     });
   }
+
+  readProgress().catch((error) => console.error(error.message));
+  window.addEventListener('oeems:student-update', () => {
+    readProgress().catch((error) => console.error(error.message));
+  });
 });

@@ -3,10 +3,13 @@ require('dotenv').config();
 const http = require('node:http');
 const path = require('node:path');
 const { Server } = require('socket.io');
+const User = require('./_models/User');
 
 const { createExpressApp } = require('./_scripts/express');
 const { connectToMongoDB, disconnectFromMongoDB } = require('./_scripts/mongodb_connection');
 const { registerSocketHandlers } = require('./_scripts/socketIO');
+const { startStudentRetentionJob } = require('./_scripts/studentRetention');
+const { watchStudentChanges } = require('./_scripts/studentChangeStream');
 const routes = require('./_routes/routes');
 
 const port = Number(process.env.PORT) || 3000;
@@ -16,12 +19,31 @@ const app = createExpressApp({
 });
 const httpServer = http.createServer(app);
 const io = new Server(httpServer);
+let closeStudentChangeStreams = async () => {};
 
 app.use('/api', routes);
+app.set('io', io);
+io.engine.use(app.locals.sessionMiddleware);
+io.use(async (socket, next) => {
+	const userId = socket.request.session?.user?.id;
+	if (!userId) return next(new Error('Authentication required.'));
+	try {
+		const user = await User.findOne({ _id: userId, emailVerified: true, accountStatus: 'active' }).select('_id');
+		if (!user) return next(new Error('Authentication required.'));
+		socket.data.studentId = userId;
+		socket.join(`student:${userId}`);
+		socket.join(`session:${socket.request.sessionID}`);
+		next();
+	} catch (error) {
+		next(error);
+	}
+});
 registerSocketHandlers(io);
 
 async function startServer() {
 	await connectToMongoDB();
+	startStudentRetentionJob(io);
+	closeStudentChangeStreams = watchStudentChanges(io);
 
 	try {
 		await new Promise((resolve, reject) => {
@@ -42,11 +64,11 @@ async function startServer() {
 
 async function shutdown(signal) {
 	console.log(`\n${signal} received. Shutting down OEEMS...`);
-	io.close();
-
 	await new Promise((resolve) => {
-		httpServer.close(() => resolve());
+		if (!httpServer.listening) return resolve();
+		io.close(resolve);
 	});
+	await closeStudentChangeStreams();
 	await disconnectFromMongoDB();
 
 	console.log('OEEMS server stopped.');

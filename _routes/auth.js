@@ -492,6 +492,7 @@ router.get('/google/callback', async (request, response) => {
 });
 
 router.post('/logout', requireSameOrigin, (request, response, next) => {
+	request.app.get('io')?.in(`session:${request.sessionID}`).disconnectSockets(true);
 	request.session.destroy((error) => {
 		if (error) return next(error);
 		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
@@ -500,6 +501,7 @@ router.post('/logout', requireSameOrigin, (request, response, next) => {
 });
 
 router.get('/logout', (request, response, next) => {
+	request.app.get('io')?.in(`session:${request.sessionID}`).disconnectSockets(true);
 	request.session.destroy((error) => {
 		if (error) return next(error);
 		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });

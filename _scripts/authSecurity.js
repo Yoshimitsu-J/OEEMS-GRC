@@ -51,7 +51,7 @@ function createStudentId() {
 }
 
 function createApplicantId() {
-	return `APP-${new Date().getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+	return `APP-${new Date().getFullYear()}-${crypto.randomInt(0, 1000000).toString().padStart(6, '0')}`;
 }
 
 module.exports = {

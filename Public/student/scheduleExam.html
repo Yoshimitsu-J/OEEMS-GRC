@@ -110,9 +110,6 @@
               <label for="selectBatch">Select Batch</label>
               <select id="selectBatch" class="form-control">
                 <option value="">-- Select Batch --</option>
-                <option value="Batch 1">Batch 1 (7:30 - 9:30 AM)</option>
-                <option value="Batch 2">Batch 2 (10:00 - 12:00 NN)</option>
-                <option value="Batch 3">Batch 3 (1:00 - 3:00 PM)</option>
               </select>
             </div>
           </div>
@@ -125,6 +122,7 @@
               <p><strong>Year:</strong> <span id="sumYear">—</span></p>
               <p><strong>Batch:</strong> <span id="sumBatch">—</span></p>
               <p><strong>Time:</strong> <span id="sumTime">—</span></p>
+              <p><strong>Facility:</strong> <span id="sumFacility">—</span></p>
             </div>
           </div>
         </div>
@@ -136,6 +134,7 @@
 
   <script src="js/applicantGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/applicantSchedule.js"></script>
 </body>

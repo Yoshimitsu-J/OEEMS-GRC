@@ -92,7 +92,8 @@
         </p>
 
         <div class="summary-actions">
-          <button class="btn-primary btn-download-summary" onclick="window.location.href='statementOfApplication.html'">DOWNLOAD SUMMARY</button>
+          <button class="btn-primary btn-download-summary" id="downloadSummaryBtn" type="button">DOWNLOAD SUMMARY</button>
+          <button class="btn-primary" id="submitApplicationBtn" type="button">SUBMIT APPLICATION</button>
           <button class="btn-secondary" id="openDisclaimer">READ DISCLAIMER</button>
         </div>
       </div>
@@ -127,6 +128,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="js/applicantGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/disclaimer.js"></script>
   <script src="js/applicationSummary.js"></script>

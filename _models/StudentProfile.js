@@ -5,7 +5,7 @@ const addressSchema = new mongoose.Schema({
 	region: { type: String, required: true, trim: true },
 	city: { type: String, required: true, trim: true },
 	barangay: { type: String, required: true, trim: true },
-	street: { type: String, required: true, trim: true }
+	streetAddress: { type: String, required: true, trim: true }
 }, { _id: false });
 
 const guardianSchema = new mongoose.Schema({
@@ -13,7 +13,15 @@ const guardianSchema = new mongoose.Schema({
 	phone: { type: String, required: true, trim: true }
 }, { _id: false });
 
+const photoSchema = new mongoose.Schema({
+	storageKey: { type: String, required: true },
+	originalName: { type: String, required: true },
+	contentType: { type: String, required: true },
+	sizeBytes: { type: Number, required: true }
+}, { _id: false });
+
 const studentProfileSchema = new mongoose.Schema({
+	studentId: { type: String, required: true, unique: true, immutable: true },
 	userId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User',
@@ -30,7 +38,7 @@ const studentProfileSchema = new mongoose.Schema({
 	phone: { type: String, required: true, trim: true },
 	address: { type: addressSchema, required: true },
 	guardian: { type: guardianSchema, required: true },
-	photo: { type: String, default: '' },
+	photo: { type: photoSchema, default: null },
 	termsAcceptedAt: { type: Date, required: true, immutable: true }
 }, {
 	collection: 'student_profiles',

@@ -3,243 +3,210 @@
    ========================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Dynamic Calendar Initialized.');
-
-  const MONTH_NAMES = [
-    'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
-    'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
-  ];
-  const MONTH_SHORT = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const TAKEN_DATES = [];
-
-  const BATCH_TIMES = {
-    'Batch 1': '7:30 - 9:30 AM',
-    'Batch 2': '10:00 - 12:00 NN',
-    'Batch 3': '1:00 - 3:00 PM'
+  const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const monthTitle = document.getElementById('monthTitle');
+  const calendarDays = document.getElementById('calendarDays');
+  const selectDay = document.getElementById('selectDay');
+  const selectBatch = document.getElementById('selectBatch');
+  const saveButton = document.getElementById('saveScheduleBtn');
+  const note = document.querySelector('.schedule-note');
+  const summary = {
+    month: document.getElementById('sumMonth'),
+    day: document.getElementById('sumDay'),
+    year: document.getElementById('sumYear'),
+    batch: document.getElementById('sumBatch'),
+    time: document.getElementById('sumTime'),
+    facility: document.getElementById('sumFacility')
   };
+  let schedules = [];
+  let selectedDate = '';
+  let selectedSchedule = null;
+  const now = new Date();
+  let currentYear = now.getFullYear();
+  let currentMonth = now.getMonth();
 
-  // Dynamic default month — next month
-  const today = new Date();
-  let currentYear  = today.getFullYear();
-  let currentMonth = today.getMonth() + 1;
-  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-
-  let selectedDate  = null;
-  let selectedBatch = null;
-
-  // DOM
-  const monthTitleEl   = document.getElementById('monthTitle');
-  const calendarDaysEl = document.getElementById('calendarDays');
-  const prevBtn        = document.getElementById('prevMonth');
-  const nextBtn        = document.getElementById('nextMonth');
-  const selectDay      = document.getElementById('selectDay');
-  const selectBatch    = document.getElementById('selectBatch');
-  const saveBtn        = document.getElementById('saveScheduleBtn');
-
-  const sumMonth = document.getElementById('sumMonth');
-  const sumDay   = document.getElementById('sumDay');
-  const sumYear  = document.getElementById('sumYear');
-  const sumBatch = document.getElementById('sumBatch');
-  const sumTime  = document.getElementById('sumTime');
-
-  // HELPERS
-  function pad2(n) { return String(n).padStart(2, '0'); }
-  function toISODate(y, m, d) { return `${y}-${pad2(m + 1)}-${pad2(d)}`; }
-
-  function isToday(y, m, d) {
-    const t = new Date();
-    return t.getFullYear() === y && t.getMonth() === m && t.getDate() === d;
+  function dateKey(value) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(new Date(value));
+    const get = (type) => parts.find((part) => part.type === type).value;
+    return `${get('year')}-${get('month')}-${get('day')}`;
   }
 
-  function isPastDate(y, m, d) {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const target = new Date(y, m, d);
-    target.setHours(0, 0, 0, 0);
-    return target < now;
+  function slotsForDate(date) {
+    return schedules.filter((schedule) => dateKey(schedule.examDate) === date);
   }
 
-  function isTaken(y, m, d) {
-    return TAKEN_DATES.includes(toISODate(y, m, d));
+  function batchLabel(batch) {
+    return batch.replace(/^batch_/, 'Batch ');
   }
 
-  // RENDER CALENDAR
-  function renderCalendar() {
-    if (!monthTitleEl || !calendarDaysEl) return;
-
-    monthTitleEl.textContent = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
-    calendarDaysEl.innerHTML = '';
-
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-    // Empty cells para sa alignment
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      const empty = document.createElement('div');
-      empty.className = 'calendar-day empty-day';
-      calendarDaysEl.appendChild(empty);
-    }
-
-    // Day cells
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayEl = document.createElement('div');
-      dayEl.className = 'calendar-day';
-      dayEl.textContent = day;
-
-      const dow = new Date(currentYear, currentMonth, day).getDay();
-      const isWeekend = dow === 0 || dow === 6;
-      const isPast = isPastDate(currentYear, currentMonth, day);
-      const isTakenDay = isTaken(currentYear, currentMonth, day);
-
-      if (isWeekend) dayEl.classList.add('weekend');
-
-      if (isPast) {
-        dayEl.classList.add('past', 'disabled');
-      } else if (isTakenDay) {
-        dayEl.classList.add('taken', 'disabled');
-      } else {
-        dayEl.classList.add('available');
-      }
-
-      if (isToday(currentYear, currentMonth, day)) dayEl.classList.add('today');
-
-      if (selectedDate &&
-          selectedDate.year === currentYear &&
-          selectedDate.month === currentMonth &&
-          selectedDate.day === day) {
-        dayEl.classList.add('active');
-      }
-
-      if (!isPast && !isTakenDay) {
-        dayEl.addEventListener('click', () => handleDayClick(day));
-      }
-
-      calendarDaysEl.appendChild(dayEl);
-    }
+  function resetSummary() {
+    Object.values(summary).forEach((element) => { if (element) element.textContent = '—'; });
+    selectedSchedule = null;
+    updateSaveButton();
   }
 
-  function handleDayClick(day) {
-    selectedDate = { year: currentYear, month: currentMonth, day: day };
-    updateSummary();
+  function setDate(date) {
+    selectedDate = date;
+    selectDay.value = date;
+    const [year, month, day] = date.split('-').map(Number);
+    summary.month.textContent = monthNames[month - 1];
+    summary.day.textContent = day;
+    summary.year.textContent = year;
+    populateSlotOptions();
     renderCalendar();
   }
 
-  function updateSummary() {
-    if (!selectedDate) {
-      sumMonth.textContent = '—';
-      sumDay.textContent   = '—';
-      sumYear.textContent  = '—';
-      return;
-    }
-    sumMonth.textContent = MONTH_SHORT[selectedDate.month];
-    sumDay.textContent   = selectedDate.day;
-    sumYear.textContent  = selectedDate.year;
+  function populateDays() {
+    selectDay.innerHTML = '<option value="">-- Select Day --</option>';
+    const dates = [...new Set(schedules.map((schedule) => dateKey(schedule.examDate)))]
+      .filter((date) => Number(date.slice(0, 4)) === currentYear && Number(date.slice(5, 7)) - 1 === currentMonth)
+      .sort();
+    dates.forEach((date) => {
+      const option = document.createElement('option');
+      option.value = date;
+      option.textContent = Number(date.slice(8, 10));
+      selectDay.appendChild(option);
+    });
   }
 
-  function updateBatchSummary() {
-    if (!selectedBatch) {
-      sumBatch.textContent = '—';
-      sumTime.textContent  = '—';
-      return;
-    }
-    sumBatch.textContent = selectedBatch.replace('Batch ', '');
-    sumTime.textContent  = BATCH_TIMES[selectedBatch] || '—';
+  function populateSlotOptions() {
+    selectBatch.innerHTML = '<option value="">-- Select Batch --</option>';
+    slotsForDate(selectedDate).forEach((schedule) => {
+      const option = document.createElement('option');
+      option.value = schedule.scheduleId;
+      option.textContent = `${batchLabel(schedule.batch)} (${schedule.startTime} - ${schedule.endTime})`;
+      selectBatch.appendChild(option);
+    });
+    selectBatch.value = '';
+    selectedSchedule = null;
+    summary.batch.textContent = '—';
+    summary.time.textContent = '—';
+    summary.facility.textContent = '—';
+    updateSaveButton();
   }
 
   function updateSaveButton() {
-    if (saveBtn) saveBtn.disabled = !(selectedDate && selectedBatch);
+    saveButton.disabled = !selectedSchedule;
   }
 
-  function populateSelectDay() {
-    if (!selectDay) return;
-    selectDay.innerHTML = '<option value="">-- Select Day --</option>';
+  function renderCalendar() {
+    monthTitle.textContent = `${months[currentMonth]} ${currentYear}`;
+    calendarDays.innerHTML = '';
+    for (let emptyIndex = 0; emptyIndex < new Date(currentYear, currentMonth, 1).getDay(); emptyIndex += 1) {
+      const empty = document.createElement('div');
+      empty.className = 'calendar-day empty-day';
+      calendarDays.appendChild(empty);
+    }
 
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      if (isPastDate(currentYear, currentMonth, day)) continue;
-      if (isTaken(currentYear, currentMonth, day)) continue;
-
-      const dow = new Date(currentYear, currentMonth, day).getDay();
-      const isWeekend = dow === 0 || dow === 6;
-
-      const opt = document.createElement('option');
-      opt.value = day;
-      opt.textContent = `${day}${isWeekend ? ' (Weekend)' : ''}`;
-
-      if (selectedDate &&
-          selectedDate.year === currentYear &&
-          selectedDate.month === currentMonth &&
-          selectedDate.day === day) {
-        opt.selected = true;
+    const dayCount = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (let day = 1; day <= dayCount; day += 1) {
+      const cell = document.createElement('div');
+      const key = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const available = slotsForDate(key).length > 0;
+      cell.className = 'calendar-day';
+      cell.textContent = day;
+      if ([0, 6].includes(new Date(currentYear, currentMonth, day).getDay())) cell.classList.add('weekend');
+      if (available) {
+        cell.classList.add('available');
+        cell.addEventListener('click', () => setDate(key));
+      } else {
+        cell.classList.add('disabled');
       }
-      selectDay.appendChild(opt);
+      if (selectedDate === key) cell.classList.add('active');
+      calendarDays.appendChild(cell);
     }
   }
 
-  // NAV
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      currentMonth--;
-      if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-      selectedDate = null;
-      updateSummary(); renderCalendar(); populateSelectDay(); updateSaveButton();
-    });
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    currentMonth -= 1;
+    if (currentMonth < 0) { currentMonth = 11; currentYear -= 1; }
+    selectedDate = '';
+    resetSummary();
+    populateDays();
+    renderCalendar();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    currentMonth += 1;
+    if (currentMonth > 11) { currentMonth = 0; currentYear += 1; }
+    selectedDate = '';
+    resetSummary();
+    populateDays();
+    renderCalendar();
+  });
+  selectDay.addEventListener('change', () => {
+    if (selectDay.value) setDate(selectDay.value);
+    else resetSummary();
+  });
+  selectBatch.addEventListener('change', () => {
+    selectedSchedule = schedules.find((schedule) => schedule.scheduleId === selectBatch.value) || null;
+    summary.batch.textContent = selectedSchedule ? batchLabel(selectedSchedule.batch) : '—';
+    summary.time.textContent = selectedSchedule ? `${selectedSchedule.startTime} - ${selectedSchedule.endTime}` : '—';
+    summary.facility.textContent = selectedSchedule?.facilityId || '—';
+    updateSaveButton();
+  });
+  saveButton.addEventListener('click', async () => {
+    if (!selectedSchedule) return;
+    saveButton.disabled = true;
+    try {
+      const response = await fetch('/api/student/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        body: JSON.stringify({ scheduleId: selectedSchedule.scheduleId })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not reserve this exam schedule.');
+      window.location.assign(result.redirectUrl);
+    } catch (error) {
+      window.alert(error.message);
+      saveButton.disabled = false;
+    }
+  });
+
+  async function loadSchedules() {
+    try {
+      const [scheduleResponse, statusResponse] = await Promise.all([
+        fetch('/api/student/schedules', { credentials: 'same-origin', cache: 'no-store' }),
+        fetch('/api/student/application-status', { credentials: 'same-origin', cache: 'no-store' })
+      ]);
+      if (!scheduleResponse.ok || !statusResponse.ok) throw new Error('Could not load available exam schedules.');
+      const scheduleData = await scheduleResponse.json();
+      const status = await statusResponse.json();
+      schedules = scheduleData.schedules;
+      if (status.schedule) {
+        selectedDate = dateKey(status.schedule.examDate);
+        const [year, month, day] = dateKey(status.schedule.examDate).split('-').map(Number);
+        summary.month.textContent = monthNames[month - 1];
+        summary.day.textContent = day;
+        summary.year.textContent = year;
+        summary.batch.textContent = batchLabel(status.schedule.batch);
+        summary.time.textContent = `${status.schedule.startTime} - ${status.schedule.endTime}`;
+        summary.facility.textContent = status.schedule.facilityId || '—';
+        selectDay.disabled = true;
+        selectBatch.disabled = true;
+        saveButton.hidden = true;
+        note.textContent = 'Your exam schedule is already reserved.';
+      } else if (schedules.length) {
+        const firstDate = new Date(schedules[0].examDate);
+        currentYear = Number(dateKey(firstDate).slice(0, 4));
+        currentMonth = Number(dateKey(firstDate).slice(5, 7)) - 1;
+        note.textContent = 'Select an available exam date and batch.';
+      } else {
+        note.textContent = 'No available exam schedules. Please check again later or contact the Admissions Department.';
+      }
+      populateDays();
+      renderCalendar();
+    } catch (error) {
+      note.textContent = error.message;
+      saveButton.disabled = true;
+    }
   }
 
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      currentMonth++;
-      if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-      selectedDate = null;
-      updateSummary(); renderCalendar(); populateSelectDay(); updateSaveButton();
-    });
-  }
-
-  if (selectDay) {
-    selectDay.addEventListener('change', (e) => {
-      const day = parseInt(e.target.value);
-      if (!day) return;
-      handleDayClick(day);
-    });
-  }
-
-  if (selectBatch) {
-    selectBatch.addEventListener('change', (e) => {
-      selectedBatch = e.target.value || null;
-      updateBatchSummary();
-      updateSaveButton();
-    });
-  }
-
-  if (saveBtn) {
-    saveBtn.addEventListener('click', () => {
-      if (!selectedDate || !selectedBatch) return;
-
-      const schedule = {
-        date: toISODate(selectedDate.year, selectedDate.month, selectedDate.day),
-        month: MONTH_SHORT[selectedDate.month],
-        day: selectedDate.day,
-        year: selectedDate.year,
-        batch: selectedBatch,
-        time: BATCH_TIMES[selectedBatch],
-        savedAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('examSchedule', JSON.stringify(schedule));
-      window.location.href = 'uploadDocuments.html';
-    });
-  }
-
-  // INIT
-  renderCalendar();
-  populateSelectDay();
-  updateSummary();
-  updateBatchSummary();
-  updateSaveButton();
+  loadSchedules();
+  window.addEventListener('oeems:student-update', loadSchedules);
 });
 

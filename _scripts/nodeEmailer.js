@@ -45,4 +45,48 @@ async function sendOtp(email, code, purpose) {
 	});
 }
 
-module.exports = { isSmtpConfigured, sendOtp };
+async function sendApplicationSubmissionConfirmation({ email, applicantId, lastName, givenName, submittedAt, schedule, portalUrl }) {
+	const submittedDate = new Intl.DateTimeFormat('en-PH', {
+		dateStyle: 'long',
+		timeZone: 'Asia/Manila'
+	}).format(submittedAt);
+	const scheduleText = `${schedule.batch} / ${schedule.date} / ${schedule.time} / ${schedule.facility}`;
+	const subject = `Entrance Examination Application Received – ${applicantId} | Global Reciprocal Colleges`;
+	const text = `Dear ${lastName}, ${givenName},
+
+Thank you for submitting your application for the Global Reciprocal Colleges Entrance Examination. We have successfully received your application details and uploaded documents through the Student Services Online Entrance Examination Registration System (OEEMS).
+
+Application Details
+Applicant Name: ${lastName}, ${givenName}
+Applicant ID: ${applicantId}
+Application Date Submitted: ${submittedDate}
+Selected Exam Schedule: ${scheduleText}
+
+Next Steps
+1. Document Verification:
+Our Admissions Staff is currently reviewing your uploaded requirements.
+
+2. Download Your SOApp:
+Once your submitted documents and selected schedule are verified and approved by the Admissions Department, your Statement of Application (SOApp) document will become available for download directly in your portal.
+
+3. Monitor Your Status:
+You may track the real-time progress of your application and verification status at any time by logging into your Student Dashboard and checking the Application Status.
+
+Access Your Portal: ${portalUrl}
+
+If you have any questions or need to make corrections to your application, please reach out to the GRC Admissions Department or use the "Report a Problem" feature inside your student account.
+
+Best regards,
+Admission Office
+Global Reciprocal Colleges
+Student Services - Online Entrance Examination Registration`;
+
+	await getTransporter().sendMail({
+		from: process.env.MAIL_FROM || process.env.SMTP_USER,
+		to: email,
+		subject,
+		text
+	});
+}
+
+module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation };
