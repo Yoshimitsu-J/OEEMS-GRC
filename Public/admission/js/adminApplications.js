@@ -9,18 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   // STATE
   // =========================================
-  let activeApplications = [
-    { id: '012345', name: 'Juan Delacaruz', date: '2026-04-01', form138: 'show-img', psa: 'show-img', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012346', name: 'Maria D. Bee', date: '2026-04-01', form138: 'show-img', psa: 'show-img', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012347', name: 'Mike S. Quel', date: '2026-04-01', form138: 'show-img', psa: 'show-img', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012348', name: 'Pike Thon', date: '2026-04-01', form138: 'show-img', psa: 'to-follow', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012349', name: 'Jhava S. Crip', date: '2026-04-01', form138: 'show-img', psa: 'to-follow', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012350', name: 'Jose Reyes', date: '2026-04-01', form138: 'show-img', psa: 'to-follow', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012351', name: 'Ana Santa', date: '2026-04-02', form138: 'show-img', psa: 'to-follow', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012352', name: 'Mario B. Karton', date: '2026-04-02', form138: 'show-img', psa: 'to-follow', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012353', name: 'Ezekiel Query', date: '2026-04-02', form138: 'show-img', psa: 'show-img', goodMoral: 'show-img', math: 'show-img', status: 'pending' },
-    { id: '012354', name: 'JayJay Berners', date: '2026-04-02', form138: 'show-img', psa: 'show-img', goodMoral: 'show-img', math: 'show-img', status: 'pending' }
-  ];
+  let activeApplications = [];
 
   let archivedApplications = [];
   let currentTab = 'active';

@@ -54,6 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setText('infoStreet', data.street);
     setText('infoGuardianName', data.guardianName);
     setText('infoGuardianPhone', data.guardianPhone);
+    const studentPhoto = document.getElementById('studentPhoto');
+    if (studentPhoto && profile.photo?.storageKey) {
+      studentPhoto.src = '/api/student/profile/photo';
+      studentPhoto.hidden = false;
+    }
     generateRealQRCode(data);
   }).catch((error) => {
     console.error(error.message);

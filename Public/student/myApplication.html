@@ -23,8 +23,8 @@
         <div class="profile-dropdown hidden" id="profileDropdown">
           <div class="profile-dropdown-header">
             <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
-            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
-            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+            <h4 class="profile-dropdown-name profile-loading" id="dropdownName" data-profile="fullname" aria-busy="true"></h4>
+            <p class="profile-dropdown-email profile-loading" id="dropdownEmail" data-profile="email" aria-busy="true"></p>
           </div>
           <div class="profile-dropdown-divider"></div>
           <ul class="profile-dropdown-menu">
@@ -68,10 +68,10 @@
         <div class="app-map-top">
           <h2 class="app-map-title">APPLICATION MAP GUIDE</h2>
           <div class="app-map-info">
-            <p><strong>APPLICATION STATUS:</strong> In Progress</p>
-            <p><strong>APPLICANT:</strong> Delacruz, Juan</p>
-            <p><strong>APPLICANT ID:</strong> 012345</p>
-            <p><strong>DATE:</strong> April 1, 2026</p>
+            <p><strong>APPLICATION STATUS:</strong> <span id="myApplicationStatus" data-application="status">Loading...</span></p>
+            <p><strong>APPLICANT:</strong> <span class="profile-loading" data-profile="applicantName" aria-busy="true"></span></p>
+            <p><strong>APPLICANT ID:</strong> <span class="profile-loading" data-profile="applicantId" aria-busy="true"></span></p>
+            <p><strong>DATE:</strong> <span class="profile-loading" data-profile="accountCreated" aria-busy="true"></span></p>
           </div>
         </div>
 
@@ -135,7 +135,7 @@
     </main>
   </div>
 
-  <script src="js/applicantGuard.js"></script>
+  <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="js/dashboard.js"></script>
 </body>

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
 	studentId: { type: String, required: true, unique: true, immutable: true },
+	applicantId: { type: String, unique: true, sparse: true, immutable: true },
 	email: { type: String, required: true, unique: true, lowercase: true, trim: true },
 	passwordHash: { type: String, select: false },
 	googleId: { type: String, unique: true, sparse: true, select: false },

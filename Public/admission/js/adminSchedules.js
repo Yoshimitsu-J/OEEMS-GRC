@@ -49,23 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const adminCalendar = document.getElementById('adminCalendar');
   const editCalendar = document.getElementById('editCalendar');
 
-  const aprilDays = [
-    { day: 1, state: 'unavailable' }, { day: 2, state: 'unavailable' },
-    { day: 3, state: 'unavailable' }, { day: 4, state: 'unavailable' },
-    { day: 5, state: 'unavailable' }, { day: 6, state: 'unavailable' },
-    { day: 7, state: 'available' }, { day: 8, state: 'available' },
-    { day: 9, state: 'available' }, { day: 10, state: 'available' },
-    { day: 11, state: 'available' }, { day: 12, state: 'available' },
-    { day: 13, state: 'available' }, { day: 14, state: 'available' },
-    { day: 15, state: 'selected' }, { day: 16, state: 'available' },
-    { day: 17, state: 'available' }, { day: 18, state: 'available' },
-    { day: 19, state: 'available' }, { day: 20, state: 'available' },
-    { day: 21, state: 'available' }, { day: 22, state: 'available' },
-    { day: 23, state: 'available' }, { day: 24, state: 'available' },
-    { day: 25, state: 'available' }, { day: 26, state: 'available' },
-    { day: 27, state: 'available' }, { day: 28, state: 'unavailable' },
-    { day: 29, state: 'unavailable' }, { day: 30, state: 'unavailable' }
-  ];
+  const configuredScheduleDays = [];
 
   function renderCalendar(container, days, clickable = false) {
     if (!container) return;
@@ -110,13 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  renderCalendar(adminCalendar, aprilDays, false);
-
-  const editAprilDays = aprilDays.map(d => ({
-    ...d,
-    state: d.day >= 25 && d.day <= 29 ? 'selected' : d.state
-  }));
-  renderCalendar(editCalendar, editAprilDays, true);
+  renderCalendar(adminCalendar, configuredScheduleDays, false);
+  renderCalendar(editCalendar, configuredScheduleDays, true);
 
   // =========================================
   // PC STATUS GRID (5x5)

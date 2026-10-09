@@ -8,18 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   // DEFAULT SAMPLE DATA
   // =========================================
-  const SAMPLE_PENDING = [
-    { id: '012345', name: 'Juan Delacaruz', score: 53, program: 'BSBA', logic: 10, math: 40, result: 'PASSED', notified: false, email: 'juan@gmail.com' },
-    { id: '012346', name: 'Maria D. Bee', score: 61, program: 'BSBA', logic: 21, math: 40, result: 'PASSED', notified: false, email: 'maria@gmail.com' },
-    { id: '012347', name: 'Mike S. Quel', score: 71, program: 'BSBA', logic: 1, math: 70, result: 'PASSED', notified: false, email: 'mike@gmail.com' },
-    { id: '012348', name: 'Pike Thon', score: 84, program: 'BSBA', logic: 34, math: 50, result: 'PASSED', notified: false, email: 'pike@gmail.com' },
-    { id: '012349', name: 'Jhava S. Crip', score: 89, program: 'BSIT', logic: 69, math: 20, result: 'PASSED', notified: false, email: 'jhava@gmail.com' },
-    { id: '012350', name: 'Jose Reyes', score: 58, program: 'BSBA', logic: 8, math: 50, result: 'PASSED', notified: false, email: 'jose@gmail.com' },
-    { id: '012351', name: 'Ana Santa', score: 80, program: 'BSBA', logic: 30, math: 50, result: 'PASSED', notified: false, email: 'ana@gmail.com' },
-    { id: '012352', name: 'Mario B. Karton', score: 50, program: 'BSBA', logic: 0, math: 50, result: 'PASSED', notified: false, email: 'mario@gmail.com' },
-    { id: '012353', name: 'Ezekiel Query', score: 12, program: '--', logic: 0, math: 12, result: 'FAILED', notified: false, email: 'ezekiel@gmail.com' },
-    { id: '012354', name: 'JayJay Berners', score: 90, program: 'BSIT', logic: 40, math: 50, result: 'PASSED', notified: false, email: 'jayjay@gmail.com' }
-  ];
+  const SAMPLE_PENDING = [];
 
   // =========================================
   // STATE

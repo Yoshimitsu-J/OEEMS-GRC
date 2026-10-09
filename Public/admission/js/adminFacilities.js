@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // COMLAB META
   // =========================================
   const comlabMeta = {
-    COMLAB1: { facilitator: 'Juan Delacruz, Jay Clark', floor: 'FLOOR 2', occupation: 'low' },
-    COMLAB2: { facilitator: 'Maria Dela Cruz', floor: 'FLOOR 2', occupation: 'full' },
-    COMLAB3: { facilitator: 'Jose Reyes', floor: 'FLOOR 2', occupation: 'low' },
-    COMLAB4: { facilitator: 'Mario Conception', floor: 'FLOOR 4', occupation: 'full' }
+    COMLAB1: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'low' },
+    COMLAB2: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'full' },
+    COMLAB3: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'low' },
+    COMLAB4: { facilitator: 'Unassigned', floor: 'FLOOR 4', occupation: 'full' }
   };
 
   // =========================================

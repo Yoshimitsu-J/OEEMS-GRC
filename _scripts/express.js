@@ -100,6 +100,16 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 			response.sendFile(path.join(publicPath, page));
 		});
 	});
+	const legacyStudentRoutes = {
+		'/public/schedule.html': path.join('student', 'scheduleExam.html'),
+		'/public/documents.html': path.join('student', 'uploadDocuments.html'),
+		'/public/summary.html': path.join('student', 'applicationSummary.html')
+	};
+	Object.entries(legacyStudentRoutes).forEach(([route, page]) => {
+		app.get(route, requireAuthenticated, requireCompletedProfile, checkStepAccess, (request, response) => {
+			response.sendFile(path.join(publicPath, page));
+		});
+	});
 
 	app.get('/public/index.html', (request, response) => {
 		response.sendFile(path.join(publicPath, 'index.html'));

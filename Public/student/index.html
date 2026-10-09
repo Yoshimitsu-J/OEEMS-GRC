@@ -33,8 +33,8 @@
             <div class="profile-dropdown-avatar">
               <i class="bi bi-person-circle"></i>
             </div>
-            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
-            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+            <h4 class="profile-dropdown-name profile-loading" id="dropdownName" data-profile="fullname" aria-busy="true"></h4>
+            <p class="profile-dropdown-email profile-loading" id="dropdownEmail" data-profile="email" aria-busy="true"></p>
           </div>
 
           <div class="profile-dropdown-divider"></div>
@@ -100,11 +100,11 @@
         <div class="banner-left">
           <p class="banner-greeting" id="bannerGreeting">Good morning,</p>
           <h1 class="banner-name">
-            <span id="welcomeName">Juan Dela Cruz</span>
+            <span id="welcomeName" class="profile-loading" data-profile="fullname" aria-busy="true"></span>
             <i class="bi bi-hand-thumbs-up-fill banner-wave"></i>
           </h1>
           <p class="banner-subtext">
-            Applicant ID: <strong id="bannerApplicantId">#012345</strong> &nbsp;•&nbsp;
+            Applicant ID: <strong id="bannerApplicantId" class="profile-loading" data-profile="applicantId" aria-busy="true"></strong> &nbsp;•&nbsp;
             Application Status: <span class="banner-status" id="applicationStatus">Loading...</span>
           </p>
         </div>
@@ -127,7 +127,7 @@
           <div class="stat-icon stat-icon-blue"><i class="bi bi-calendar-check"></i></div>
           <div class="stat-info">
             <p class="stat-label">Exam Schedule</p>
-            <p class="stat-value" id="examScheduleText">April 15, 2026</p>
+            <p class="stat-value" id="examScheduleText">No exam schedule</p>
           </div>
         </div>
         <div class="stat-card">
@@ -203,7 +203,7 @@
               <span class="announcement-dot"></span>
               <div>
                 <p class="announcement-title">Bring valid ID</p>
-                <p class="announcement-date">Required sa exam day — April 15, 2026</p>
+                <p class="announcement-date">Required sa exam day — <span data-application="examDate">—</span></p>
               </div>
             </li>
             <li>
@@ -221,7 +221,7 @@
     </main>
   </div>
 
-  <script src="js/applicantGuard.js"></script>
+  <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>

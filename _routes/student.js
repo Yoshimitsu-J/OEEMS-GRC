@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const PDFDocument = require('pdfkit');
+const User = require('../_models/User');
 const StudentProfile = require('../_models/StudentProfile');
 const StudentApplication = require('../_models/StudentApplication');
 const StudentSchedule = require('../_models/StudentSchedule');
@@ -164,6 +165,27 @@ router.get('/profile', requireAuthenticated, async (request, response) => {
 	}
 });
 
+router.get('/profile/photo', requireAuthenticated, requireCompletedProfile, async (request, response) => {
+	const photo = response.locals.studentProfile.photo;
+	if (!photo?.storageKey || !mongoose.isValidObjectId(photo.storageKey)) {
+		return response.status(404).end();
+	}
+	if (!['image/jpeg', 'image/png'].includes(photo.contentType)) {
+		return response.status(404).end();
+	}
+
+	response.set({
+		'Content-Type': photo.contentType,
+		'Cache-Control': 'no-store, private',
+		'X-Content-Type-Options': 'nosniff'
+	});
+	const stream = getUploadBucket().openDownloadStream(new mongoose.Types.ObjectId(photo.storageKey));
+	stream.once('error', () => {
+		if (!response.headersSent) response.status(404).end();
+	});
+	stream.pipe(response);
+});
+
 router.get('/application-status', requireAuthenticated, requireCompletedProfile, async (request, response) => {
 	try {
 		const workflow = await getWorkflow(response.locals.studentProfile);
@@ -172,7 +194,10 @@ router.get('/application-status', requireAuthenticated, requireCompletedProfile,
 			applicantId: response.locals.studentProfile.applicantId,
 			applicationStatus: workflow.applicationStatus,
 			workflowStatus: workflow.application?.status || 'draft',
+			cycle: workflow.application?.cycle || currentCycle(),
 			submittedAt: workflow.application?.status === 'under_review' ? workflow.application.updatedAt : null,
+			applicationCreatedAt: workflow.application?.createdAt || null,
+			approval: workflow.application?.approval || null,
 			progressPercent: workflow.progressPercent,
 			currentStep: workflow.nextStep?.number || (workflow.applicationStatus === 'Pending' ? 5 : null),
 			nextStep: workflow.nextStep,
@@ -309,18 +334,23 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 		}
 		let savedProfile;
 		for (let attempt = 0; attempt < 3; attempt += 1) {
+			const applicantIdCandidate = existingProfile?.applicantId || user.applicantId || await createApplicantId();
 			const session = await mongoose.startSession();
 			try {
 				await session.withTransaction(async () => {
 					savedProfile = await StudentProfile.findOne({ userId }).session(session);
+					if (user.applicantId && savedProfile?.applicantId && user.applicantId !== savedProfile.applicantId) {
+						throw new Error('The account and profile Applicant IDs do not match.');
+					}
+					const applicantId = savedProfile?.applicantId || user.applicantId || applicantIdCandidate;
+
 					if (savedProfile) {
 						await StudentProfile.collection.updateOne({ _id: savedProfile._id }, {
-							$set: { ...profile, studentId: user.studentId },
+							$set: { ...profile, studentId: user.studentId, applicantId },
 							$unset: { 'address.street': '' }
 						}, { session });
 						savedProfile = await StudentProfile.findById(savedProfile._id).session(session);
 					} else {
-						const applicantId = createApplicantId();
 						[savedProfile] = await StudentProfile.create([{
 							...profile,
 							userId,
@@ -328,6 +358,14 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 							applicantId,
 							termsAcceptedAt: new Date()
 						}], { session });
+					}
+
+					const userIdUpdate = await User.collection.updateOne({
+						_id: userId,
+						$or: [{ applicantId: { $exists: false } }, { applicantId }]
+					}, { $set: { applicantId } }, { session });
+					if (userIdUpdate.matchedCount !== 1) {
+						throw new Error('Could not synchronize the Applicant ID to the user account.');
 					}
 
 					await StudentApplication.updateOne({ applicantId: savedProfile.applicantId }, {
@@ -358,7 +396,12 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 			redirectUrl: '/public/student-dashboard.html'
 		});
 	} catch (error) {
-		console.error('Student profile save failed:', error.message);
+		console.error('Student profile save failed:', {
+			name: error.name,
+			code: error.code || null,
+			message: error.message,
+		errorLabels: error.errorLabels || []
+		});
 		response.status(500).json({ error: 'Could not save the student profile. Please try again.' });
 	}
 });

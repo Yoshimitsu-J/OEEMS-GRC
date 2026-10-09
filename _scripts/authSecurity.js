@@ -2,6 +2,8 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { promisify } = require('node:util');
+const User = require('../_models/User');
+const StudentProfile = require('../_models/StudentProfile');
 
 const scrypt = promisify(crypto.scrypt);
 const sessionSecretPath = path.join(__dirname, '..', '_confidentials', 'session_secret.txt');
@@ -50,8 +52,16 @@ function createStudentId() {
 	return `STU-${new Date().getFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
-function createApplicantId() {
-	return `APP-${new Date().getFullYear()}-${crypto.randomInt(0, 1000000).toString().padStart(6, '0')}`;
+async function createApplicantId() {
+	for (let attempt = 0; attempt < 10; attempt += 1) {
+		const applicantId = `APP${new Date().getFullYear()}${crypto.randomInt(0, 1000000).toString().padStart(6, '0')}`;
+		const [userExists, profileExists] = await Promise.all([
+			User.exists({ applicantId }),
+			StudentProfile.exists({ applicantId })
+		]);
+		if (!userExists && !profileExists) return applicantId;
+	}
+	throw new Error('Could not generate a unique applicant ID. Please try again.');
 }
 
 module.exports = {

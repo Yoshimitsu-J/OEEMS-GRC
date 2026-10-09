@@ -22,8 +22,8 @@
         <div class="profile-dropdown hidden" id="profileDropdown">
           <div class="profile-dropdown-header">
             <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
-            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
-            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+            <h4 class="profile-dropdown-name profile-loading" id="dropdownName" data-profile="fullname" aria-busy="true"></h4>
+            <p class="profile-dropdown-email profile-loading" id="dropdownEmail" data-profile="email" aria-busy="true"></p>
           </div>
           <div class="profile-dropdown-divider"></div>
           <ul class="profile-dropdown-menu">
@@ -70,21 +70,21 @@
             <p class="summary-qr-label">Scan Me</p>
           </div>
           <div class="summary-name-box">
-            <h2 id="summaryName">Juan Delacruz</h2>
-            <p id="summaryEmail">juandelacruz1@gmail.com</p>
+            <h2 id="summaryName" class="profile-loading" data-profile="fullname" aria-busy="true"></h2>
+            <p id="summaryEmail" class="profile-loading" data-profile="email" aria-busy="true"></p>
           </div>
         </div>
 
         <table class="summary-table">
-          <tr><td>Sex</td><td>Male</td></tr>
-          <tr><td>Address</td><td>81 10th Avenue, Ext. Cor. Grace Park, Caloocan City, Barangay 81, NCR, Philippines</td></tr>
-          <tr><td>Phone Number</td><td>09123456789</td></tr>
-          <tr><td>Account Creation Date</td><td>April 01, 2026</td></tr>
-          <tr><td>Booking Exam Date</td><td>April 01, 2026</td></tr>
+          <tr><td>Sex</td><td class="profile-loading" data-profile="sex" aria-busy="true"></td></tr>
+          <tr><td>Address</td><td class="profile-loading" data-profile="address" aria-busy="true"></td></tr>
+          <tr><td>Phone Number</td><td class="profile-loading" data-profile="phone" aria-busy="true"></td></tr>
+          <tr><td>Account Creation Date</td><td class="profile-loading" data-profile="accountCreated" aria-busy="true"></td></tr>
+          <tr><td>Booking Exam Date</td><td id="summaryBookingDate">—</td></tr>
           <tr><td>Amount of Exam</td><td>Php 200.00</td></tr>
-          <tr><td>Examination Schedule</td><td>April 15, 2026, Wednesday</td></tr>
-          <tr><td>Examination Time</td><td>7:30 - 9:30 AM</td></tr>
-          <tr><td>Exam Facility Location</td><td>Computer Lab 1, 2nd Floor</td></tr>
+          <tr><td>Examination Schedule</td><td id="summaryExamDate">—</td></tr>
+          <tr><td>Examination Time</td><td id="summaryExamTime">—</td></tr>
+          <tr><td>Exam Facility Location</td><td id="summaryExamFacility">—</td></tr>
         </table>
 
         <p class="summary-disclaimer">
@@ -126,7 +126,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  <script src="js/applicantGuard.js"></script>
+  <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>

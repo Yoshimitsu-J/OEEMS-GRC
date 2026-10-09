@@ -101,7 +101,7 @@ async function checkStepAccess(request, response, next) {
 	const restrictedPages = new Set([
 		'scheduleexam.html', 'uploaddocuments.html', 'applicationsummary.html',
 		'myapplication.html', 'statementofapplication.html', 'takeexam.html', 'examresult.html',
-		'application', 'exam'
+		'application', 'exam', 'schedule.html', 'documents.html', 'summary.html'
 	]);
 
 	try {
@@ -122,7 +122,11 @@ async function checkStepAccess(request, response, next) {
 			.map((document) => document.documentType));
 		const allDocumentsSubmitted = REQUIRED_UPLOADS.every((type) => uploaded.has(type));
 		const reviewLocked = ['under_review', 'approved', 'declined', 'exam_completed', 'result_released'].includes(application?.status);
-		const protectedPage = page === 'application' ? 'myapplication.html' : page === 'exam' ? 'takeexam.html' : page;
+		const protectedPage = page === 'application' ? 'myapplication.html'
+			: page === 'exam' ? 'takeexam.html'
+				: page === 'schedule.html' ? 'scheduleexam.html'
+					: page === 'documents.html' ? 'uploaddocuments.html'
+						: page === 'summary.html' ? 'applicationsummary.html' : page;
 		let redirect = null;
 
 		if (reviewLocked && ['scheduleexam.html', 'uploaddocuments.html', 'applicationsummary.html', 'myapplication.html'].includes(protectedPage)) {

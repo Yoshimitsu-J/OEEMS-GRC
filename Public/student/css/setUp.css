@@ -24,7 +24,7 @@
 .setup-title {
   font-size: 24px;
   font-weight: 800;
-  color: #8B0000;
+  color: #800000;
   text-align: center;
   margin-bottom: 30px;
   letter-spacing: 0.5px;
@@ -38,7 +38,7 @@
   display: block;
   font-size: 15px;
   font-weight: 700;
-  color: #8B0000;
+  color: #800000;
   margin-bottom: 8px;
 }
 
@@ -55,7 +55,7 @@
 
 .setup-input:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: #800000;
 }
 
 .password-wrapper {
@@ -80,7 +80,7 @@
 
 .btn-next {
   width: 100%;
-  background-color: #8B0000;
+  background-color: #800000;
   color: #ffffff;
   border: none;
   padding: 14px;
@@ -121,7 +121,7 @@
   justify-content: space-between;
   padding: 0 20px;
   height: 60px;
-  background-color: #8B0000;
+  background-color: #800000;
   color: #ffffff;
   position: fixed;
   top: 0;
@@ -161,7 +161,7 @@
 .terms-title {
   font-size: 24px;
   font-weight: 800;
-  color: #8B0000;
+  color: #800000;
   text-align: center;
   margin-bottom: 6px;
 }
@@ -182,7 +182,7 @@
 .terms-body h3 {
   font-size: 14px;
   font-weight: 800;
-  color: #8B0000;
+  color: #800000;
   margin-top: 18px;
   margin-bottom: 6px;
 }
@@ -248,7 +248,7 @@
 }
 
 .terms-modal-card .close-modal:hover {
-  color: #8B0000 !important;
+  color: #800000 !important;
 }
 
 /* =========================================

@@ -7,7 +7,7 @@
    0. ROOT VARIABLES & RESET
    ========================================= */
 :root {
-  --primary-color: #8B0000;
+  --primary-color: #800000;
   --primary-hover: #A00000;
   --bg-color: #F0F0F0;
   --card-bg: #FFFFFF;
@@ -104,7 +104,7 @@ body {
   top: 4px;
   right: 4px;
   background: #FFD700;
-  color: #8B0000;
+  color: #800000;
   font-size: 10px;
   font-weight: 800;
   padding: 1px 5px;
@@ -112,7 +112,7 @@ body {
   min-width: 16px;
   text-align: center;
   line-height: 1.2;
-  border: 2px solid #8B0000;
+  border: 2px solid #800000;
 }
 
 .user-profile {
@@ -407,6 +407,111 @@ body {
   text-decoration: none;
 }
 
+.profile-loading {
+  display: inline-block;
+  min-width: 7rem;
+  color: transparent !important;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #eeeeee 25%, #ffffff 50%, #eeeeee 75%);
+  background-size: 200% 100%;
+  animation: profile-skeleton 1.25s ease-in-out infinite;
+}
+
+@keyframes profile-skeleton {
+  to { background-position: -200% 0; }
+}
+
+.step-locked {
+  opacity: 0.48 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.35);
+}
+
+.step-guard-open {
+  overflow: hidden;
+}
+
+.step-guard-backdrop[hidden] {
+  display: none;
+}
+
+.step-guard-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 12, 12, 0.62);
+}
+
+.step-guard-modal {
+  position: relative;
+  width: min(100%, 440px);
+  padding: 30px;
+  overflow: hidden;
+  color: #242020;
+  background: #ffffff;
+  border: 1px solid #e2dada;
+  border-radius: 8px;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.28);
+}
+
+.step-guard-accent {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: #800000;
+}
+
+.step-guard-modal h2 {
+  margin: 4px 0 10px;
+  color: #800000;
+  font-size: 22px;
+}
+
+.step-guard-modal p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.step-guard-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.step-guard-actions button {
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #800000;
+  border-radius: 4px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.step-guard-close {
+  color: #282323;
+  background: #ffffff;
+}
+
+.step-guard-proceed {
+  color: #ffffff;
+  background: #800000;
+}
+
+.step-guard-actions button:focus-visible {
+  outline: 3px solid #be7f7f;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .step-guard-modal { padding: 26px 22px 22px; }
+  .step-guard-actions { flex-direction: column-reverse; }
+}
+
 /* =========================================
    7. WELCOME
    ========================================= */
@@ -547,7 +652,7 @@ body {
 .step-connector {
   flex: 1;
   height: 4px;
-  background: linear-gradient(90deg, #8B0000 0%, #8B0000 50%, #333 50%, #333 100%);
+  background: linear-gradient(90deg, #800000 0%, #800000 50%, #333 50%, #333 100%);
   margin: 0 8px;
   border-radius: 2px;
 }
@@ -570,7 +675,7 @@ body {
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  background: #8B0000;
+  background: #800000;
   color: #ffffff;
   text-decoration: none;
   padding: 15px 12px;
@@ -796,13 +901,13 @@ body {
 }
 
 .disclaimer-card .close-modal:hover {
-  color: #8B0000 !important;
+  color: #800000 !important;
 }
 
 .disclaimer-title {
   font-size: 32px;
   font-weight: 800;
-  color: #8B0000;
+  color: #800000;
   text-align: center;
   margin-bottom: 20px;
 }
@@ -827,14 +932,14 @@ body {
 }
 
 .disclaimer-list li strong {
-  color: #8B0000 !important;
+  color: #800000 !important;
   font-weight: 700;
 }
 
 .btn-disclaimer-ok {
   display: block;
   margin: 0 auto;
-  background: #8B0000;
+  background: #800000;
   color: #fff;
   border: none;
   padding: 12px 50px;
@@ -875,7 +980,7 @@ body {
 .student-photo-box {
   width: 140px;
   height: 140px;
-  border: 3px solid #8B0000;
+  border: 3px solid #800000;
   border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
@@ -938,7 +1043,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #8B0000;
+  background: #800000;
   color: #ffffff;
   padding: 8px 16px;
   border-radius: 6px;
@@ -998,12 +1103,12 @@ body {
 .details-title {
   font-size: 14px;
   font-weight: 700;
-  color: #8B0000;
+  color: #800000;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 20px 0 10px 0;
   padding-bottom: 6px;
-  border-bottom: 2px solid #8B0000;
+  border-bottom: 2px solid #800000;
 }
 
 .student-info-table {
@@ -1119,9 +1224,9 @@ body {
 }
 
 .keypad-go {
-  background: #8B0000;
+  background: #800000;
   color: #ffffff;
-  border-color: #8B0000;
+  border-color: #800000;
 }
 
 .keypad-go:hover {
@@ -1145,7 +1250,7 @@ body {
 .congrats-title {
   font-size: 28px;
   font-weight: 800;
-  color: #8B0000;
+  color: #800000;
   margin-bottom: 15px;
 }
 
@@ -1165,7 +1270,7 @@ body {
 
 .btn-setup {
   display: inline-block;
-  background-color: #8B0000;
+  background-color: #800000;
   color: #ffffff;
   padding: 14px 40px;
   border-radius: 25px;
@@ -1431,7 +1536,7 @@ body {
   align-items: center !important;
   text-align: center !important;
   padding: 20px 18px 15px 18px !important;
-  background: linear-gradient(135deg, #8B0000 0%, #B22222 100%) !important;
+  background: linear-gradient(135deg, #800000 0%, #B22222 100%) !important;
   color: #ffffff !important;
   margin: 0 !important;
 }
@@ -1513,7 +1618,7 @@ body {
 
 .profile-dropdown-menu li a i {
   font-size: 17px !important;
-  color: #8B0000 !important;
+  color: #800000 !important;
   width: 20px !important;
   text-align: center !important;
   transition: transform 0.15s ease !important;
@@ -1526,7 +1631,7 @@ body {
 
 .profile-dropdown-menu li a:hover {
   background: #f5f5f5 !important;
-  color: #8B0000 !important;
+  color: #800000 !important;
 }
 
 .profile-dropdown-menu li a:hover i {
@@ -1539,7 +1644,7 @@ body {
   align-items: center !important;
   gap: 12px !important;
   padding: 13px 18px !important;
-  color: #8B0000 !important;
+  color: #800000 !important;
   text-decoration: none !important;
   font-size: 13px !important;
   font-weight: 700 !important;
@@ -1553,11 +1658,11 @@ body {
   font-size: 17px !important;
   width: 20px !important;
   text-align: center !important;
-  color: #8B0000 !important;
+  color: #800000 !important;
 }
 
 .profile-dropdown-logout span {
-  color: #8B0000 !important;
+  color: #800000 !important;
   text-decoration: none !important;
 }
 
@@ -1602,7 +1707,7 @@ body {
   color: #333;
 }
 
-.schedule-title-red { color: #8B0000; }
+.schedule-title-red { color: #800000; }
 
 .schedule-note {
   text-align: center;
@@ -1633,7 +1738,7 @@ body {
   background: transparent;
   border: none;
   font-size: 20px;
-  color: #8B0000;
+  color: #800000;
   cursor: pointer;
   width: 36px;
   height: 36px;
@@ -1682,7 +1787,7 @@ body {
 /* ✅ DAY CELLS */
 .calendar-day {
   padding: 0;
-  background-color: #8B0000;
+  background-color: #800000;
   color: #ffffff;
   border-radius: 6px;
   font-size: 14px;
@@ -1778,7 +1883,7 @@ body {
 
 .schedule-left .form-control:focus {
   outline: none;
-  border-color: #8B0000;
+  border-color: #800000;
 }
 
 .schedule-right { padding-left: 10px; }

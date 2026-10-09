@@ -30,8 +30,8 @@
         <div class="profile-dropdown hidden" id="profileDropdown">
           <div class="profile-dropdown-header">
             <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
-            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
-            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+            <h4 class="profile-dropdown-name profile-loading" id="dropdownName" data-profile="fullname" aria-busy="true"></h4>
+            <p class="profile-dropdown-email profile-loading" id="dropdownEmail" data-profile="email" aria-busy="true"></p>
           </div>
           <div class="profile-dropdown-divider"></div>
           <ul class="profile-dropdown-menu">
@@ -81,7 +81,7 @@
         <div class="student-profile-top">
           <div class="student-profile-left">
             <div class="student-photo-box">
-              <img id="studentPhoto" src="../assets/image/grc-logo.png" alt="Student Photo" class="student-photo">
+              <img id="studentPhoto" alt="Student Photo" class="student-photo" hidden>
             </div>
             <div class="student-qr-box">
               <div id="qrcode" class="qr-code-image"></div>
@@ -92,13 +92,13 @@
           <div class="student-profile-right">
             <div class="applicant-id-box">
               <span class="applicant-id-label">APPLICANT ID</span>
-              <span class="applicant-id-number" id="applicantId">012345</span>
+              <span class="applicant-id-number profile-loading" id="applicantId" data-profile="applicantId" aria-busy="true"></span>
             </div>
-            <h2 class="student-name-display" id="studentName">Juan Dela Cruz</h2>
-            <p class="student-email-display" id="studentEmail">juandelacruz1@gmail.com</p>
+            <h2 class="student-name-display profile-loading" id="studentName" data-profile="fullname" aria-busy="true"></h2>
+            <p class="student-email-display profile-loading" id="studentEmail" data-profile="email" aria-busy="true"></p>
             <div class="student-status-badge">
               <i class="bi bi-check-circle-fill"></i>
-              <span id="studentStatus">Application Submitted</span>
+              <span id="studentStatus">Loading status...</span>
             </div>
           </div>
         </div>
@@ -106,24 +106,24 @@
         <div class="student-details-section">
           <h3 class="details-title">PERSONAL INFORMATION</h3>
           <table class="student-info-table">
-            <tr><td>Sex</td><td id="infoSex">Male</td></tr>
-            <tr><td>Birthday</td><td id="infoBirthday">January 1, 2006</td></tr>
-            <tr><td>Phone Number</td><td id="infoPhone">+63 912 345 6789</td></tr>
-            <tr><td>Country</td><td id="infoCountry">Philippines</td></tr>
+            <tr><td>Sex</td><td id="infoSex" class="profile-loading" data-profile="sex" aria-busy="true"></td></tr>
+            <tr><td>Birthday</td><td id="infoBirthday" class="profile-loading" data-profile="birthday" aria-busy="true"></td></tr>
+            <tr><td>Phone Number</td><td id="infoPhone" class="profile-loading" data-profile="phone" aria-busy="true"></td></tr>
+            <tr><td>Country</td><td id="infoCountry" class="profile-loading" data-profile="country" aria-busy="true"></td></tr>
           </table>
 
           <h3 class="details-title">ADDRESS</h3>
           <table class="student-info-table">
-            <tr><td>Region</td><td id="infoRegion">NCR</td></tr>
-            <tr><td>City / Municipality</td><td id="infoCity">Caloocan City</td></tr>
-            <tr><td>Barangay</td><td id="infoBarangay">Barangay 81</td></tr>
-            <tr><td>Street Address</td><td id="infoStreet">81 10th Avenue, Ext. Cor. Grace Park</td></tr>
+            <tr><td>Region</td><td id="infoRegion" class="profile-loading" data-profile="region" aria-busy="true"></td></tr>
+            <tr><td>City / Municipality</td><td id="infoCity" class="profile-loading" data-profile="city" aria-busy="true"></td></tr>
+            <tr><td>Barangay</td><td id="infoBarangay" class="profile-loading" data-profile="barangay" aria-busy="true"></td></tr>
+            <tr><td>Street Address</td><td id="infoStreet" class="profile-loading" data-profile="street" aria-busy="true"></td></tr>
           </table>
 
           <h3 class="details-title">GUARDIAN INFORMATION</h3>
           <table class="student-info-table">
-            <tr><td>Guardian's Name</td><td id="infoGuardianName">Maria D. Bee</td></tr>
-            <tr><td>Guardian's Phone</td><td id="infoGuardianPhone">+63 998 765 4321</td></tr>
+            <tr><td>Guardian's Name</td><td id="infoGuardianName" class="profile-loading" data-profile="guardianName" aria-busy="true"></td></tr>
+            <tr><td>Guardian's Phone</td><td id="infoGuardianPhone" class="profile-loading" data-profile="guardianPhone" aria-busy="true"></td></tr>
           </table>
         </div>
 
@@ -137,7 +137,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-  <script src="js/applicantGuard.js"></script>
+  <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>

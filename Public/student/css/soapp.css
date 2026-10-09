@@ -67,7 +67,7 @@ body {
 }
 
 .red-bold {
-  color: #8B0000;
+  color: #800000;
   font-weight: 700;
 }
 
@@ -122,7 +122,7 @@ body {
 }
 
 .red-text {
-  color: #8B0000;
+  color: #800000;
 }
 
 .soapp-section {
@@ -168,7 +168,7 @@ body {
 }
 
 .soapp-applicant-number {
-  color: #8B0000;
+  color: #800000;
   font-size: 3.5rem;
   font-weight: 800;
   line-height: 1;
@@ -194,7 +194,7 @@ body {
 }
 
 .btn-download {
-  background: #8B0000;
+  background: #800000;
   color: #fff;
   padding: 10px 30px;
   border: none;

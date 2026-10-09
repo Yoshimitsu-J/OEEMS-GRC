@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error(result.error || 'Could not reserve this exam schedule.');
       window.location.assign(result.redirectUrl);
     } catch (error) {
-      window.alert(error.message);
+      note.textContent = error.message;
       saveButton.disabled = false;
     }
   });

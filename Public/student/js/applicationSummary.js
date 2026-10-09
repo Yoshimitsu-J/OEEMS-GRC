@@ -73,18 +73,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not submit the application.');
       if (!result.emailSent && !result.alreadySubmitted) {
-        window.alert('Your application was received, but the confirmation email could not be sent. Please contact the Admissions Department.');
+        window.StepGuard?.showMessage('Your application was received, but the confirmation email could not be sent. Please contact the Admissions Department.');
       }
       window.location.replace(result.redirectUrl || '/student/');
     } catch (error) {
-      window.alert(error.message);
+      window.StepGuard?.showMessage(error.message);
       submitButton.disabled = false;
     }
   });
 
   loadSummary().catch((error) => {
     console.error(error.message);
-    window.alert(error.message);
+    window.StepGuard?.showMessage(error.message);
   });
   window.addEventListener('oeems:student-update', () => {
     loadSummary().catch((error) => console.error(error.message));

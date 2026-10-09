@@ -1,6 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const mongoose = require('mongoose');
+const User = require('../_models/User');
+const StudentProfile = require('../_models/StudentProfile');
 
 const credentialsPath = path.join(__dirname, '..', '_confidentials', 'mongoDB_Credentials.txt');
 const databaseNames = ['OEEMS', 'OEEMS_Admission', 'OEEMS_Student'];
@@ -36,6 +38,7 @@ async function connectToMongoDB() {
 		await connection.db.command({ ping: 1 });
 		databaseConnections.set(databaseName, connection);
 	}
+	await Promise.all([User.init(), StudentProfile.init()]);
 
 	console.log(`MongoDB connected: ${databaseNames.join(', ')}`);
 	return Object.fromEntries(databaseConnections);

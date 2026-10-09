@@ -22,8 +22,8 @@
         <div class="profile-dropdown hidden" id="profileDropdown">
           <div class="profile-dropdown-header">
             <div class="profile-dropdown-avatar"><i class="bi bi-person-circle"></i></div>
-            <h4 class="profile-dropdown-name" id="dropdownName">Juan Dela Cruz</h4>
-            <p class="profile-dropdown-email" id="dropdownEmail">juandelacruz@gmail.com</p>
+            <h4 class="profile-dropdown-name profile-loading" id="dropdownName" data-profile="fullname" aria-busy="true"></h4>
+            <p class="profile-dropdown-email profile-loading" id="dropdownEmail" data-profile="email" aria-busy="true"></p>
           </div>
           <div class="profile-dropdown-divider"></div>
           <ul class="profile-dropdown-menu">
@@ -132,7 +132,7 @@
     </main>
   </div>
 
-  <script src="js/applicantGuard.js"></script>
+  <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/dashboard.js"></script>

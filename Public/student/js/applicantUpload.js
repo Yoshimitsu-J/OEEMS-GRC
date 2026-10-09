@@ -61,11 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         await readProgress();
       } catch (error) {
-        window.alert(error.message);
+        const note = document.querySelector('.upload-required');
+        if (note) note.textContent = error.message;
         return;
       }
       if (uploaded.size !== documentTypes.length) {
-        window.alert(`Please upload all ${documentTypes.length} required documents. Uploaded: ${uploaded.size} of ${documentTypes.length}.`);
+        const note = document.querySelector('.upload-required');
+        if (note) note.textContent = `Please upload all ${documentTypes.length} required documents. Uploaded: ${uploaded.size} of ${documentTypes.length}.`;
         return;
       }
 

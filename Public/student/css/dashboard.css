@@ -15,7 +15,7 @@
 
 /* BANNER */
 .dashboard-banner {
-  background: linear-gradient(135deg, #8B0000 0%, #B22222 100%);
+  background: linear-gradient(135deg, #800000 0%, #B22222 100%);
   border-radius: 12px;
   padding: 28px 32px;
   color: #ffffff;
@@ -32,7 +32,7 @@
 
 .banner-status {
   background: #FFD700;
-  color: #8B0000;
+  color: #800000;
   padding: 3px 12px;
   border-radius: 12px;
   font-weight: 700;
@@ -97,7 +97,7 @@
   flex-shrink: 0;
 }
 
-.stat-icon-red    { background: #ffe5e5; color: #8B0000; }
+.stat-icon-red    { background: #ffe5e5; color: #800000; }
 .stat-icon-blue   { background: #e3f2fd; color: #1976d2; }
 .stat-icon-green  { background: #e8f5e9; color: #2e7d32; }
 .stat-icon-orange { background: #fff3e0; color: #ef6c00; }
@@ -125,7 +125,7 @@
 }
 
 .card-title-small { font-size: 16px; font-weight: 700; color: #333; margin: 0; }
-.progress-percent { font-size: 13px; font-weight: 700; color: #8B0000; }
+.progress-percent { font-size: 13px; font-weight: 700; color: #800000; }
 
 .progress-bar-wrapper {
   height: 8px;
@@ -137,7 +137,7 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #8B0000, #d32f2f);
+  background: linear-gradient(90deg, #800000, #d32f2f);
   border-radius: 4px;
   transition: width 0.6s ease;
 }
@@ -183,8 +183,8 @@
 .step.completed .step-circle { background: #2ecc71; border-color: #2ecc71; color: #ffffff; }
 
 .step.active .step-circle {
-  background: #8B0000;
-  border-color: #8B0000;
+  background: #800000;
+  border-color: #800000;
   color: #ffffff;
   box-shadow: 0 0 0 5px rgba(139, 0, 0, 0.15);
 }
@@ -213,7 +213,7 @@
 
 .next-step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .next-step-header i { font-size: 22px; color: #ef6c00; }
-.next-step-header h3 { font-size: 16px; font-weight: 800; color: #8B0000; margin: 0; }
+.next-step-header h3 { font-size: 16px; font-weight: 800; color: #800000; margin: 0; }
 
 .next-step-desc {
   font-size: 14px;
@@ -238,7 +238,7 @@
 }
 
 .announcements-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.announcements-header i { font-size: 20px; color: #8B0000; }
+.announcements-header i { font-size: 20px; color: #800000; }
 .announcements-header h3 { font-size: 16px; font-weight: 800; color: #333; margin: 0; }
 
 .announcement-list { list-style: none; padding: 0; margin: 0; }
@@ -249,7 +249,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #8B0000;
+  background: #800000;
   margin-top: 6px;
   flex-shrink: 0;
 }
@@ -283,13 +283,13 @@
 
 .quick-action:hover {
   background: #ffffff;
-  border-color: #8B0000;
-  color: #8B0000;
+  border-color: #800000;
+  color: #800000;
   transform: translateY(-3px);
   box-shadow: 0 6px 16px rgba(139, 0, 0, 0.1);
 }
 
-.quick-action i { font-size: 26px; color: #8B0000; }
+.quick-action i { font-size: 26px; color: #800000; }
 .quick-action span { font-size: 12px; font-weight: 700; text-align: center; }
 
 /* RESPONSIVE */

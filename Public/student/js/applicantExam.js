@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (timeLeft <= 0) {
         clearInterval(interval);
-        alert("Time's up! Your exam will be submitted.");
+        window.StepGuard?.showMessage("Time's up! Your exam will be submitted.", 'Exam Ended');
         window.location.href = 'examResult.html';
       }
       timeLeft--;
