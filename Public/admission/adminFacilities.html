@@ -57,106 +57,41 @@
     <main class="admin-main-content">
       <h2 class="page-title">FACILITIES | SUMMARY</h2>
 
+      <section class="facility-create-section" aria-labelledby="facilityCreateHeading">
+        <h3 id="facilityCreateHeading">ADD FACILITY</h3>
+        <form id="facilityCreateForm" class="facility-create-form">
+          <label>Facility name<input id="facilityName" name="name" maxlength="80" required></label>
+          <label>Initial PC count<input id="initialPCCount" name="computerCount" type="number" min="0" max="200" value="0" required></label>
+          <button type="submit" class="btn-schedule-action">ADD FACILITY</button>
+        </form>
+        <p id="facilityMessage" class="facility-message" aria-live="polite"></p>
+      </section>
+
       <div class="facilities-grid">
-
-        <!-- ========== TOP LEFT: BAR CHART ========== -->
-        <div class="table-card facilities-chart-card">
-          <div class="facilities-bar-legend">
-            <span class="legend-dot legend-green"></span>
-            <span>Overall Dashboard</span>
-          </div>
-          <div class="facilities-bar-wrapper">
-            <canvas id="overallDashboardChart"></canvas>
-          </div>
-        </div>
-
-        <!-- ========== COMLAB 1 ========== -->
-        <div class="table-card comlab-card">
-          <h3 class="comlab-title">COMLAB 1</h3>
-          <div class="comlab-dots" id="comlab1Dots"></div>
-          <div class="comlab-footer">
-            <div class="comlab-info">
-              <span class="comlab-label">FACILITATOR :</span>
-              <span class="comlab-value" data-comlab="1" data-field="facilitator">Unassigned</span>
-            </div>
-            <div class="comlab-info-row">
-              <div class="comlab-occupation">
-                <span class="comlab-label">OCCUPATION</span>
-                <span class="occupation-dot occupation-low" data-comlab="1" data-field="occupation"></span>
-              </div>
-              <div class="comlab-floor" data-comlab="1" data-field="floor">FLOOR 2</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ========== COMLAB 2 ========== -->
-        <div class="table-card comlab-card">
-          <h3 class="comlab-title">COMLAB 2</h3>
-          <div class="comlab-dots" id="comlab2Dots"></div>
-          <div class="comlab-footer">
-            <div class="comlab-info">
-              <span class="comlab-label">FACILITATOR :</span>
-              <span class="comlab-value" data-comlab="2" data-field="facilitator">Unassigned</span>
-            </div>
-            <div class="comlab-info-row">
-              <div class="comlab-occupation">
-                <span class="comlab-label">OCCUPATION</span>
-                <span class="occupation-dot occupation-full" data-comlab="2" data-field="occupation"></span>
-              </div>
-              <div class="comlab-floor" data-comlab="2" data-field="floor">FLOOR 2</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ========== BOTTOM LEFT: PIE CHART ========== -->
-        <div class="table-card facilities-chart-card">
-          <h3 class="facilities-pie-title">OVERALL PC's STATUS</h3>
-          <div class="facilities-pie-wrapper">
-            <canvas id="overallPCStatusChart"></canvas>
-          </div>
-        </div>
-
-        <!-- ========== COMLAB 3 ========== -->
-        <div class="table-card comlab-card">
-          <h3 class="comlab-title">COMLAB 3</h3>
-          <div class="comlab-dots" id="comlab3Dots"></div>
-          <div class="comlab-footer">
-            <div class="comlab-info">
-              <span class="comlab-label">FACILITATOR :</span>
-              <span class="comlab-value" data-comlab="3" data-field="facilitator">Unassigned</span>
-            </div>
-            <div class="comlab-info-row">
-              <div class="comlab-occupation">
-                <span class="comlab-label">OCCUPATION</span>
-                <span class="occupation-dot occupation-low" data-comlab="3" data-field="occupation"></span>
-              </div>
-              <div class="comlab-floor" data-comlab="3" data-field="floor">FLOOR 2</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ========== COMLAB 4 ========== -->
-        <div class="table-card comlab-card">
-          <h3 class="comlab-title">COMLAB 4</h3>
-          <div class="comlab-dots" id="comlab4Dots"></div>
-          <div class="comlab-footer">
-            <div class="comlab-info">
-              <span class="comlab-label">FACILITATOR :</span>
-              <span class="comlab-value" data-comlab="4" data-field="facilitator">Mario Conception</span>
-            </div>
-            <div class="comlab-info-row">
-              <div class="comlab-occupation">
-                <span class="comlab-label">OCCUPATION</span>
-                <span class="occupation-dot occupation-full" data-comlab="4" data-field="occupation"></span>
-              </div>
-              <div class="comlab-floor" data-comlab="4" data-field="floor">FLOOR 4</div>
-            </div>
-          </div>
-        </div>
-
+        <section class="table-card facilities-chart-card">
+          <h3 class="facilities-pie-title">OVERALL DASHBOARD</h3>
+          <div class="facilities-bar-wrapper"><canvas id="overallDashboardChart"></canvas></div>
+        </section>
+        <section class="table-card facilities-chart-card">
+          <h3 class="facilities-pie-title">OVERALL PC'S STATUS</h3>
+          <div class="facilities-pie-wrapper"><canvas id="overallPCStatusChart"></canvas></div>
+        </section>
       </div>
+      <section id="facilityList" class="facility-list" aria-live="polite"></section>
     </main>
   </div>
+
+  <dialog id="facilityConfirmDialog" class="facility-confirm-dialog">
+    <form method="dialog">
+      <h3 id="facilityConfirmTitle"></h3>
+      <p id="facilityConfirmMessage"></p>
+      <p id="facilityConfirmExtra" class="facility-confirm-extra"></p>
+      <div class="facility-dialog-actions">
+        <button type="submit" value="cancel" class="btn-schedule-action">CANCEL</button>
+        <button type="submit" value="confirm" class="btn-schedule-action facility-danger-btn">YES</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="js/adminCommon.js"></script>
   <script src="js/adminFacilities.js"></script>

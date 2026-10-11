@@ -1,267 +1,312 @@
-/* =========================================
-   ADMIN FACILITIES — Charts + COMLAB Dots
-   (Synchronized with Schedules via localStorage)
-   ========================================= */
-
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Admin Facilities JS Initialized.');
-  console.log('Chart.js loaded?', typeof Chart !== 'undefined');
+  const facilityList = document.getElementById('facilityList');
+  const facilityForm = document.getElementById('facilityCreateForm');
+  const facilityMessage = document.getElementById('facilityMessage');
+  const confirmDialog = document.getElementById('facilityConfirmDialog');
+  const confirmTitle = document.getElementById('facilityConfirmTitle');
+  const confirmMessage = document.getElementById('facilityConfirmMessage');
+  const confirmExtra = document.getElementById('facilityConfirmExtra');
+  const editFacilities = new Set();
+  const selectedPCs = new Map();
+  let facilities = [];
+  let dashboardChart;
+  let computerChart;
 
-  // =========================================
-  // LOAD PC DATA FROM LOCALSTORAGE
-  // =========================================
-  function loadPCData() {
-    const saved = localStorage.getItem('pcStatusData');
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        console.log('✅ Loaded PC data from localStorage');
-        return data;
-      } catch (e) {
-        console.warn('Failed to parse pcStatusData:', e);
-      }
+  async function api(url, options = {}) {
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      ...options,
+      headers: { ...(options.headers || {}), ...(options.body ? { 'Content-Type': 'application/json' } : {}) }
+    });
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      window.location.assign('/admission/adminLoginPage.html');
+      throw new Error('Admission administrator authentication required.');
     }
-    console.log('⚠️ No saved PC data. Using defaults.');
-    return {
-      COMLAB1: Array(25).fill('working'),
-      COMLAB2: Array(25).fill('working'),
-      COMLAB3: Array(25).fill('working'),
-      COMLAB4: Array(25).fill('working')
-    };
+    if (!response.ok) throw new Error(body.error || 'Request failed.');
+    return body;
   }
 
-  let pcData = loadPCData();
+  function showMessage(message, isError = false) {
+    facilityMessage.textContent = message;
+    facilityMessage.classList.toggle('is-error', isError);
+  }
 
-  // =========================================
-  // COMLAB META
-  // =========================================
-  const comlabMeta = {
-    COMLAB1: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'low' },
-    COMLAB2: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'full' },
-    COMLAB3: { facilitator: 'Unassigned', floor: 'FLOOR 2', occupation: 'low' },
-    COMLAB4: { facilitator: 'Unassigned', floor: 'FLOOR 4', occupation: 'full' }
-  };
+  function confirmAction(title, message, action, extra = '') {
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    confirmExtra.textContent = extra;
+    confirmExtra.hidden = !extra;
+    confirmDialog.showModal();
+    const onClose = async () => {
+      confirmDialog.removeEventListener('close', onClose);
+      if (confirmDialog.returnValue !== 'confirm') return;
+      try {
+        await action();
+      } catch (error) {
+        showMessage(error.message, true);
+      }
+    };
+    confirmDialog.addEventListener('close', onClose);
+  }
 
-  // =========================================
-  // RENDER COMLAB DOTS
-  // =========================================
-  function renderComlabDots(containerId, states) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+  async function loadFacilities() {
+    showMessage('Loading facilities...');
+    try {
+      const month = new Date();
+      const result = await api(`/api/admin/schedules/config?year=${month.getFullYear()}&month=${month.getMonth() + 1}`);
+      facilities = result.facilities || [];
+      renderFacilities();
+      updateCharts();
+      showMessage('');
+    } catch (error) {
+      showMessage(error.message, true);
+    }
+  }
 
-    container.innerHTML = '';
+  function nextComputerNumber(computers) {
+    return computers.reduce((highest, computer) => Math.max(highest, computer.computerNumber || 0), 0) + 1;
+  }
 
-    if (!states || states.length === 0) {
-      container.innerHTML = '<p class="no-pc-data">No PC data.</p>';
+  function renderFacilities() {
+    facilityList.replaceChildren();
+    if (!facilities.length) {
+      const empty = document.createElement('p');
+      empty.className = 'facility-empty-state';
+      empty.textContent = 'No facilities configured.';
+      facilityList.appendChild(empty);
       return;
     }
 
-    states.forEach((state, index) => {
-      const dot = document.createElement('span');
-      dot.className = `comlab-dot dot-${state}`;
-      dot.title = `PC ${index + 1} — ${getStatusLabel(state)}`;
-      container.appendChild(dot);
-    });
+    facilities.forEach((facility) => {
+      const computers = [...(facility.computers || [])].sort((left, right) => left.computerNumber - right.computerNumber);
+      const editing = editFacilities.has(facility.facilityId);
+      const card = document.createElement('article');
+      card.className = 'table-card facility-card';
 
-    console.log(`✅ Rendered ${states.length} dots for #${containerId}`);
-  }
+      const header = document.createElement('div');
+      header.className = 'facility-card-header';
+      const titleBlock = document.createElement('div');
+      const title = document.createElement('h3');
+      title.className = 'comlab-title';
+      title.textContent = facility.name || facility.facilityId;
+      const id = document.createElement('p');
+      id.className = 'facility-id';
+      id.textContent = facility.facilityId;
+      titleBlock.append(title, id);
 
-  function getStatusLabel(state) {
-    if (state === 'working') return 'Working Properly';
-    if (state === 'unavailable') return 'Unavailable';
-    if (state === 'maintenance') return 'Maintenance';
-    return state;
-  }
-
-  function updateComlabMeta() {
-    Object.keys(comlabMeta).forEach((labKey) => {
-      const num = labKey.replace('COMLAB', '');
-      const meta = comlabMeta[labKey];
-      const facilitatorEl = document.querySelector(`[data-comlab="${num}"][data-field="facilitator"]`);
-      const floorEl = document.querySelector(`[data-comlab="${num}"][data-field="floor"]`);
-      const occupationEl = document.querySelector(`[data-comlab="${num}"][data-field="occupation"]`);
-      if (facilitatorEl) facilitatorEl.textContent = meta.facilitator;
-      if (floorEl) floorEl.textContent = meta.floor;
-      if (occupationEl) occupationEl.className = `occupation-dot occupation-${meta.occupation}`;
-    });
-  }
-
-  // ✅ RENDER DOTS AGAD
-  renderComlabDots('comlab1Dots', pcData.COMLAB1);
-  renderComlabDots('comlab2Dots', pcData.COMLAB2);
-  renderComlabDots('comlab3Dots', pcData.COMLAB3);
-  renderComlabDots('comlab4Dots', pcData.COMLAB4);
-  updateComlabMeta();
-
-  // =========================================
-  // COMPUTE STATS
-  // =========================================
-  function computeStats(states) {
-    if (!states || states.length === 0) return { working: 0, unavailable: 0, maintenance: 0, total: 0 };
-    return {
-      working: states.filter((s) => s === 'working').length,
-      unavailable: states.filter((s) => s === 'unavailable').length,
-      maintenance: states.filter((s) => s === 'maintenance').length,
-      total: states.length
-    };
-  }
-
-  const stats1 = computeStats(pcData.COMLAB1);
-  const stats2 = computeStats(pcData.COMLAB2);
-  const stats3 = computeStats(pcData.COMLAB3);
-  const stats4 = computeStats(pcData.COMLAB4);
-
-  // =========================================
-  // CHART.JS CHARTS
-  // =========================================
-  if (typeof Chart === 'undefined') {
-    console.error('❌ Chart.js NOT loaded.');
-    showChartPlaceholder('overallDashboardChart', 'Bar Chart not available');
-    showChartPlaceholder('overallPCStatusChart', 'Pie Chart not available');
-    return;
-  }
-
-  console.log('✅ Chart.js detected. Initializing charts...');
-
-  const totalFacilities = 4;
-  const totalWorking = stats1.working + stats2.working + stats3.working + stats4.working;
-
-  // CHART 1: Bar Chart
-  const barChartEl = document.getElementById('overallDashboardChart');
-  if (barChartEl) {
-    try {
-      new Chart(barChartEl, {
-        type: 'bar',
-        data: {
-          labels: ['Total Facility', 'Working PCs'],
-          datasets: [{
-            data: [totalFacilities, totalWorking],
-            backgroundColor: ['#2ecc71', '#2ecc71'],
-            borderColor: ['#27ae60', '#27ae60'],
-            borderWidth: 1,
-            borderRadius: 4,
-            barThickness: 35
-          }]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: 10 },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(0,0,0,0.85)',
-              padding: 10,
-              callbacks: { label: (ctx) => `Count: ${ctx.parsed.x}` }
-            }
-          },
-          scales: {
-            x: {
-              beginAtZero: true,
-              max: Math.max(40, totalWorking + 10),
-              ticks: { stepSize: 10, font: { size: 10 }, color: '#333' },
-              grid: { color: '#f0f0f0' }
-            },
-            y: {
-              ticks: { font: { size: 11, weight: 'bold' }, color: '#333' },
-              grid: { display: false }
-            }
-          }
+      const statusButton = document.createElement('button');
+      statusButton.type = 'button';
+      statusButton.className = `facility-status ${facility.status === 'active' ? 'is-available' : 'is-unavailable'}`;
+      statusButton.textContent = facility.status === 'active' ? 'Available' : 'Unavailable';
+      statusButton.setAttribute('aria-label', `${facility.facilityId}: ${statusButton.textContent}. Change status`);
+      statusButton.addEventListener('click', async () => {
+        statusButton.disabled = true;
+        try {
+          const status = facility.status === 'active' ? 'inactive' : 'active';
+          await api(`/api/admin/facilities/${encodeURIComponent(facility.facilityId)}/status`, {
+            method: 'PUT', body: JSON.stringify({ status })
+          });
+          facility.status = status;
+          renderFacilities();
+          updateCharts();
+        } catch (error) {
+          showMessage(error.message, true);
+          statusButton.disabled = false;
         }
       });
-      console.log('✅ Bar chart rendered');
-    } catch (err) {
-      console.error('❌ Bar chart error:', err);
-    }
-  }
+      header.append(titleBlock, statusButton);
 
-  // CHART 2: Pie Chart
-  const pieData = [stats1.working, stats2.working, stats3.working, stats4.working];
-  const pieLabels = [
-    `COMLAB 1\n${stats1.working}`,
-    `COMLAB 2\n${stats2.working}`,
-    `COMLAB 3\n${stats3.working}`,
-    `COMLAB 4\n${stats4.working}`
-  ];
-
-  const pieChartEl = document.getElementById('overallPCStatusChart');
-  if (pieChartEl) {
-    try {
-      new Chart(pieChartEl, {
-        type: 'pie',
-        data: {
-          labels: ['COMLAB 1', 'COMLAB 2', 'COMLAB 3', 'COMLAB 4'],
-          datasets: [{
-            data: pieData,
-            backgroundColor: ['#f4d03f', '#2ecc71', '#f39c12', '#e63946'],
-            borderColor: '#ffffff',
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: 10 },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(0,0,0,0.85)',
-              padding: 12,
-              callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed} working` }
-            }
-          }
-        },
-        plugins: [{
-          id: 'pieLabels',
-          afterDatasetsDraw: (chart) => {
-            const { ctx } = chart;
-            const meta = chart.getDatasetMeta(0);
-            meta.data.forEach((segment, index) => {
-              const { x, y } = segment.tooltipPosition();
-              ctx.save();
-              ctx.font = 'bold 11px Arial';
-              ctx.fillStyle = '#fff';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              const lines = pieLabels[index].split('\n');
-              lines.forEach((line, i) => {
-                ctx.fillText(line, x, y + (i - 0.5) * 14);
-              });
-              ctx.restore();
-            });
-          }
-        }]
+      const actions = document.createElement('div');
+      actions.className = 'facility-card-actions';
+      const editButton = document.createElement('button');
+      editButton.type = 'button';
+      editButton.className = 'btn-schedule-action';
+      editButton.textContent = editing ? 'DONE EDITING' : 'EDIT';
+      editButton.addEventListener('click', () => {
+        if (editing) editFacilities.delete(facility.facilityId);
+        else editFacilities.add(facility.facilityId);
+        renderFacilities();
       });
-      console.log('✅ Pie chart rendered');
-    } catch (err) {
-      console.error('❌ Pie chart error:', err);
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'btn-schedule-action facility-danger-btn';
+      deleteButton.textContent = 'REMOVE FACILITY';
+      deleteButton.addEventListener('click', () => confirmAction(
+        `ARE YOU SURE DELETING ${facility.facilityId}`,
+        'Note: This will forcely remove the lists of PC inside of the facility too, other Admin users will see this configuration.',
+        async () => {
+          await api(`/api/admin/facilities/${encodeURIComponent(facility.facilityId)}`, { method: 'DELETE' });
+          await loadFacilities();
+        },
+        'Unbooked exam slots for this facility will also be removed. Facilities with booked slots cannot be deleted.'
+      ));
+      actions.append(editButton, deleteButton);
+
+      const dots = document.createElement('div');
+      dots.className = 'comlab-dots facility-computer-dots';
+      if (!computers.length) {
+        const empty = document.createElement('p');
+        empty.className = 'no-pc-data';
+        empty.textContent = 'No PCs configured.';
+        dots.appendChild(empty);
+      }
+      const selected = selectedPCs.get(facility.facilityId) || new Set();
+      computers.forEach((computer) => {
+        const item = document.createElement('div');
+        item.className = 'facility-pc-item';
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = `comlab-dot dot-${computer.status}`;
+        dot.textContent = computer.computerName || String(computer.computerNumber);
+        dot.title = `${dot.textContent}: ${computer.status}`;
+        dot.disabled = !editing;
+        dot.setAttribute('aria-label', `${dot.title}${editing ? ', cycle status' : ''}`);
+        dot.addEventListener('click', () => {
+          const states = ['working', 'maintenance', 'unavailable'];
+          computer.status = states[(states.indexOf(computer.status) + 1) % states.length];
+          renderFacilities();
+          updateCharts();
+        });
+        item.appendChild(dot);
+        if (editing) {
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = selected.has(computer.computerNumber);
+          checkbox.setAttribute('aria-label', `Select ${dot.textContent} for removal`);
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) selected.add(computer.computerNumber);
+            else selected.delete(computer.computerNumber);
+            selectedPCs.set(facility.facilityId, selected);
+            renderFacilities();
+          });
+          item.appendChild(checkbox);
+        }
+        dots.appendChild(item);
+      });
+
+      card.append(header, actions, dots);
+      if (editing) {
+        const editor = document.createElement('div');
+        editor.className = 'facility-edit-controls';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.maxLength = 5;
+        nameInput.placeholder = 'Auto # or name';
+        nameInput.setAttribute('aria-label', 'Optional PC name, maximum 5 characters');
+        const addButton = document.createElement('button');
+        addButton.type = 'button';
+        addButton.className = 'btn-schedule-action';
+        addButton.textContent = 'ADD PC';
+        addButton.addEventListener('click', () => {
+          const computerName = nameInput.value.trim();
+          if (computerName.length > 5) {
+            showMessage('PC names can contain up to 5 characters.', true);
+            return;
+          }
+          computers.push({ computerNumber: nextComputerNumber(computers), computerName: computerName || null, status: 'working' });
+          facility.computers = computers;
+          renderFacilities();
+          updateCharts();
+        });
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'btn-schedule-action facility-danger-btn';
+        removeButton.textContent = 'REMOVE SELECTED PCs';
+        removeButton.disabled = selected.size === 0;
+        removeButton.addEventListener('click', () => {
+          const names = computers.filter((computer) => selected.has(computer.computerNumber))
+            .map((computer) => computer.computerName || String(computer.computerNumber)).join(', ');
+          confirmAction(
+            `ARE YOU SURE DELETING ${names}?`,
+            'Note: other Admin users will see this configuration.',
+            async () => {
+              facility.computers = computers.filter((computer) => !selected.has(computer.computerNumber));
+              selectedPCs.delete(facility.facilityId);
+              renderFacilities();
+              updateCharts();
+            }
+          );
+        });
+        const saveButton = document.createElement('button');
+        saveButton.type = 'button';
+        saveButton.className = 'btn-schedule-action facility-save-btn';
+        saveButton.textContent = 'SAVE';
+        saveButton.addEventListener('click', async () => {
+          saveButton.disabled = true;
+          try {
+            const result = await api(`/api/admin/schedules/computers/${encodeURIComponent(facility.facilityId)}`, {
+              method: 'PUT',
+              body: JSON.stringify({ computers: facility.computers || computers })
+            });
+            showMessage(`${result.computerCount} PCs saved for ${facility.name || facility.facilityId}.`);
+            selectedPCs.delete(facility.facilityId);
+            editFacilities.delete(facility.facilityId);
+            await loadFacilities();
+          } catch (error) {
+            showMessage(error.message, true);
+            saveButton.disabled = false;
+          }
+        });
+        editor.append(nameInput, addButton, removeButton, saveButton);
+        card.appendChild(editor);
+      }
+      facilityList.appendChild(card);
+    });
+  }
+
+  function updateCharts() {
+    const facilityCounts = [
+      facilities.filter((facility) => facility.status === 'active').length,
+      facilities.filter((facility) => facility.status !== 'active').length
+    ];
+    const computers = facilities.flatMap((facility) => facility.computers || []);
+    const computerCounts = ['working', 'maintenance', 'unavailable'].map((status) =>
+      computers.filter((computer) => computer.status === status).length);
+    if (typeof Chart === 'undefined') return;
+
+    if (!dashboardChart) {
+      dashboardChart = new Chart(document.getElementById('overallDashboardChart'), {
+        type: 'bar',
+        data: { labels: ['Available', 'Unavailable'], datasets: [{ data: facilityCounts, backgroundColor: ['#2ecc71', '#8a8a8a'], borderRadius: 3 }] },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } }
+      });
+      computerChart = new Chart(document.getElementById('overallPCStatusChart'), {
+        type: 'doughnut',
+        data: { labels: ['Working', 'Maintenance', 'Unavailable'], datasets: [{ data: computerCounts, backgroundColor: ['#2ecc71', '#580000', '#8a8a8a'], borderColor: '#fff', borderWidth: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' } } }
+      });
+      return;
     }
+    dashboardChart.data.datasets[0].data = facilityCounts;
+    computerChart.data.datasets[0].data = computerCounts;
+    dashboardChart.update();
+    computerChart.update();
   }
 
-  function showChartPlaceholder(canvasId, message) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const wrapper = canvas.parentElement;
-    if (!wrapper) return;
-    wrapper.innerHTML = `
-      <div class="chart-fallback">
-        <i class="bi bi-exclamation-triangle-fill"></i>
-        <p>${message}</p>
-        <small>Chart.js not loaded.</small>
-      </div>
-    `;
-  }
-
-  // =========================================
-  // REAL-TIME SYNC
-  // =========================================
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'pcStatusData') {
-      console.log('🔄 PC status updated. Reloading...');
-      location.reload();
+  facilityForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const submitButton = facilityForm.querySelector('[type="submit"]');
+    submitButton.disabled = true;
+    try {
+      await api('/api/admin/facilities', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: document.getElementById('facilityName').value.trim(),
+          computerCount: Number(document.getElementById('initialPCCount').value)
+        })
+      });
+      facilityForm.reset();
+      document.getElementById('initialPCCount').value = '0';
+      showMessage('Facility created.');
+      await loadFacilities();
+    } catch (error) {
+      showMessage(error.message, true);
+    } finally {
+      submitButton.disabled = false;
     }
   });
 
-  console.log('✅ Facilities page initialized.');
+  loadFacilities();
 });

@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const pcGrid = document.getElementById('pcStatusGrid');
   const batchRows = document.getElementById('batchRows');
   const addBatchButton = document.getElementById('addBatchBtn');
-  const pcSaveButton = document.getElementById('savePCStatus');
   const scheduleSaveButton = document.getElementById('saveScheduleChanges');
   const managerView = document.getElementById('scheduleManagerView');
   const editView = document.getElementById('editScheduleView');
@@ -188,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ? oldValue
       : facilities[0]?.facilityId || '';
     facilitySelect.value = selectedFacilityId;
-    pcSaveButton.disabled = !selectedFacilityId;
     loadComputerStatuses();
   }
 
@@ -196,28 +194,18 @@ document.addEventListener('DOMContentLoaded', () => {
     pcStatuses = configuration.computers
       .filter((computer) => computer.facilityId === selectedFacilityId)
       .sort((left, right) => left.computerNumber - right.computerNumber)
-      .map((computer) => ({ computerNumber: computer.computerNumber, status: computer.status }));
+      .map((computer) => ({ computerNumber: computer.computerNumber, computerName: computer.computerName || null, status: computer.status }));
     renderPCGrid();
   }
 
   function renderPCGrid() {
     pcGrid.replaceChildren();
     pcStatuses.forEach((computer) => {
-      const cell = document.createElement('button');
-      cell.type = 'button';
+      const cell = document.createElement('span');
       cell.className = `pc-box pc-${computer.status}`;
-      cell.textContent = String(computer.computerNumber);
-      cell.title = `PC ${computer.computerNumber}: ${computer.status}`;
+      cell.textContent = computer.computerName || String(computer.computerNumber);
+      cell.title = `${cell.textContent}: ${computer.status}`;
       cell.setAttribute('aria-label', cell.title);
-      cell.addEventListener('click', () => {
-        const index = stateOrder.indexOf(computer.status);
-        computer.status = stateOrder[(index + 1) % stateOrder.length];
-        cell.className = `pc-box pc-${computer.status}`;
-        cell.title = `PC ${computer.computerNumber}: ${computer.status}`;
-        cell.setAttribute('aria-label', cell.title);
-        updateComputerCounts();
-        updateSummaryCharts();
-      });
       pcGrid.appendChild(cell);
     });
     updateSummaryCharts();
@@ -373,24 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
   facilitySelect.addEventListener('change', () => {
     selectedFacilityId = facilitySelect.value;
     loadComputerStatuses();
-  });
-  pcSaveButton.addEventListener('click', async () => {
-    if (!selectedFacilityId) return;
-    pcSaveButton.disabled = true;
-    try {
-      const result = await api(`/api/admin/schedules/computers/${encodeURIComponent(selectedFacilityId)}`, {
-        method: 'PUT',
-        body: JSON.stringify({ computers: pcStatuses })
-      });
-      configuration.computers = configuration.computers.filter((computer) => computer.facilityId !== selectedFacilityId)
-        .concat(pcStatuses.map((computer) => ({ ...computer, facilityId: selectedFacilityId })));
-      renderSelectedDate();
-      showToast(`${result.computerCount} computer statuses saved.`);
-    } catch (error) {
-      showToast(error.message, 'error');
-    } finally {
-      pcSaveButton.disabled = !selectedFacilityId;
-    }
   });
   addBatchButton.addEventListener('click', () => {
     if (batches.length >= 3) return;

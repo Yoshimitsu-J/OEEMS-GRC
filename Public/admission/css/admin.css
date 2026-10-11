@@ -1186,7 +1186,7 @@ a.btn-logout-nav:hover {
   font-size: 12px;
   font-weight: 700;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: default;
   transition: all 0.2s ease;
   color: #fff;
   min-height: 0;
@@ -1198,8 +1198,8 @@ a.btn-logout-nav:hover {
 .pc-box.pc-maintenance { background: #580000; }
 
 .pc-box:hover {
-  transform: scale(1.1);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  transform: none;
+  box-shadow: none;
 }
 
 .pc-note {
@@ -2853,8 +2853,7 @@ a.btn-logout-nav:hover {
 
 .facilities-grid {
   display: grid;
-  grid-template-columns: 320px 1fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
   align-items: stretch;
 }
@@ -2963,8 +2962,187 @@ a.btn-logout-nav:hover {
 }
 
 .comlab-dot.dot-working { background: #2ecc71; }
-.comlab-dot.dot-unavailable { background: #e63946; }
-.comlab-dot.dot-maintenance { background: #f4d03f; }
+.comlab-dot.dot-unavailable { background: #8a8a8a; }
+.comlab-dot.dot-maintenance { background: #580000; }
+
+.facility-create-section {
+  margin: 0 0 16px;
+  padding: 16px;
+  background: #fff;
+  border-left: 4px solid #8b0000;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.facility-create-section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+.facility-create-form,
+.facility-edit-controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.facility-create-form label {
+  display: grid;
+  gap: 5px;
+  flex: 1 1 220px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.facility-create-form input,
+.facility-edit-controls input[type="text"] {
+  min-width: 0;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  font: inherit;
+}
+
+.facility-create-form .btn-schedule-action {
+  width: auto;
+  min-width: 140px;
+  margin: 0;
+}
+
+.facility-message {
+  min-height: 18px;
+  margin: 8px 0 0;
+  color: #246b3c;
+  font-size: 12px;
+}
+
+.facility-message.is-error { color: #a00000; }
+
+.facility-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.facility-card {
+  min-width: 0;
+  padding: 16px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.facility-card-header,
+.facility-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.facility-card-header .comlab-title {
+  margin: 0;
+  text-align: left;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.facility-id {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.facility-status {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.facility-status.is-available { background: #287d45; }
+.facility-status.is-unavailable { background: #707070; }
+
+.facility-card-actions { margin-top: 12px; }
+
+.facility-card-actions .btn-schedule-action,
+.facility-edit-controls .btn-schedule-action {
+  width: auto;
+  min-height: 38px;
+  margin: 0;
+  padding: 9px 12px;
+}
+
+.facility-danger-btn { background: #555 !important; }
+.facility-danger-btn:hover { background: #333 !important; }
+
+.facility-computer-dots {
+  grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  justify-items: center;
+  align-content: start;
+  gap: 10px;
+  min-height: 58px;
+  margin: 8px 0;
+  padding: 12px 0;
+}
+
+.facility-pc-item {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.facility-pc-item .comlab-dot {
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  overflow: hidden;
+  border: 0;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: default;
+  overflow-wrap: anywhere;
+}
+
+.facility-pc-item .comlab-dot:disabled { opacity: 1; }
+.facility-pc-item .comlab-dot:not(:disabled) { cursor: pointer; }
+
+.facility-pc-item input { width: 14px; height: 14px; margin: 0; }
+
+.facility-edit-controls {
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.facility-edit-controls input[type="text"] { flex: 1 1 110px; }
+.facility-edit-controls .facility-save-btn { background: #287d45; }
+.facility-empty-state { grid-column: 1 / -1; padding: 18px; color: #666; }
+
+.facility-confirm-dialog {
+  width: min(92vw, 460px);
+  padding: 22px;
+  border: 0;
+  border-top: 5px solid #8b0000;
+  border-radius: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+}
+
+.facility-confirm-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+.facility-confirm-dialog h3 { margin: 0 0 10px; font-size: 18px; overflow-wrap: anywhere; }
+.facility-confirm-dialog p { line-height: 1.5; }
+.facility-confirm-extra { color: #666; font-size: 12px; }
+.facility-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.facility-dialog-actions .btn-schedule-action { width: auto; min-width: 100px; }
+.btn-schedule-action[href] { display: block; text-align: center; text-decoration: none; }
 
 .comlab-footer {
   margin-top: auto;
@@ -3631,6 +3809,15 @@ a.btn-logout-nav:hover {
   .facilities-grid {
     grid-template-columns: 1fr;
   }
+  .facility-list {
+    grid-template-columns: 1fr;
+  }
+  .facility-create-form {
+    align-items: stretch;
+  }
+  .facility-create-form .btn-schedule-action {
+    width: 100%;
+  }
   .facilities-chart-card:first-child,
   .facilities-chart-card:nth-child(4) {
     grid-column: auto;
@@ -3665,6 +3852,18 @@ a.btn-logout-nav:hover {
    ========================================= */
 
 @media (max-width: 600px) {
+  .facility-card-header,
+  .facility-card-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .facility-card-actions .btn-schedule-action,
+  .facility-edit-controls .btn-schedule-action {
+    width: 100%;
+  }
+  .facility-dialog-actions .btn-schedule-action {
+    width: 50%;
+  }
   .q-text-row {
     flex-wrap: wrap;
   }

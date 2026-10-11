@@ -88,7 +88,7 @@ router.get('/schedules/config', requireAdmin, async (request, response) => {
 		const byFacility = new Map();
 		computers.forEach((computer) => {
 			if (!byFacility.has(computer.facilityId)) byFacility.set(computer.facilityId, []);
-			byFacility.get(computer.facilityId).push({ computerNumber: computer.computerNumber, status: computer.status });
+			byFacility.get(computer.facilityId).push({ computerNumber: computer.computerNumber, computerName: computer.computerName || null, status: computer.status });
 		});
 		response.set('Cache-Control', 'no-store');
 		response.json({
@@ -124,23 +124,145 @@ router.get('/schedules/config', requireAdmin, async (request, response) => {
 	}
 });
 
+router.post('/facilities', requireSameOrigin, requireAdmin, async (request, response) => {
+	const name = typeof request.body?.name === 'string' ? request.body.name.trim() : '';
+	const computerCount = Number(request.body?.computerCount);
+	if (!name || name.length > 80 || !Number.isInteger(computerCount) || computerCount < 0 || computerCount > 200) {
+		return response.status(400).json({ error: 'Enter a facility name and a PC count from 0 to 200.' });
+	}
+
+	const db = getDatabaseConnection('OEEMS_Admission').db;
+	const baseId = name.toUpperCase().replace(/[^A-Z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 64) || 'FACILITY';
+	let facilityId = baseId;
+	for (let suffix = 2; await db.collection('facilities').findOne({ facilityId }); suffix += 1) {
+		facilityId = `${baseId.slice(0, 58)}-${suffix}`;
+	}
+	const now = new Date();
+	const facility = { facilityId, name, status: 'active', capacity: computerCount, createdAt: now, updatedAt: now };
+	const session = mongoose.connection.getClient().startSession();
+	try {
+		await session.withTransaction(async () => {
+			await db.collection('facilities').insertOne(facility, { session });
+			if (computerCount) {
+				await db.collection('facility_computers').insertMany(Array.from({ length: computerCount }, (_, index) => ({
+					facilityId,
+					computerNumber: index + 1,
+					status: 'working',
+					lastUpdatedByAdminId: response.locals.authAdmin.adminId,
+					lastUpdatedAt: now
+				})), { session });
+			}
+			await db.collection('admin_audit_logs').insertOne({
+				adminId: response.locals.authAdmin.adminId,
+				action: 'facility_created',
+				resourceType: 'facility',
+				resourceId: facilityId,
+				details: { name, computerCount },
+				ipAddress: request.ip || null,
+				userAgent: request.get('user-agent') || null,
+				createdAt: now
+			}, { session });
+		});
+		response.status(201).json({ ok: true, facility: { ...facility, computers: Array.from({ length: computerCount }, (_, index) => ({ computerNumber: index + 1, computerName: null, status: 'working' })) } });
+		request.app.get('io')?.emit('admission:facilities-updated', { facilityId });
+	} catch (error) {
+		console.error('Facility creation failed:', error.message);
+		response.status(500).json({ error: 'Could not create the facility.' });
+	} finally {
+		await session.endSession();
+	}
+});
+
+router.put('/facilities/:facilityId/status', requireSameOrigin, requireAdmin, async (request, response) => {
+	const facilityId = request.params.facilityId.trim();
+	const status = request.body?.status;
+	if (!facilityId || !['active', 'inactive'].includes(status)) {
+		return response.status(400).json({ error: 'Choose Available or Unavailable.' });
+	}
+	try {
+		const db = getDatabaseConnection('OEEMS_Admission').db;
+		const result = await db.collection('facilities').updateOne({ facilityId }, { $set: { status, updatedAt: new Date() } });
+		if (!result.matchedCount) return response.status(404).json({ error: 'Facility not found.' });
+		await db.collection('admin_audit_logs').insertOne({
+			adminId: response.locals.authAdmin.adminId,
+			action: 'facility_status_changed',
+			resourceType: 'facility',
+			resourceId: facilityId,
+			details: { status },
+			ipAddress: request.ip || null,
+			userAgent: request.get('user-agent') || null,
+			createdAt: new Date()
+		});
+		response.json({ ok: true, facilityId, status });
+		request.app.get('io')?.emit('admission:facilities-updated', { facilityId });
+	} catch (error) {
+		console.error('Facility status update failed:', error.message);
+		response.status(500).json({ error: 'Could not update facility status.' });
+	}
+});
+
+router.delete('/facilities/:facilityId', requireSameOrigin, requireAdmin, async (request, response) => {
+	const facilityId = request.params.facilityId.trim();
+	if (!facilityId) return response.status(400).json({ error: 'Facility ID is required.' });
+	const db = getDatabaseConnection('OEEMS_Admission').db;
+	const session = mongoose.connection.getClient().startSession();
+	try {
+		await session.withTransaction(async () => {
+			const facility = await db.collection('facilities').findOne({ facilityId }, { session });
+			if (!facility) {
+				const error = new Error('Facility not found.');
+				error.status = 404;
+				throw error;
+			}
+			const bookedSlot = await db.collection('schedule_slots').findOne({ facilityId, bookedCount: { $gt: 0 } }, { session, projection: { _id: 1 } });
+			if (bookedSlot) {
+				const error = new Error('This facility has booked exam slots and cannot be deleted yet.');
+				error.status = 409;
+				throw error;
+			}
+			await db.collection('facility_computers').deleteMany({ facilityId }, { session });
+			await db.collection('schedule_slots').deleteMany({ facilityId }, { session });
+			await db.collection('facilities').deleteOne({ facilityId }, { session });
+			await db.collection('admin_audit_logs').insertOne({
+				adminId: response.locals.authAdmin.adminId,
+				action: 'facility_deleted',
+				resourceType: 'facility',
+				resourceId: facilityId,
+				details: {},
+				ipAddress: request.ip || null,
+				userAgent: request.get('user-agent') || null,
+				createdAt: new Date()
+			}, { session });
+		});
+		response.json({ ok: true, facilityId });
+		request.app.get('io')?.emit('admission:facilities-updated', { facilityId });
+	} catch (error) {
+		if (error.status) return response.status(error.status).json({ error: error.message });
+		console.error('Facility deletion failed:', error.message);
+		response.status(500).json({ error: 'Could not delete facility.' });
+	} finally {
+		await session.endSession();
+	}
+});
+
 router.put('/schedules/computers/:facilityId', requireSameOrigin, requireAdmin, async (request, response) => {
 	const facilityId = typeof request.params.facilityId === 'string' ? request.params.facilityId.trim() : '';
 	const computers = request.body?.computers;
 	const allowedStatuses = new Set(['working', 'unavailable', 'maintenance']);
 	if (!facilityId || !Array.isArray(computers) || computers.some((computer) =>
-		!Number.isInteger(computer.computerNumber) || computer.computerNumber < 1 || !allowedStatuses.has(computer.status)
+		!Number.isInteger(computer.computerNumber) || computer.computerNumber < 1 || !allowedStatuses.has(computer.status) ||
+		(computer.computerName != null && (typeof computer.computerName !== 'string' || computer.computerName.trim().length > 5))
 	) || new Set(computers.map((computer) => computer.computerNumber)).size !== computers.length) {
-		return response.status(400).json({ error: 'Provide each computer number once with a valid PC status.' });
+		return response.status(400).json({ error: 'Provide each PC once with a valid name (up to 5 characters) and status.' });
 	}
 
 	const db = getDatabaseConnection('OEEMS_Admission').db;
 	const session = mongoose.connection.getClient().startSession();
 	try {
 		await session.withTransaction(async () => {
-			const facility = await db.collection('facilities').findOne({ facilityId, status: 'active' }, { session });
+			const facility = await db.collection('facilities').findOne({ facilityId }, { session });
 			if (!facility) {
-				const error = new Error('Facility not found or inactive.');
+				const error = new Error('Facility not found.');
 				error.status = 404;
 				throw error;
 			}
@@ -149,11 +271,13 @@ router.put('/schedules/computers/:facilityId', requireSameOrigin, requireAdmin, 
 				await db.collection('facility_computers').insertMany(computers.map((computer) => ({
 					facilityId,
 					computerNumber: computer.computerNumber,
+					...(computer.computerName?.trim() ? { computerName: computer.computerName.trim() } : {}),
 					status: computer.status,
 					lastUpdatedByAdminId: response.locals.authAdmin.adminId,
 					lastUpdatedAt: new Date()
 				})), { session });
 			}
+			await db.collection('facilities').updateOne({ facilityId }, { $set: { capacity: computers.length, updatedAt: new Date() } }, { session });
 			await db.collection('admin_audit_logs').insertOne({
 				adminId: response.locals.authAdmin.adminId,
 				action: 'facility_computers_overwritten',
