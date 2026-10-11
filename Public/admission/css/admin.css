@@ -914,6 +914,8 @@ a.btn-logout-nav:hover {
 }
 
 .admin-cal-day {
+  border: 0;
+  font: inherit;
   aspect-ratio: 1;
   display: flex;
   align-items: center;
@@ -937,17 +939,76 @@ a.btn-logout-nav:hover {
 }
 
 .admin-cal-day.state-available {
-  background: #8B0000;
+  background: #2e9d55;
 }
 
 .admin-cal-day.state-selected {
-  background: #ff4444;
-  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.3);
-  transform: scale(1.05);
+  outline: 3px solid #ffffff;
+  outline-offset: -4px;
+  box-shadow: 0 0 0 2px #222222;
 }
 
 .admin-cal-day.state-taken {
   background: #580000;
+}
+
+.admin-cal-day.state-normal {
+  background: #800000;
+}
+
+.admin-cal-day.state-sunday {
+  background: #111111;
+}
+
+.admin-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 8px 0;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #555;
+}
+
+.admin-calendar-weekdays span {
+  min-width: 0;
+}
+
+.schedule-calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 12px;
+  margin: 4px 0 10px;
+  font-size: 10px;
+  color: #444;
+}
+
+.schedule-calendar-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-calendar-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.calendar-unavailable { background: #555555; }
+.calendar-available { background: #2e9d55; }
+.calendar-normal { background: #800000; }
+.calendar-sunday { background: #111111; }
+
+.batch-remove-btn {
+  border: 0;
+  background: transparent;
+  color: #800000;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .admin-cal-day:hover:not(.empty) {
@@ -1303,7 +1364,7 @@ a.btn-logout-nav:hover {
 
 .batch-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: minmax(74px, 1fr) minmax(70px, 1fr) minmax(70px, 1fr) auto;
   gap: 8px;
   padding: 14px 10px;
   align-items: center;

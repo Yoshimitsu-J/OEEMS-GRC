@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function batchLabel(batch) {
-    return batch.replace(/^batch_/, 'Batch ');
+    return typeof batch === 'string' ? batch.replace(/^batch_/, 'Batch ') : 'Not yet configured';
   }
 
   function resetSummary() {
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const [year, month, day] = date.split('-').map(Number);
     summary.month.textContent = monthNames[month - 1];
     summary.day.textContent = day;
-    summary.year.textContent = year;
+    summary.year.textContent = slotsForDate(date)[0]?.cycle || `${year}-${year + 1}`;
     populateSlotOptions();
     renderCalendar();
   }
@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     summary.batch.textContent = selectedSchedule ? batchLabel(selectedSchedule.batch) : '—';
     summary.time.textContent = selectedSchedule ? `${selectedSchedule.startTime} - ${selectedSchedule.endTime}` : '—';
     summary.facility.textContent = selectedSchedule?.facilityId || '—';
+    if (selectedSchedule) summary.year.textContent = selectedSchedule.cycle || 'Not yet configured';
     updateSaveButton();
   });
   saveButton.addEventListener('click', async () => {
@@ -182,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const [year, month, day] = dateKey(status.schedule.examDate).split('-').map(Number);
         summary.month.textContent = monthNames[month - 1];
         summary.day.textContent = day;
-        summary.year.textContent = year;
+        summary.year.textContent = status.schedule.cycle || `${year}-${year + 1}`;
         summary.batch.textContent = batchLabel(status.schedule.batch);
         summary.time.textContent = `${status.schedule.startTime} - ${status.schedule.endTime}`;
         summary.facility.textContent = status.schedule.facilityId || '—';

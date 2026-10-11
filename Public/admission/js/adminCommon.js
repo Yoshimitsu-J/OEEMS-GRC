@@ -16,10 +16,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const logoutBtn = document.querySelector('.btn-logout-nav');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', (e) => {
+    logoutBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      localStorage.removeItem('userSession');
-      window.location.href = 'adminLoginPage.html';
+      try {
+        await fetch('/api/admin/auth/logout', {
+          method: 'POST',
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+      } finally {
+        window.location.assign('/admission/adminLoginPage.html');
+      }
     });
   }
 

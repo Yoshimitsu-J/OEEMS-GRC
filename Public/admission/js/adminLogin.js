@@ -6,31 +6,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('adminLoginForm');
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById('adminUsername').value.trim();
-    const password = document.getElementById('adminPassword').value.trim();
+    const login = document.getElementById('adminUsername').value.trim();
+    const password = document.getElementById('adminPassword').value;
     const msgEl = document.getElementById('adminMessage');
+    const submitButton = form.querySelector('[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
 
-    if (username === 'admin' && password === 'admin123') {
-      const adminSession = {
-        username: username,
-        fullname: 'Dr. Esguerra',
-        role: 'Admin',
-        token: 'admin-token-' + Date.now()
-      };
-      localStorage.setItem('userSession', JSON.stringify(adminSession));
-
-      msgEl.textContent = 'Login successful! Redirecting...';
+    try {
+      const response = await fetch('/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        cache: 'no-store',
+        body: JSON.stringify({ login, password })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not sign in.');
+      msgEl.textContent = 'Login successful. Redirecting...';
       msgEl.style.color = '#27ae60';
-
-      setTimeout(() => {
-        window.location.href = 'adminQuickView.html';
-      }, 800);
-    } else {
-      msgEl.textContent = 'Invalid credentials. Use admin / admin123';
+      window.location.assign(result.redirectUrl);
+    } catch (error) {
+      msgEl.textContent = error.message;
       msgEl.style.color = '#c0392b';
+      if (submitButton) submitButton.disabled = false;
     }
   });
 });

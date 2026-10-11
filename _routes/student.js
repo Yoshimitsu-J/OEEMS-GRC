@@ -221,24 +221,33 @@ router.get('/application-status', requireAuthenticated, requireCompletedProfile,
 router.get('/schedules', requireAuthenticated, requireCompletedProfile, async (request, response) => {
 	try {
 		const db = getDatabaseConnection('OEEMS_Admission').db;
+		const application = await StudentApplication.findOne({ applicantId: response.locals.studentProfile.applicantId }).lean();
+		const requestedCycle = typeof request.query.cycle === 'string' && /^\d{4}-\d{4}$/.test(request.query.cycle)
+			? request.query.cycle
+			: null;
+		const cycle = application?.cycle || requestedCycle || currentCycle();
 		const schedules = await db.collection('schedule_slots').find({
-			cycle: currentCycle(),
+			cycle,
 			status: 'available',
 			examDate: { $gte: new Date() },
 			$expr: { $lt: [{ $ifNull: ['$bookedCount', 0] }, '$capacity'] }
 		}, {
 			projection: { _id: 1, scheduleId: 1, cycle: 1, examDate: 1, batch: 1, startTime: 1, endTime: 1, facilityId: 1, capacity: 1, bookedCount: 1, status: 1 }
 		}).sort({ examDate: 1, batch: 1 }).toArray();
+		const months = [...new Set(schedules.map((schedule) => {
+			const date = new Date(schedule.examDate);
+			return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+		}))];
 
 		response.set('Cache-Control', 'no-store');
-		response.json({ schedules: schedules.map((schedule) => ({
+		response.json({ cycle, months, schedules: schedules.map((schedule) => ({
 			scheduleId: String(schedule.scheduleId),
 			cycle: schedule.cycle,
 			examDate: schedule.examDate,
-			batch: `batch_${schedule.batch}`,
-			startTime: schedule.startTime,
-			endTime: schedule.endTime,
-			facilityId: schedule.facilityId,
+			batch: /^batch_[123]$/.test(schedule.batch) ? schedule.batch : 'Not yet configured',
+			startTime: schedule.startTime || 'Not yet configured',
+			endTime: schedule.endTime || 'Not yet configured',
+			facilityId: schedule.facilityId || 'Not yet configured',
 			remainingSeats: schedule.capacity - (schedule.bookedCount || 0)
 		})) });
 	} catch (error) {
@@ -253,17 +262,17 @@ router.post('/schedule', requireSameOrigin, requireAuthenticated, requireComplet
 
 	const profile = response.locals.studentProfile;
 	const applicantId = profile.applicantId;
-	const cycle = currentCycle();
 	const session = await mongoose.startSession();
 	let booking;
 	try {
 		await session.withTransaction(async () => {
-			const application = await StudentApplication.findOne({ applicantId, cycle }).session(session);
+			const application = await StudentApplication.findOne({ applicantId }).session(session);
 			if (!application || !['draft', 'scheduled'].includes(application.status)) {
 				const error = new Error('This application can no longer change its exam schedule.');
 				error.status = 409;
 				throw error;
 			}
+			const cycle = application.cycle;
 			if (application.scheduleId || await StudentSchedule.exists({ applicantId, cycle, bookingStatus: { $in: ['reserved', 'confirmed'] } }).session(session)) {
 				const error = new Error('An exam schedule is already booked for this application.');
 				error.status = 409;
@@ -282,7 +291,7 @@ router.post('/schedule', requireSameOrigin, requireAuthenticated, requireComplet
 				returnDocument: 'after',
 				includeResultMetadata: false
 			});
-			if (!slot || ![1, 2, 3].includes(Number(slot.batch))) {
+			if (!slot || !['batch_1', 'batch_2', 'batch_3'].includes(slot.batch)) {
 				const error = new Error('That exam slot is no longer available. Refresh the schedule list and choose another slot.');
 				error.status = 409;
 				throw error;
@@ -293,7 +302,7 @@ router.post('/schedule', requireSameOrigin, requireAuthenticated, requireComplet
 				applicantId,
 				cycle,
 				examDate: slot.examDate,
-				batch: `batch_${Number(slot.batch)}`,
+				batch: slot.batch,
 				startTime: slot.startTime,
 				endTime: slot.endTime,
 				facilityId: slot.facilityId || null,

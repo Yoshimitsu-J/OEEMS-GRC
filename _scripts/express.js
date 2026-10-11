@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { readMongoUri } = require('./mongodb_connection');
 const { requireAuthenticated, requireCompletedProfile, requireIncompleteProfile, checkStepAccess } = require('../_middleware/studentAccess');
+const { protectAdmissionPages } = require('../_middleware/adminAccess');
 
 const publicPath = path.join(__dirname, '..', 'public');
 const sessionSecretPath = path.join(__dirname, '..', '_confidentials', 'session_secret.txt');
@@ -43,6 +44,7 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 	});
 	app.locals.sessionMiddleware = sessionMiddleware;
 	app.use(sessionMiddleware);
+	app.use('/admission', protectAdmissionPages);
 
 	app.use(['/student', '/public/student'], (request, response, next) => {
 		const requestPath = request.path.toLowerCase();

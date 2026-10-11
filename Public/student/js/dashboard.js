@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateDashboard().catch((error) => console.error(error.message));
   if (typeof window.io === 'function') {
     const socket = window.io();
-    ['student:profile-updated', 'student:application-updated', 'student:application-submitted'].forEach((eventName) => {
+    ['student:profile-updated', 'student:application-updated', 'student:application-submitted', 'admission:schedule-updated'].forEach((eventName) => {
       socket.on(eventName, (detail) => {
         updateDashboard().catch((error) => console.error(error.message));
         window.dispatchEvent(new CustomEvent('oeems:student-update', { detail }));
