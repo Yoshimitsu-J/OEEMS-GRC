@@ -811,6 +811,66 @@ body {
   margin-bottom: 20px;
 }
 
+.upload-card {
+  padding-top: 18px;
+}
+
+.upload-progress {
+  margin: 0 0 18px;
+}
+
+.upload-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 13px;
+}
+
+#uploadProgressCount {
+  color: #800000;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.upload-progress-track {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #dedede;
+}
+
+#uploadProgressFill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: #2f8f4e;
+  transition: width 180ms ease;
+}
+
+.upload-guidelines {
+  margin-bottom: 22px;
+  padding: 15px 17px;
+  border-left: 4px solid #800000;
+  border-radius: 4px;
+  background: #fff8e8;
+  color: #333;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.upload-guidelines h2 {
+  margin: 0 0 8px;
+  color: #800000;
+  font-size: 15px;
+}
+
+.upload-guidelines p { margin: 7px 0; }
+.upload-guidelines ol { margin: 7px 0 7px 22px; padding: 0; }
+
 .file-upload-item p {
   font-size: 14px;
   font-weight: bold;
@@ -822,6 +882,26 @@ body {
   align-items: center;
   gap: 15px;
 }
+
+.upload-controls .upload-status {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.upload-remove-btn {
+  padding: 5px 9px;
+  border: 1px solid #9b1c1c;
+  border-radius: 4px;
+  background: #fff;
+  color: #8a1010;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.upload-remove-btn:hover { background: #fff0f0; }
+.upload-remove-btn:disabled { cursor: wait; opacity: 0.65; }
+.upload-remove-btn[hidden] { display: none; }
 
 .btn-upload {
   background-color: #EFEFEF;
@@ -880,6 +960,13 @@ body {
   color: var(--primary-color);
   font-weight: bold;
   margin-bottom: 20px;
+}
+
+#uploadDocumentsBtn:disabled {
+  background-color: #999 !important;
+  cursor: not-allowed;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 /* =========================================
@@ -2000,6 +2087,15 @@ body {
   background: #fff0f0;
   color: #8a1010;
   font-weight: 700;
+}
+
+.upload-submit-notice {
+  padding: 13px;
+  border-left: 4px solid #800000;
+  border-radius: 4px;
+  background: #fff4e6;
+  color: #57320d;
+  line-height: 1.55;
 }
 
 .schedule-success-dialog { border-top-color: #2f8f4e; }

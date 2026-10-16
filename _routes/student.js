@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
 const PDFDocument = require('pdfkit');
+const path = require('node:path');
 const User = require('../_models/User');
 const StudentProfile = require('../_models/StudentProfile');
 const StudentApplication = require('../_models/StudentApplication');
@@ -20,6 +21,20 @@ const upload = multer({
 	limits: { fileSize: 10 * 1024 * 1024, files: 1 }
 });
 
+function receiveDocumentUpload(request, response, next) {
+	upload.single('file')(request, response, (error) => {
+		if (!error) return next();
+		if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+			return response.status(413).json({ error: 'Each document must be 10 MB or smaller.' });
+		}
+		if (error instanceof multer.MulterError) {
+			return response.status(400).json({ error: 'Could not receive this document. Choose one JPG or PNG file.' });
+		}
+		console.error('Document upload request failed:', error.message);
+		return response.status(400).json({ error: 'Could not receive this document. Please try again.' });
+	});
+}
+
 function currentCycle() {
 	if (process.env.APPLICATION_CYCLE) return process.env.APPLICATION_CYCLE;
 	const year = new Date().getFullYear();
@@ -32,6 +47,14 @@ function todayExamDateStart() {
 	}).formatToParts(new Date());
 	const value = (type) => parts.find((part) => part.type === type).value;
 	return new Date(`${value('year')}-${value('month')}-${value('day')}T00:00:00.000Z`);
+}
+
+async function syncStudentProgress(applicantId, progress, session) {
+	const db = getDatabaseConnection('OEEMS_Student').db;
+	await db.collection('student_progress').updateOne({ applicantId }, {
+		$set: { ...progress, updatedAt: new Date() },
+		$setOnInsert: { applicantId, createdAt: new Date() }
+	}, { upsert: true, ...(session ? { session } : {}) });
 }
 
 function workflowStatus(application) {
@@ -57,7 +80,7 @@ async function getWorkflow(profile) {
 
 	if (!isSubmitted) {
 		if (!schedule) nextStep = { number: 2, title: 'Schedule Exam', href: 'scheduleExam.html' };
-		else if (documentCount < REQUIRED_UPLOADS.length) nextStep = { number: 3, title: 'Upload Documents', href: 'uploadDocuments.html' };
+		else if (documentCount < REQUIRED_UPLOADS.length || application?.status !== 'documents_submitted') nextStep = { number: 3, title: 'Upload Documents', href: 'uploadDocuments.html' };
 		else nextStep = { number: 4, title: 'Review and Submit Application', href: 'applicationSummary.html' };
 	} else if (application?.status === 'approved') {
 		nextStep = { number: 5, title: 'Take Exam', href: 'takeExam.html' };
@@ -311,9 +334,20 @@ router.post('/schedule/reschedule', requireSameOrigin, requireAuthenticated, req
 			application.status = 'draft';
 			application.scheduleId = null;
 			await application.save({ session });
+			await syncStudentProgress(applicantId, {
+				documentCount: 0,
+				requiredDocumentCount: REQUIRED_UPLOADS.length,
+				documentsComplete: false,
+				currentStep: 2,
+				nextStep: 'scheduleExam'
+			}, session);
 		});
 
-		request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
+		try {
+			request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
+		} catch (error) {
+			console.error('Student schedule notification failed:', error.message);
+		}
 		response.json({ ok: true, cycle, message: 'Schedule progress reset. Choose a new exam date and batch.' });
 	} catch (error) {
 		if (error.status === 409) return response.status(409).json({ error: error.message });
@@ -496,7 +530,142 @@ router.post('/profile', requireSameOrigin, requireAuthenticated, async (request,
 	}
 });
 
-router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated, requireCompletedProfile, upload.single('file'), async (request, response) => {
+router.post('/documents/re-edit', requireSameOrigin, requireAuthenticated, requireCompletedProfile, async (request, response) => {
+	const applicantId = response.locals.studentProfile.applicantId;
+	const session = await mongoose.startSession();
+	try {
+		await session.withTransaction(async () => {
+			const application = await StudentApplication.findOne({ applicantId }).session(session);
+			if (!application || !['scheduled', 'documents_submitted'].includes(application.status)) {
+				const error = new Error('Documents cannot be edited at this application stage.');
+				error.status = 409;
+				throw error;
+			}
+			application.status = 'scheduled';
+			await application.save({ session });
+			const documents = await StudentDocument.find({
+				applicantId,
+				verificationStatus: { $in: ['submitted', 'under_review', 'accepted'] }
+			}).session(session).select('documentType').lean();
+			await syncStudentProgress(applicantId, {
+				documentCount: new Set(documents.map((document) => document.documentType)).size,
+				requiredDocumentCount: REQUIRED_UPLOADS.length,
+				documentsComplete: false,
+				currentStep: 3,
+				nextStep: 'uploadDocuments'
+			}, session);
+		});
+		response.json({ ok: true });
+	} catch (error) {
+		if (error.status === 409) return response.status(409).json({ error: error.message });
+		console.error('Document re-edit authorization failed:', error.message);
+		response.status(500).json({ error: 'Could not reopen document editing.' });
+	} finally {
+		await session.endSession();
+	}
+});
+
+router.post('/documents/apply', requireSameOrigin, requireAuthenticated, requireCompletedProfile, async (request, response) => {
+	const applicantId = response.locals.studentProfile.applicantId;
+	const session = await mongoose.startSession();
+	try {
+		await session.withTransaction(async () => {
+			const application = await StudentApplication.findOne({ applicantId }).session(session);
+			if (!application || !['scheduled', 'documents_submitted'].includes(application.status)) {
+				const error = new Error('Complete exam scheduling before applying documents.');
+				error.status = 409;
+				throw error;
+			}
+			const schedule = await StudentSchedule.findOne({
+				_id: application.scheduleId,
+				applicantId,
+				bookingStatus: { $in: ['reserved', 'confirmed'] }
+			}).session(session).select('_id').lean();
+			if (!schedule) {
+				const error = new Error('Your exam schedule is no longer active. Please schedule your exam again.');
+				error.status = 409;
+				throw error;
+			}
+			const documents = await StudentDocument.find({
+				applicantId,
+				documentType: { $in: REQUIRED_UPLOADS },
+				verificationStatus: { $in: ['submitted', 'under_review', 'accepted'] }
+			}).session(session).select('documentType').lean();
+			const completedTypes = new Set(documents.map((document) => document.documentType));
+			if (REQUIRED_UPLOADS.some((type) => !completedTypes.has(type))) {
+				const error = new Error('Please upload all three required documents before applying.');
+				error.status = 400;
+				throw error;
+			}
+			application.status = 'documents_submitted';
+			await application.save({ session });
+			await syncStudentProgress(applicantId, {
+				documentCount: REQUIRED_UPLOADS.length,
+				requiredDocumentCount: REQUIRED_UPLOADS.length,
+				documentsComplete: true,
+				currentStep: 4,
+				nextStep: 'applicationSummary'
+			}, session);
+		});
+		response.json({ ok: true, redirectUrl: '/student/applicationSummary.html' });
+	} catch (error) {
+		if (error.status) return response.status(error.status).json({ error: error.message });
+		console.error('Document application failed:', error.message);
+		response.status(500).json({ error: 'Could not apply your documents. Please try again.' });
+	} finally {
+		await session.endSession();
+	}
+});
+
+router.delete('/documents/:documentType', requireSameOrigin, requireAuthenticated, requireCompletedProfile, async (request, response) => {
+	const { documentType } = request.params;
+	if (!REQUIRED_UPLOADS.includes(documentType)) return response.status(400).json({ error: 'Unsupported document type.' });
+
+	const applicantId = response.locals.studentProfile.applicantId;
+	const session = await mongoose.startSession();
+	let storageKey;
+	try {
+		await session.withTransaction(async () => {
+			const application = await StudentApplication.findOne({ applicantId }).session(session);
+			if (!application || application.status !== 'scheduled') {
+				const error = new Error('Confirm document re-editing before removing saved files.');
+				error.status = 409;
+				throw error;
+			}
+			const document = await StudentDocument.findOne({ applicantId, documentType }).session(session);
+			if (!document) {
+				const error = new Error('This document is not currently uploaded.');
+				error.status = 404;
+				throw error;
+			}
+			storageKey = document.storageKey;
+			await StudentDocument.deleteOne({ _id: document._id }, { session });
+			const remainingDocuments = await StudentDocument.find({ applicantId })
+				.session(session).select('documentType verificationStatus').lean();
+			const completed = new Set(remainingDocuments
+				.filter((item) => ['submitted', 'under_review', 'accepted'].includes(item.verificationStatus))
+				.map((item) => item.documentType));
+			await syncStudentProgress(applicantId, {
+				documentCount: REQUIRED_UPLOADS.filter((type) => completed.has(type)).length,
+				requiredDocumentCount: REQUIRED_UPLOADS.length,
+				documentsComplete: false,
+				currentStep: 3,
+				nextStep: 'uploadDocuments'
+			}, session);
+		});
+	} catch (error) {
+		if (error.status) return response.status(error.status).json({ error: error.message });
+		console.error('Student document removal failed:', error.message);
+		return response.status(500).json({ error: 'Could not remove this document. Please try again.' });
+	} finally {
+		await session.endSession();
+	}
+
+	await deleteGridFsFile(storageKey);
+	response.json({ ok: true, documentType });
+});
+
+router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated, requireCompletedProfile, receiveDocumentUpload, async (request, response) => {
 	const { documentType } = request.params;
 	const file = request.file;
 	if (!REQUIRED_UPLOADS.includes(documentType)) {
@@ -509,7 +678,7 @@ router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated,
 	const profile = response.locals.studentProfile;
 	const applicantId = profile.applicantId;
 	const application = await StudentApplication.findOne({ applicantId });
-	if (!application || !['scheduled', 'documents_submitted'].includes(application.status)) {
+	if (!application || application.status !== 'scheduled') {
 		return response.status(409).json({ error: 'Complete exam scheduling before uploading documents.' });
 	}
 
@@ -520,7 +689,7 @@ router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated,
 		storageKey = await saveGridFsFile(file, { applicantId, documentType });
 		await session.withTransaction(async () => {
 			const currentApplication = await StudentApplication.findOne({ applicantId }).session(session);
-			if (!currentApplication || !['scheduled', 'documents_submitted'].includes(currentApplication.status)) {
+			if (!currentApplication || currentApplication.status !== 'scheduled') {
 				const error = new Error('Application is locked for changes.');
 				error.status = 409;
 				throw error;
@@ -544,10 +713,13 @@ router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated,
 			const completed = new Set(docs
 				.filter((document) => ['submitted', 'under_review', 'accepted'].includes(document.verificationStatus))
 				.map((document) => document.documentType));
-			if (REQUIRED_UPLOADS.every((type) => completed.has(type))) {
-				currentApplication.status = 'documents_submitted';
-				await currentApplication.save({ session });
-			}
+			await syncStudentProgress(applicantId, {
+				documentCount: REQUIRED_UPLOADS.filter((type) => completed.has(type)).length,
+				requiredDocumentCount: REQUIRED_UPLOADS.length,
+				documentsComplete: false,
+				currentStep: 3,
+				nextStep: 'uploadDocuments'
+			}, session);
 		});
 	} catch (error) {
 		await deleteGridFsFile(storageKey);
@@ -559,8 +731,12 @@ router.post('/documents/:documentType', requireSameOrigin, requireAuthenticated,
 	}
 
 	if (previousStorageKey && previousStorageKey !== storageKey) await deleteGridFsFile(previousStorageKey);
-	request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
 	response.status(201).json({ ok: true, documentType, originalName: path.basename(file.originalname).slice(0, 180) });
+	try {
+		request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
+	} catch (error) {
+		console.error('Student document notification failed:', error.message);
+	}
 });
 
 router.get('/application/summary.pdf', requireAuthenticated, requireCompletedProfile, async (request, response) => {

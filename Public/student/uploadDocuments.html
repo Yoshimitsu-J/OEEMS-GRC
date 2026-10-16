@@ -65,30 +65,56 @@
       <p class="upload-note">In this page, please fill all the information needed to book an entrance exam.</p>
       <p class="upload-required">Required: Please make sure the images are clear and readable.</p>
 
-      <div class="card">
+      <div class="card upload-card">
+        <section class="upload-progress" aria-label="Required document upload progress">
+          <div class="upload-progress-heading">
+            <strong>Required documents</strong>
+            <span id="uploadProgressCount">0/3</span>
+          </div>
+          <div class="upload-progress-track" role="progressbar" aria-label="Required documents uploaded" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="uploadProgressBar">
+            <span id="uploadProgressFill"></span>
+          </div>
+        </section>
+
+        <section class="upload-guidelines" aria-labelledby="uploadGuidelinesTitle">
+          <h2 id="uploadGuidelinesTitle">📌 Important Upload Guidelines</h2>
+          <p>To ensure a smooth and faster review process, please upload clear and readable photos or scanned copies of all required documents. Make sure that:</p>
+          <ol>
+            <li>All text is visible and not blurry.</li>
+            <li>The entire document is captured within the image.</li>
+            <li>Photos are taken in good lighting.</li>
+            <li>Images are not cropped, edited, or covered by filters.</li>
+            <li>File uploads are clear and portrait (recommended).</li>
+          </ol>
+          <p>Unclear or incomplete document images may cause rejection or delay for the verification of your application.</p>
+        </section>
+
         <div class="file-upload-item">
-          <p>1) Please attach the Form 138 (Grade 12 Report Card):</p>
+          <p>1) Form 138 (Grade 12 Report Card)</p>
           <div class="upload-controls">
-            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" data-document-type="form138" hidden>Upload Image</label>
             <span class="upload-status">No file selected</span>
+            <button type="button" class="upload-remove-btn" data-remove-document="form138" hidden>Remove</button>
           </div>
           <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
         </div>
 
         <div class="file-upload-item">
-          <p>2) Please attach the current Good Moral:</p>
+          <p>2) Current Good Moral</p>
           <div class="upload-controls">
-            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" data-document-type="good_moral" hidden>Upload Image</label>
             <span class="upload-status">No file selected</span>
+            <button type="button" class="upload-remove-btn" data-remove-document="good_moral" hidden>Remove</button>
           </div>
           <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
         </div>
 
         <div class="file-upload-item">
-          <p>3) Please attach a current 2x2 Picture:</p>
+          <p>3) Current 2x2 Picture</p>
           <div class="upload-controls">
-            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" hidden>Upload Image</label>
+            <label class="btn-upload"><i class="bi bi-upload"></i> <input type="file" data-document-type="picture_2x2" hidden>Upload Image</label>
             <span class="upload-status">No file selected</span>
+            <button type="button" class="upload-remove-btn" data-remove-document="picture_2x2" hidden>Remove</button>
           </div>
           <span class="upload-hint">Upload (.jpg .jpeg .png)</span>
         </div>
@@ -103,10 +129,31 @@
       </div>
 
       <div class="upload-form-wrapper">
-        <button class="btn-primary" id="applyUploadBtn">APPLY</button>
+        <button type="button" class="btn-primary" id="uploadDocumentsBtn" disabled>UPLOAD</button>
       </div>
     </main>
   </div>
+
+  <dialog id="documentEditDialog" class="schedule-confirm-dialog" aria-labelledby="documentEditTitle">
+    <h2 id="documentEditTitle">Looks like your documents are already uploaded</h2>
+    <p>Edit your documents?</p>
+    <p class="reschedule-warning">Note: This action will revert your further progress.</p>
+    <p id="documentEditError" class="reschedule-error" role="alert"></p>
+    <div class="schedule-confirm-actions">
+      <button type="button" class="btn-primary" id="beginDocumentEdit">YES</button>
+      <button type="button" class="btn-primary schedule-confirm-no" id="keepDocuments">NO</button>
+    </div>
+  </dialog>
+
+  <dialog id="uploadSubmitDialog" class="schedule-confirm-dialog" aria-labelledby="uploadSubmitTitle">
+    <h2 id="uploadSubmitTitle">Ready to continue?</h2>
+    <p class="upload-submit-notice">Note: You have to review all of your configurations from Step 1 to 3 at "Application Summary" before submitting your Application</p>
+    <p id="uploadSubmitError" class="reschedule-error" role="alert"></p>
+    <div class="schedule-confirm-actions">
+      <button type="button" class="btn-primary" id="confirmUploadSubmit">Continue</button>
+      <button type="button" class="btn-primary schedule-confirm-no" id="cancelUploadSubmit">Cancel</button>
+    </div>
+  </dialog>
 
   <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
