@@ -131,7 +131,7 @@ async function checkStepAccess(request, response, next) {
 
 		if (reviewLocked && ['scheduleexam.html', 'uploaddocuments.html', 'applicationsummary.html', 'myapplication.html'].includes(protectedPage)) {
 			redirect = '/student/';
-		} else if (protectedPage === 'scheduleexam.html' && !['draft', 'scheduled'].includes(application?.status || 'draft')) {
+		} else if (protectedPage === 'scheduleexam.html' && !['draft', 'scheduled', 'documents_submitted'].includes(application?.status || 'draft')) {
 			redirect = '/student/';
 		} else if (protectedPage === 'uploaddocuments.html' && (!schedule || !['scheduled', 'documents_submitted'].includes(application?.status))) {
 			redirect = '/student/scheduleExam.html';

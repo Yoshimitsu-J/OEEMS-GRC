@@ -94,6 +94,11 @@
 
           <!-- DAYS GRID (populated by JS) -->
           <div id="calendarDays" class="calendar-days-grid"></div>
+          <div class="calendar-status-legend" aria-label="Calendar availability legend">
+            <span><i class="calendar-legend-swatch available" aria-hidden="true"></i>Available</span>
+            <span><i class="calendar-legend-swatch unavailable" aria-hidden="true"></i>Unavailable</span>
+            <span><i class="calendar-legend-swatch sunday" aria-hidden="true"></i>Sunday</span>
+          </div>
         </div>
 
         <!-- SCHEDULE SUMMARY -->
@@ -122,7 +127,6 @@
               <p><strong>Year:</strong> <span id="sumYear">—</span></p>
               <p><strong>Batch:</strong> <span id="sumBatch">—</span></p>
               <p><strong>Time:</strong> <span id="sumTime">—</span></p>
-              <p><strong>Facility:</strong> <span id="sumFacility">—</span></p>
             </div>
           </div>
         </div>
@@ -131,6 +135,35 @@
       </div>
     </main>
   </div>
+
+  <dialog id="scheduleConfirmDialog" class="schedule-confirm-dialog" aria-labelledby="scheduleConfirmTitle">
+    <h2 id="scheduleConfirmTitle">Check if informations are correct:</h2>
+    <div id="scheduleConfirmationSummary" class="schedule-confirmation-summary"></div>
+    <div class="schedule-confirm-actions">
+      <button type="button" class="btn-primary" id="confirmScheduleYes">YES</button>
+      <button type="button" class="btn-primary schedule-confirm-no" id="confirmScheduleNo">NO, Edit again</button>
+    </div>
+  </dialog>
+
+  <dialog id="scheduleSuccessDialog" class="schedule-confirm-dialog schedule-success-dialog" aria-labelledby="scheduleSuccessTitle">
+    <h2 id="scheduleSuccessTitle">Schedule was configured Successfully</h2>
+    <p>You can now proceed to Upload Documents</p>
+    <p class="schedule-success-note">You can still edit this, as long as the application has not been submitted yet</p>
+    <div class="schedule-confirm-actions">
+      <button type="button" class="btn-primary" id="proceedToDocuments">Proceed to next step</button>
+    </div>
+  </dialog>
+
+  <dialog id="existingScheduleDialog" class="schedule-confirm-dialog" aria-labelledby="existingScheduleTitle">
+    <h2 id="existingScheduleTitle">Looks like you already save an schedule</h2>
+    <p>Change your schedule?</p>
+    <p class="reschedule-warning">Note: This action will revert your further progress.</p>
+    <p id="rescheduleError" class="reschedule-error" role="alert"></p>
+    <div class="schedule-confirm-actions">
+      <button type="button" class="btn-primary" id="beginReschedule">YES</button>
+      <button type="button" class="btn-primary schedule-confirm-no" id="keepExistingSchedule">NO</button>
+    </div>
+  </dialog>
 
   <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
