@@ -366,17 +366,25 @@ router.post('/schedule', requireSameOrigin, requireAuthenticated, requireComplet
 				throw error;
 			}
 
-			const [savedBooking] = await StudentSchedule.create([{
-				scheduleId: String(slot.scheduleId),
-				applicantId,
-				cycle,
-				examDate: slot.examDate,
-				batch: slot.batch,
-				startTime: slot.startTime,
-				endTime: slot.endTime,
-				facilityId: slot.facilityId || null,
-				bookingStatus: 'confirmed'
-			}], { session });
+			const savedBooking = await StudentSchedule.findOneAndUpdate({ applicantId, cycle }, {
+				$set: {
+					scheduleId: String(slot.scheduleId),
+					examDate: slot.examDate,
+					batch: slot.batch,
+					startTime: slot.startTime,
+					endTime: slot.endTime,
+					facilityId: slot.facilityId || null,
+					bookingStatus: 'confirmed',
+					bookedAt: new Date(),
+					cancelledAt: null
+				}
+			}, {
+				session,
+				upsert: true,
+				new: true,
+				runValidators: true,
+				setDefaultsOnInsert: true
+			});
 			application.status = 'scheduled';
 			application.scheduleId = savedBooking._id;
 			await application.save({ session });
@@ -390,8 +398,12 @@ router.post('/schedule', requireSameOrigin, requireAuthenticated, requireComplet
 		await session.endSession();
 	}
 
-	request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
 	response.status(201).json({ ok: true, schedule: booking, redirectUrl: '/student/uploadDocuments.html' });
+	try {
+		request.app.get('io')?.to(`student:${response.locals.authUser._id}`).emit('student:application-updated', { applicantId });
+	} catch (error) {
+		console.error('Student schedule notification failed:', error.message);
+	}
 });
 
 router.post('/profile', requireSameOrigin, requireAuthenticated, async (request, response) => {
