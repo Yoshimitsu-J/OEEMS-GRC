@@ -99,8 +99,8 @@ body {
 }
 
 .qr-code-placeholder {
-  width: 100px;
-  height: 100px;
+  width: 216px;
+  height: 216px;
   border: 2px solid #000;
   display: flex;
   align-items: center;
@@ -205,6 +205,7 @@ body {
 }
 
 @media print {
+  @page { size: A4; margin: 12mm; }
   .soapp-buttons {
     display: none;
   }

@@ -19,60 +19,33 @@
     </div>
 
     <div class="soapp-top-row">
-      <div>
-        <h2 class="soapp-title">Statement of Application</h2>
-      </div>
-      <div class="soapp-applicant-id">
-        <span>Applicant</span>
-        <span class="red-bold profile-loading" id="soappApplicantId" data-profile="applicantId" aria-busy="true"></span>
-      </div>
+      <div><h2 class="soapp-title">Statement of Application</h2></div>
     </div>
 
     <div class="soapp-qr-section">
-      <div class="soapp-info-left">
-        <p>APPLICANT: <strong class="profile-loading" data-profile="applicantName" aria-busy="true"></strong></p>
-        <p>SCHOOL YEAR: <strong data-application="cycle">—</strong></p>
+      <div class="qr-code-box">
+        <div id="soappQrCode" class="qr-code-placeholder"></div>
       </div>
-      <div class="soapp-qr-right">
-        <div class="qr-code-box">
-          <!-- ✅ Real QR code na ito -->
-          <div id="soappQrCode" class="qr-code-placeholder"></div>
-          <p class="qr-scan-label">Scan Me</p>
-        </div>
-        <p class="qr-instruction">
-          Present your <span class="red-text">Application ID</span> or <span class="red-text">QR Code</span> to Examination Facilitator to Verify your Application with your payment slip provided from Cashier
-        </p>
-      </div>
+      <p class="qr-instruction">
+        Present your Statement of Account (Hardcopy/Softcopy) or QR Code, along with your official Payment slip from the Cashier, to the Examination Facilitator for application code verification.
+      </p>
     </div>
 
     <div class="soapp-section">
-      <h4>Application Information</h4>
-      <div class="soapp-row"><p>Date of Application:</p><p data-application="applicationDate">—</p></div>
-      <div class="soapp-row"><p>Applicant ID:</p><p data-application="applicantId">—</p></div>
-      <div class="soapp-row"><p>Approved:</p><p data-application="approvedDate">—</p></div>
+      <h4>APPLICATION INFORMATION</h4>
+      <div class="soapp-row"><p>Applicant ID:</p><p class="red-bold" data-application="applicantId">—</p></div>
+      <div class="soapp-row"><p>Application Code:</p><p class="red-bold profile-loading" data-profile="applicantId" aria-busy="true"></p></div>
       <div class="soapp-row"><p>Exam Date:</p><p data-application="examDate">—</p></div>
-      <div class="soapp-row"><p>Exam Facility:</p><p data-application="facility">—</p></div>
+      <div class="soapp-row"><p>Exam Batch:</p><p data-application="batch">—</p></div>
+      <div class="soapp-row"><p>Exam Time:</p><p data-application="examTime">—</p></div>
     </div>
 
     <div class="soapp-section">
-      <h4>Applicant Information</h4>
-      <div class="soapp-row"><p>Email Address:</p><p class="profile-loading" data-profile="email" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>Contact No.:</p><p class="profile-loading" data-profile="phone" aria-busy="true"></p></div>
-    </div>
-
-    <div class="soapp-section">
-      <h4>Address</h4>
-      <div class="soapp-row"><p>Country:</p><p class="profile-loading" data-profile="country" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>Region:</p><p class="profile-loading" data-profile="region" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>City/Municipality:</p><p class="profile-loading" data-profile="city" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>Barangay:</p><p class="profile-loading" data-profile="barangay" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>Home Street:</p><p class="profile-loading" data-profile="street" aria-busy="true"></p></div>
-    </div>
-
-    <div class="soapp-section">
-      <h4>Parent/Guardian Informations</h4>
-      <div class="soapp-row"><p>Name:</p><p class="profile-loading" data-profile="guardianName" aria-busy="true"></p></div>
-      <div class="soapp-row"><p>Contact No.:</p><p class="profile-loading" data-profile="guardianPhone" aria-busy="true"></p></div>
+      <h4>APPLICANT INFORMATION</h4>
+      <div class="soapp-row"><p>Name:</p><p class="profile-loading" data-profile="fullname" aria-busy="true"></p></div>
+      <div class="soapp-row"><p>Address:</p><p class="profile-loading" data-profile="address" aria-busy="true"></p></div>
+      <div class="soapp-row"><p>Contact Number:</p><p class="profile-loading" data-profile="phone" aria-busy="true"></p></div>
+      <div class="soapp-row"><p>Email:</p><p class="profile-loading" data-profile="email" aria-busy="true"></p></div>
     </div>
 
     <div class="soapp-footer">

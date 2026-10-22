@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GRC-CAT Entrance Examination</title>
+  <link rel="stylesheet" href="../student/css/style.css">
+  <link rel="stylesheet" href="../student/css/exam.css">
+</head>
+<body>
+  <header class="exam-site-header"><div class="brand"><h1>GRC-CAT Entrance Examination</h1></div><div class="exam-top-bar" aria-live="polite"><strong data-exam-timer>03:00</strong></div></header>
+  <div class="exam-layout">
+    <main class="exam-main">
+      <div class="exam-meta"><span class="exam-question-count" data-items-progress>0 out of 0 items</span></div>
+      <div class="card exam-card">
+        <h3 class="exam-question" data-exam-question>Loading examination...</h3>
+      </div>
+      <div class="exam-options" data-exam-options></div>
+      <button type="button" class="btn-primary exam-next-btn" data-exam-next disabled>Next</button>
+    </main>
+
+  </div>
+  <dialog id="examInstructionsDialog" class="exam-dialog" aria-labelledby="examInstructionsTitle">
+    <h2 id="examInstructionsTitle">Instruction and Regulations!</h2>
+    <ol class="exam-instructions-list">
+      <li><strong>Strict Proctoring &amp; Monitoring:</strong> All examination sessions are monitored. Any attempt to switch tabs, minimize the browser window, or navigate away from the test interface will be logged as a security violation and may result in automatic exam disqualification.</li>
+      <li><strong>Prohibited Shortcuts &amp; Actions:</strong> Right-clicking, copying, pasting, opening developer tools, and using keyboard shortcuts (such as Ctrl+C, Ctrl+V, F12) are strictly disabled during the exam.</li>
+      <li><strong>Single-Device &amp; Fullscreen Compliance:</strong> The examination interface runs exclusively in full-screen mode. Do not attempt to log in from multiple devices or browser tabs simultaneously.</li>
+      <li><strong>Strict Time Limit:</strong> The examination is strictly timed. Once you click "Start Exam," the timer will begin counting down and cannot be paused.</li>
+      <li><strong>Auto-Submission:</strong> The system will automatically submit your exam responses when the allocated time expires.</li>
+      <li><strong>Pacing &amp; Navigation:</strong> Monitor the on-screen countdown timer closely and manage your time effectively across all examination categories.</li>
+    </ol>
+    <p class="exam-good-luck"><em>Wishing you the very best on your entrance examination! Trust in your preparation, stay calm, read each question carefully, and give it your absolute best effort. Good luck!</em></p>
+    <button type="button" class="btn-primary" id="startExamButton">Start Exam</button>
+  </dialog>
+  <script src="../student/js/applicantExam.js"></script>
+</body>
+</html>

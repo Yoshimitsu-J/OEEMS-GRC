@@ -75,6 +75,42 @@ router.post('/auth/logout', requireSameOrigin, requireAdmin, (request, response,
 	});
 });
 
+router.get('/questionnaire/config', requireAdmin, async (request, response) => {
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const configuration = await admissionDb.collection('questionnaire_questions').findOne({ documentType: 'questionnaire_configuration' });
+		response.set('Cache-Control', 'no-store');
+		response.json({ configuration: configuration?.configuration || { categories: ['Logical reasoning', 'Abstract', 'Filipino', 'English', 'Math'], questionsByCategory: {} } });
+	} catch (error) {
+		console.error('Questionnaire configuration read failed:', error.message);
+		response.status(500).json({ error: 'Could not load questionnaire configuration.' });
+	}
+});
+
+router.put('/questionnaire/config', requireSameOrigin, requireAdmin, async (request, response) => {
+	const configuration = request.body?.configuration;
+	if (!configuration || !Array.isArray(configuration.categories) || !configuration.questionsByCategory || typeof configuration.questionsByCategory !== 'object') {
+		return response.status(400).json({ error: 'Provide a valid questionnaire JSON configuration.' });
+	}
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const categories = configuration.categories.map((name, index) => ({ categoryId: String(name).trim().replace(/[^a-z0-9]+/gi, '-').toLowerCase(), name: String(name).trim(), order: index })).filter((category) => category.name);
+		const now = new Date();
+		await admissionDb.collection('questionnaire_questions').updateOne({ documentType: 'questionnaire_configuration' }, {
+			$set: { configuration, version: String(now.getTime()), updatedAt: now, updatedByAdminId: response.locals.authAdmin.adminId },
+			$setOnInsert: { createdAt: now }
+		}, { upsert: true });
+		await admissionDb.collection('questionnaire_categories').deleteMany({});
+		if (categories.length) await admissionDb.collection('questionnaire_categories').insertMany(categories.map((category) => ({ ...category, status: 'active', updatedAt: now })));
+		await admissionDb.collection('exam_versions').updateOne({ active: true }, { $set: { active: false, updatedAt: now } }, { upsert: false });
+		await admissionDb.collection('exam_versions').insertOne({ version: String(now.getTime()), configurationVersion: String(now.getTime()), active: true, durationMinutes: 3, createdAt: now, createdByAdminId: response.locals.authAdmin.adminId });
+		response.json({ ok: true, version: String(now.getTime()) });
+	} catch (error) {
+		console.error('Questionnaire configuration save failed:', error.message);
+		response.status(500).json({ error: 'Could not save questionnaire configuration.' });
+	}
+});
+
 router.get('/auth/me', requireAdmin, (request, response) => {
 	const admin = response.locals.authAdmin;
 	response.json({ adminId: admin.adminId, email: admin.email, name: admin.name, role: admin.role });
@@ -197,30 +233,67 @@ router.get('/applications/:applicantId/documents/:documentType', requireAdmin, a
 });
 
 async function createStatementPermit(application, profile, schedule, applicationNumber) {
-	const qrData = JSON.stringify({ applicationNumber, applicantId: application.applicantId, name: application.name || '', email: application.email || '', profile: profile || {}, schedule: schedule || {}, submittedAt: application.submittedAt || application.createdAt || null });
-	const qrImage = await QRCode.toDataURL(qrData, { errorCorrectionLevel: 'H', margin: 1, width: 240 });
+	const address = profile?.address || application.profile?.address || {};
+	const fullAddress = [address.streetAddress || address.street, address.barangay, address.city, address.region, address.country].filter(Boolean).join(', ') || 'Not provided';
+	const fullName = [profile?.givenName || application.profile?.givenName, profile?.middleName || application.profile?.middleName, profile?.lastName || application.profile?.lastName, profile?.suffix || application.profile?.suffix].filter(Boolean).join(' ') || application.name || 'Not provided';
+	const statementInformation = {
+		applicationCode: applicationNumber,
+		applicantId: application.applicantId,
+		name: fullName,
+		address: fullAddress,
+		contactNumber: profile?.phone || application.profile?.phone || '',
+		email: application.email || profile?.email || '',
+		examDate: schedule?.examDate || null,
+		examBatch: schedule?.batch || null,
+		examTime: schedule?.startTime && schedule?.endTime ? `${schedule.startTime} - ${schedule.endTime}` : null
+	};
+	const qrImage = await QRCode.toDataURL(JSON.stringify(statementInformation), { errorCorrectionLevel: 'H', margin: 1, width: 432 });
 	return await new Promise((resolve, reject) => {
 		const document = new PDFDocument({ size: 'A4', margin: 50 });
 		const chunks = [];
 		document.on('data', (chunk) => chunks.push(chunk));
 		document.on('end', () => resolve(Buffer.concat(chunks)));
 		document.on('error', reject);
+
 		document.fontSize(18).fillColor('#800000').text('GLOBAL RECIPROCAL COLLEGES', { align: 'center' });
-		document.fontSize(14).fillColor('#333333').text('Statement of Application / Examination Permit', { align: 'center' });
-		document.moveDown();
-		document.image(qrImage, 445, 40, { width: 95, height: 95 });
+		document.moveDown(0.2);
+		document.fontSize(13).fillColor('#333333').text('Statement of Application', { align: 'center' });
+		document.moveDown(1);
+
+		const qrSize = 216;
+		const qrX = (document.page.width - qrSize) / 2;
+		document.image(qrImage, qrX, document.y, { width: qrSize, height: qrSize });
+		document.y += qrSize + 12;
+
 		document.fontSize(10).fillColor('#111111');
-		document.text(`Application ID: ${applicationNumber}`);
-		document.text(`Applicant ID: ${application.applicantId}`);
-		document.text(`Name: ${application.name || [profile?.givenName, profile?.middleName, profile?.lastName, profile?.suffix].filter(Boolean).join(' ')}`);
-		document.text(`Email: ${application.email || ''}`);
-		document.moveDown();
-		document.text(`Exam Date: ${schedule?.examDate ? new Date(schedule.examDate).toLocaleDateString('en-PH') : 'To be assigned'}`);
-		document.text(`Batch: ${String(schedule?.batch || '').replace(/^batch_/, 'Batch ') || 'To be assigned'}`);
-		document.text(`Exam Time: ${schedule?.startTime && schedule?.endTime ? `${schedule.startTime} - ${schedule.endTime}` : 'To be assigned'}`);
-		document.text(`Venue/Facility: ${schedule?.facilityId || 'To be assigned'}`);
-		document.moveDown();
-		document.text('Bring this printed permit, your official Payment Slip from the Cashier, and a valid ID.', { align: 'left' });
+		document.text(`Application Code: ${applicationNumber}`, { align: 'center' });
+		document.moveDown(1);
+		document.fontSize(9).text('Present your Statement of Account (Hardcopy/Softcopy) or QR Code, along with your official Payment slip from the Cashier, to the Examination Facilitator for application code verification.', { align: 'justify' });
+		document.moveDown(1.2);
+
+		function section(title, rows) {
+			document.fontSize(12).fillColor('#800000').text(title, { underline: true });
+			document.moveDown(0.35);
+			document.fillColor('#111111').fontSize(10);
+			for (const [label, value] of rows) {
+				document.text(label, 50, document.y, { continued: true });
+				document.text(`  ${value || 'Not provided'}`, { align: 'left' });
+			}
+			document.moveDown(0.8);
+		}
+
+		section('APPLICATION INFORMATION', [
+			['Applicant ID:', applicationNumber],
+			['Exam Date:', schedule?.examDate ? new Date(schedule.examDate).toLocaleDateString('en-PH') : 'To be assigned'],
+			['Exam Batch:', schedule?.batch ? String(schedule.batch).replace(/^batch_/, 'Batch ') : 'To be assigned'],
+			['Exam Time:', schedule?.startTime && schedule?.endTime ? `${schedule.startTime} - ${schedule.endTime}` : 'To be assigned']
+		]);
+		section('APPLICANT INFORMATION', [
+			['Name:', fullName],
+			['Address:', fullAddress],
+			['Contact Number:', profile?.phone || application.profile?.phone || 'Not provided'],
+			['Email:', application.email || profile?.email || 'Not provided']
+		]);
 		document.end();
 	});
 }

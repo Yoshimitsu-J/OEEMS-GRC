@@ -5,6 +5,41 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Admin Questionnaire JS Initialized.');
 
+  const actionDialog = document.getElementById('questionnaireActionDialog');
+  const actionTitle = document.getElementById('questionnaireActionTitle');
+  const actionMessage = document.getElementById('questionnaireActionMessage');
+  const actionCancel = document.getElementById('questionnaireActionCancel');
+  const actionConfirm = document.getElementById('questionnaireActionConfirm');
+  const messageDialog = document.getElementById('questionnaireMessageDialog');
+  const messageTitle = document.getElementById('questionnaireMessageTitle');
+  let actionCallback = null;
+
+  function showMessage(title, message) {
+    messageTitle.textContent = title;
+    document.getElementById('questionnaireMessageText').textContent = message;
+    messageDialog.showModal();
+  }
+
+  function confirmAction(title, message, callback, confirmLabel = 'Confirm') {
+    actionTitle.textContent = title;
+    actionMessage.textContent = message;
+    actionConfirm.textContent = confirmLabel;
+    actionCallback = callback;
+    actionDialog.showModal();
+  }
+
+  actionCancel.addEventListener('click', () => {
+    actionCallback = null;
+    actionDialog.close();
+  });
+  actionConfirm.addEventListener('click', async () => {
+    const callback = actionCallback;
+    actionCallback = null;
+    actionDialog.close();
+    if (callback) await callback();
+  });
+  document.querySelector('[data-close-questionnaire-message]').addEventListener('click', () => messageDialog.close());
+
   // =========================================
   // STATE
   // =========================================
@@ -53,6 +88,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================
   // LOAD FROM LOCALSTORAGE
   // =========================================
+  fetch('/api/admin/questionnaire/config', { credentials: 'same-origin', cache: 'no-store' })
+    .then((response) => response.ok ? response.json() : Promise.reject(new Error('Could not load questionnaire configuration.')))
+    .then((result) => {
+      if (!result.configuration?.categories || !result.configuration?.questionsByCategory) return;
+      categories = result.configuration.categories;
+      questionsByCategory = result.configuration.questionsByCategory;
+      currentCategory = categories[0] || currentCategory;
+      renderCategories();
+      renderQuestions();
+      renderSummary();
+    })
+    .catch((error) => console.error(error.message));
+
   const saved = localStorage.getItem('questionnaireData');
   if (saved) {
     try {
@@ -92,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteBtn.innerHTML = '<i class="bi bi-x"></i>';
         deleteBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          if (confirm(`Delete category "${cat}"?`)) {
+          confirmAction('Delete Category', `Delete category "${cat}"?`, () => {
             categories = categories.filter((c) => c !== cat);
             delete questionsByCategory[cat];
             if (currentCategory === cat) {
@@ -102,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCategories();
             renderQuestions();
             renderSummary();
-          }
+          }, 'Delete');
         });
         li.appendChild(deleteBtn);
       }
@@ -330,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
             q.options.splice(oIndex, 1);
             renderQuestions();
           } else {
-            alert('Kailangan ng hindi bababa sa 2 options.');
+            showMessage('Invalid Option Count', 'Kailangan ng hindi bababa sa 2 options.');
           }
         });
 
@@ -370,11 +418,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       header.querySelector('.q-del').addEventListener('click', (e) => {
         e.stopPropagation();
-        if (confirm(`Delete question #${q.id}?`)) {
+        confirmAction('Delete Question', `Delete question #${q.id}?`, () => {
           questionsByCategory[currentCategory].splice(qIndex, 1);
           renderQuestions();
           renderSummary();
-        }
+        }, 'Delete');
       });
 
       questionsContainer.appendChild(card);
@@ -449,11 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
   addCategoryBtn.addEventListener('click', () => {
     const name = newCategoryInput.value.trim();
     if (!name) {
-      alert('Please enter a category name.');
+      showMessage('Category Name Required', 'Please enter a category name.');
       return;
     }
     if (categories.includes(name)) {
-      alert('Category already exists.');
+      showMessage('Duplicate Category', 'Category already exists.');
       return;
     }
 
@@ -491,9 +539,22 @@ document.addEventListener('DOMContentLoaded', () => {
       questionsByCategory,
       savedAt: new Date().toISOString()
     };
-    localStorage.setItem('questionnaireData', JSON.stringify(data));
-    alert('✅ Questionnaire saved successfully!');
-    console.log('Saved:', data);
+    confirmAction('Save Questionnaire', 'Save these questionnaire changes to MongoDB?', async () => {
+    try {
+      const response = await fetch('/api/admin/questionnaire/config', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ configuration: data })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Could not save questionnaire.');
+      localStorage.setItem('questionnaireData', JSON.stringify(data));
+      showMessage('Save Successful', 'The questionnaire configuration was saved successfully.');
+    } catch (error) {
+      showMessage('Save Failed', error.message);
+    }
+    }, 'Save Changes');
   });
 
   // =========================================
@@ -535,12 +596,12 @@ document.addEventListener('DOMContentLoaded', () => {
           renderCategories();
           renderQuestions();
           renderSummary();
-          alert('✅ Imported successfully!');
+          showMessage('Import Successful', 'The questionnaire configuration was imported successfully.');
         } else {
-          alert('Invalid JSON format.');
+          showMessage('Invalid JSON', 'Invalid JSON format.');
         }
       } catch (err) {
-        alert('Failed to parse JSON file.');
+        showMessage('Import Failed', 'Failed to parse JSON file.');
         console.error(err);
       }
     };
