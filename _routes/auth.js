@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
 const { OAuth2Client } = require('google-auth-library');
 const OtpRequest = require('../_models/OtpRequest');
 const StudentProfile = require('../_models/StudentProfile');
@@ -40,6 +41,11 @@ function normalizeEmail(value) {
 
 function isValidEmail(email) {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254;
+}
+
+function isValidPassword(password) {
+	return typeof password === 'string' && password.length >= 8 && password.length <= 128 &&
+		/[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password) && /[_\/@#!]/.test(password);
 }
 
 function isLocalDevelopment(request) {
@@ -172,6 +178,23 @@ async function consumeOtp(userId, purpose, code) {
 		: { ok: false, expired: Date.now() > expiresAt };
 }
 
+async function validateOtpWithoutConsuming(userId, purpose, code) {
+	const otpRequest = await OtpRequest.findOne({
+		userId,
+		purpose,
+		consumedAt: null,
+		attemptCount: { $lt: OTP_MAX_ATTEMPTS }
+	}).select('+codeHash').sort({ createdAt: -1 });
+	if (!otpRequest || Date.now() > otpRequest.expiresAt.getTime()) return { ok: false };
+	if (compareOtp(code, otpRequest.codeHash)) return { ok: true, otpRequest };
+	await OtpRequest.updateOne({
+		_id: otpRequest._id,
+		consumedAt: null,
+		attemptCount: { $lt: OTP_MAX_ATTEMPTS }
+	}, { $inc: { attemptCount: 1 } });
+	return { ok: false };
+}
+
 async function findOrCreateGoogleUser(profile) {
 	const email = normalizeEmail(profile.email);
 	let user = await User.findOne({ googleId: profile.sub }).select('+googleId');
@@ -218,8 +241,8 @@ router.post('/signup', requireSameOrigin, authLimiter, async (request, response)
 	try {
 		const email = normalizeEmail(request.body.email);
 		const password = request.body.password;
-		if (!isValidEmail(email) || typeof password !== 'string' || password.length < 8 || password.length > 128) {
-			return response.status(400).json({ error: 'Enter a valid email and a password of 8 to 128 characters.' });
+		if (!isValidEmail(email) || !isValidPassword(password)) {
+			return response.status(400).json({ error: 'Enter a valid email and a password that meets all listed requirements.' });
 		}
 
 		let user = await User.findOne({ email });
@@ -377,42 +400,134 @@ router.post('/password-reset/request', requireSameOrigin, authLimiter, async (re
 	}
 
 	const genericMessage = 'If an active account exists for that email, a reset code has been sent.';
+	let delivery = null;
 	try {
 		const user = await User.findOne({ email, emailVerified: true, accountStatus: 'active' });
 		if (user) {
 			try {
-				await issueOtp(user, 'password_reset', isLocalDevelopment(request));
+				delivery = await issueOtp(user, 'password_reset', isLocalDevelopment(request));
 			} catch (error) {
 				if (error.status !== 429) console.error('Password reset email failed:', error.message);
 			}
 		}
-		response.status(202).json({ ok: true, message: genericMessage });
+		response.status(202).json({
+			ok: true,
+			message: genericMessage,
+			isDevMode: isLocalDevelopment(request),
+			expiresInMs: delivery ? Math.max(0, delivery.expiresAt.getTime() - Date.now()) : 2 * 60 * 1000
+		});
 	} catch (error) {
 		console.error('Password reset request failed:', error.message);
-		response.status(202).json({ ok: true, message: genericMessage });
+		response.status(202).json({ ok: true, message: genericMessage, isDevMode: isLocalDevelopment(request), expiresInMs: 2 * 60 * 1000 });
 	}
 });
 
-router.post('/password-reset/confirm', requireSameOrigin, authLimiter, async (request, response) => {
+router.post('/password-reset/resend', requireSameOrigin, authLimiter, async (request, response) => {
+	const email = normalizeEmail(request.body.email);
+	if (!isValidEmail(email)) return response.status(400).json({ error: 'Enter a valid email address.' });
+	const genericMessage = 'If an active account exists for that email, a reset code has been sent.';
+	try {
+		const user = await User.findOne({ email, emailVerified: true, accountStatus: 'active' });
+		let delivery = null;
+		if (user) {
+			try {
+				delivery = await issueOtp(user, 'password_reset', isLocalDevelopment(request));
+			} catch (error) {
+				if (error.status === 429) return response.status(429).json({ error: error.message });
+				console.error('Password reset resend failed:', error.message);
+			}
+		}
+		response.status(202).json({
+			ok: true,
+			message: genericMessage,
+			isDevMode: isLocalDevelopment(request),
+			expiresInMs: delivery ? Math.max(0, delivery.expiresAt.getTime() - Date.now()) : 2 * 60 * 1000
+		});
+	} catch (error) {
+		console.error('Password reset resend failed:', error.message);
+		response.status(202).json({ ok: true, message: genericMessage, isDevMode: isLocalDevelopment(request), expiresInMs: 2 * 60 * 1000 });
+	}
+});
+
+router.post('/password-reset/verify', requireSameOrigin, authLimiter, async (request, response) => {
 	const email = normalizeEmail(request.body.email);
 	const code = typeof request.body.code === 'string' ? request.body.code.trim() : '';
-	const password = request.body.password;
-	if (!isValidEmail(email) || !/^\d{6}$/.test(code) || typeof password !== 'string' || password.length < 8 || password.length > 128) {
-		return response.status(400).json({ error: 'Enter a valid email, six-digit code, and an 8 to 128 character password.' });
+	if (!isValidEmail(email) || !/^\d{6}$/.test(code)) {
+		return response.status(400).json({ error: 'Enter a valid email and six-digit verification code.' });
 	}
 
 	try {
 		const user = await User.findOne({ email, emailVerified: true, accountStatus: 'active' });
-		const verification = user ? await consumeOtp(user._id, 'password_reset', code) : { ok: false };
+		const verification = user ? await validateOtpWithoutConsuming(user._id, 'password_reset', code) : { ok: false };
 		if (!user || !verification.ok) {
 			return response.status(400).json({ error: 'The reset code is incorrect, expired, or already used.' });
 		}
-		user.passwordHash = await hashPassword(password);
-		await user.save();
-		response.json({ ok: true, message: 'Password reset. Please sign in with your new password.' });
+		await regenerateSession(request);
+		request.session.passwordReset = {
+			userId: user._id.toString(),
+			otpRequestId: verification.otpRequest._id.toString(),
+			expiresAt: Math.min(verification.otpRequest.expiresAt.getTime(), Date.now() + 10 * 60 * 1000)
+		};
+		await saveSession(request);
+		response.json({ ok: true, redirectUrl: '/resetPassword.html' });
 	} catch (error) {
+		console.error('Password reset OTP verification failed:', error.message);
+		response.status(500).json({ error: 'Could not verify the code. Please try again.' });
+	}
+});
+
+router.post('/password-reset/confirm', requireSameOrigin, authLimiter, async (request, response) => {
+	const password = request.body.password;
+	const passwordConfirmation = request.body.confirmPassword;
+	if (!isValidPassword(password) || password !== passwordConfirmation) {
+		return response.status(400).json({ error: 'Enter matching passwords that meet all listed requirements.' });
+	}
+
+	const grant = request.session.passwordReset;
+	if (!grant?.userId || !grant.otpRequestId || grant.expiresAt <= Date.now()) {
+		return response.status(401).json({ error: 'Your password reset session expired. Request a new code.' });
+	}
+
+	const passwordHash = await hashPassword(password);
+	const session = await mongoose.startSession();
+	try {
+		await session.withTransaction(async () => {
+			const otpRequest = await OtpRequest.findOneAndUpdate({
+				_id: grant.otpRequestId,
+				userId: grant.userId,
+				purpose: 'password_reset',
+				consumedAt: null,
+				attemptCount: { $lt: OTP_MAX_ATTEMPTS },
+				expiresAt: { $gt: new Date() }
+			}, {
+				$set: { consumedAt: new Date() },
+				$inc: { attemptCount: 1 }
+			}, { new: true, session }).select('_id');
+			if (!otpRequest) {
+				const error = new Error('Your reset code expired or has already been used. Request a new code.');
+				error.status = 401;
+				throw error;
+			}
+			const result = await User.updateOne({
+				_id: grant.userId,
+				emailVerified: true,
+				accountStatus: 'active'
+			}, { $set: { passwordHash } }, { session });
+			if (result.matchedCount !== 1) {
+				const error = new Error('This account cannot reset its password.');
+				error.status = 401;
+				throw error;
+			}
+		});
+		request.session.passwordReset = null;
+		await saveSession(request);
+		response.json({ ok: true, message: 'Password reset successfully.' });
+	} catch (error) {
+		if (error.status === 401) return response.status(401).json({ error: error.message });
 		console.error('Password reset failed:', error.message);
 		response.status(500).json({ error: 'Could not reset the password. Please try again.' });
+	} finally {
+		await session.endSession();
 	}
 });
 

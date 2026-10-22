@@ -36,7 +36,7 @@
         </div>
 
         <div class="forgot-pass-container">
-          <a href="#" id="openForgotPassword">Forgot Password?</a>
+          <a href="forgotPassword.html">Forgot Password?</a>
         </div>
 
         <button type="submit" class="btn-login">LOGIN</button>
@@ -49,57 +49,6 @@
           Don't have an account? <a href="signUp.html">Sign Up</a>
         </div>
       </form>
-    </div>
-  </div>
-
-  <div id="forgotPasswordModal" class="modal-overlay hidden">
-    <div class="modal-card">
-      <span class="close-modal" id="closeForgotPassword">&times;</span>
-
-      <div id="forgotStep1" class="forgot-step">
-        <h2>Forgot Password?</h2>
-        <p class="otp-help">Enter your email address and we'll send you a verification code.</p>
-        <label for="forgotEmail" class="modal-label">Email Address</label>
-        <input type="email" id="forgotEmail" class="modal-input" placeholder="you@example.com" required>
-        <button id="sendCodeBtn" class="btn-primary btn-block">Send Verification Code</button>
-        <p id="forgotMessage1" class="forgot-message"></p>
-      </div>
-
-      <div id="forgotStep2" class="forgot-step hidden">
-        <h2>Verify Code</h2>
-        <p class="otp-help">Enter the 6-digit code sent to your email.</p>
-        <div class="otp-inputs">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-          <input type="text" maxlength="1" class="otp-box forgotOtpBox">
-        </div>
-        <button id="verifyCodeBtn" class="btn-primary btn-block">Continue</button>
-        <p id="forgotMessage2" class="forgot-message"></p>
-      </div>
-
-      <div id="forgotStep3" class="forgot-step hidden">
-        <h2>Reset Password</h2>
-        <p class="otp-help">Choose a new password for your account.</p>
-        <label for="newPassword" class="modal-label">New Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="newPassword" class="modal-input" placeholder="Enter new password">
-          <button type="button" class="toggle-password" id="toggleNewPassword">
-            <i class="bi bi-eye" id="eyeIconNew"></i>
-          </button>
-        </div>
-        <label for="confirmNewPassword" class="modal-label">Confirm Password</label>
-        <div class="password-wrapper">
-          <input type="password" id="confirmNewPassword" class="modal-input" placeholder="Confirm new password">
-          <button type="button" class="toggle-password" id="toggleConfirmNew">
-            <i class="bi bi-eye" id="eyeIconConfirmNew"></i>
-          </button>
-        </div>
-        <button id="resetPasswordBtn" class="btn-primary btn-block">Reset Password</button>
-        <p id="forgotMessage3" class="forgot-message"></p>
-      </div>
     </div>
   </div>
 

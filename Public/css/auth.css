@@ -34,6 +34,9 @@
 .auth-primary { border: 1px solid var(--auth-maroon); background: var(--auth-maroon); color: #fff; cursor: pointer; }
 .auth-primary:hover:not(:disabled) { background: #650000; }
 .auth-primary:disabled { cursor: not-allowed; opacity: 0.55; }
+.auth-secondary { display: flex; width: 100%; min-height: 2.9rem; align-items: center; justify-content: center; border: 1px solid #aaa0a0; border-radius: 4px; background: #fff; color: var(--auth-maroon); font: inherit; font-weight: 750; cursor: pointer; }
+.auth-secondary:hover:not(:disabled) { background: #faf7f7; }
+.auth-secondary:disabled { cursor: not-allowed; opacity: 0.55; }
 .auth-google { border: 1px solid #aaa0a0; background: #fff; color: #292020; }
 .auth-google:hover { border-color: var(--auth-maroon); background: #faf7f7; }
 .auth-google i { color: #4285f4; }
@@ -52,4 +55,6 @@
 .auth-dialog-close { position: absolute; top: 0.6rem; right: 0.7rem; width: 2rem; height: 2rem; border: 0; background: transparent; color: var(--auth-muted); font-size: 1.7rem; cursor: pointer; }
 .otp-digit-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.5rem; }
 .otp-digit { width: 100%; min-width: 0; height: 3.3rem; border: 1px solid #a99b9b; border-radius: 4px; background: #fff; color: var(--auth-ink); font: inherit; font-size: 1.35rem; font-variant-numeric: tabular-nums; text-align: center; }
+.auth-success-dialog { text-align: center; }
+.auth-success-dialog .auth-primary { margin-top: 1rem; }
 @media (max-width: 370px) { .otp-digit-row { gap: 0.3rem; } .otp-digit { height: 3rem; font-size: 1.2rem; } }
