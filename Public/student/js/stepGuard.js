@@ -87,7 +87,7 @@
     if (isPending()) return false;
     if (status.workflowStatus === 'approved') return step === 5;
     if (status.workflowStatus === 'result_released') return step === 6;
-    if (['declined', 'exam_completed'].includes(status.workflowStatus) || step > 4) return false;
+    if (status.workflowStatus === 'exam_completed' || step > 4) return false;
     const completedThrough = status.nextStep?.number || 2;
     return step <= completedThrough;
   }

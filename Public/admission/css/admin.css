@@ -2347,12 +2347,51 @@ a.btn-logout-nav:hover {
 .application-summary-modal-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
 .application-summary-modal-content p { margin: 0; padding: 9px 0; border-bottom: 1px solid #e5e0e0; overflow-wrap: anywhere; font-size: 13px; }
 .application-summary-modal-content strong { color: #444; }
-.reject-application-dialog { width: min(92vw, 470px); }
+.reject-application-dialog { width: min(92vw, 580px); }
 .reject-application-dialog > p { line-height: 1.5; }
+.rejection-causes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; padding: 0; border: 0; }
+.rejection-causes legend { margin-bottom: 10px; font-weight: 800; }
+.rejection-causes label { display: flex; gap: 8px; align-items: flex-start; min-height: 76px; padding: 10px; border: 1px solid #d4caca; border-radius: 6px; cursor: pointer; }
+.rejection-causes label:has(input:checked) { border-color: #800000; background: #fff4f4; }
+.rejection-causes span { display: grid; gap: 4px; }
+.rejection-causes small { color: #685858; line-height: 1.3; }
+.other-rejection-wrap { display: grid; gap: 6px; margin-top: 12px; font-weight: 800; }
+.other-rejection-wrap textarea { width: 100%; resize: vertical; padding: 8px; border: 1px solid #aaa; border-radius: 4px; }
+@media (max-width: 650px) { .rejection-causes { grid-template-columns: 1fr; } }
 #reviewActionError { color: #9b1c1c; }
 .review-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .review-modal-actions .btn-decline { min-height: 38px; padding: 8px 14px; border: 0; border-radius: 4px; background: #f2caca; color: #7c1717; font-weight: 800; cursor: pointer; }
 .review-modal-actions button:disabled { cursor: wait; opacity: 0.65; }
+
+.activities-card { margin-bottom: 20px; padding: 16px; }
+.activities-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.activities-heading h3,
+.applications-table-section > h3 { margin: 0 0 12px; color: #333; font-size: 16px; }
+.activities-actions { display: flex; gap: 8px; }
+.activity-filter-btn,
+.btn-restore-application {
+  min-height: 36px;
+  padding: 8px 13px;
+  border: 1px solid #800000;
+  border-radius: 4px;
+  background: #fff;
+  color: #800000;
+  font-weight: 700;
+  cursor: pointer;
+}
+.activity-filter-btn:hover,
+.btn-restore-application:hover { background: #f8eeee; }
+.activity-list-table { min-width: 600px; }
+.applications-table-section { margin: 0 0 28px; }
+.applications-table-scroll,
+.activity-log-scroll { overflow-x: auto; }
+.applications-pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 12px 0 24px; color: #444; font-size: 13px; }
+.applications-page-btn { min-height: 34px; padding: 7px 12px; border: 1px solid #777; border-radius: 4px; background: #fff; color: #333; font-weight: 700; cursor: pointer; }
+.applications-page-btn:hover:not(:disabled) { background: #f2eeee; }
+.applications-page-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.activity-log-panel h3 { margin-top: 0; color: #800000; }
+.activity-log-table { min-width: 720px; }
+.activity-log-table td { overflow-wrap: anywhere; }
 
 @media (max-width: 700px) {
   .application-summary-modal-content { grid-template-columns: 1fr; }

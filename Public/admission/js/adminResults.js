@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentTab = 'pending';
   let selectedIds = new Set();
   let currentSort = { field: 'name', direction: 'asc' };
+  let activityEntries = [];
+  let activityPage = 0;
+  const pageSize = 10;
 
   // =========================================
   // DOM ELEMENTS
@@ -44,6 +47,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreTooltip = document.getElementById('scoreTooltip');
   const tooltipName = document.getElementById('tooltipName');
   const tooltipBody = document.getElementById('tooltipBody');
+  const resultsTablePanel = document.getElementById('resultsTablePanel');
+  const activityLogPanel = document.getElementById('activityLogPanel');
+  const activityLogBody = document.getElementById('activityLogBody');
+  const activityLogPrev = document.getElementById('activityLogPrev');
+  const activityLogNext = document.getElementById('activityLogNext');
+  const activityLogPageLabel = document.getElementById('activityLogPageLabel');
 
   // =========================================
   // LOAD DATA WITH VALIDATION
@@ -108,13 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
       currentTab = tab.dataset.tab;
       selectedIds.clear();
       updateTabsAndBars();
-      renderTable();
+      if (currentTab === 'activity') loadActivityLog();
+      else renderTable();
     });
   });
 
   function updateTabsAndBars() {
     if (pendingCountEl) pendingCountEl.textContent = pendingResults.length;
     if (notifiedCountEl) notifiedCountEl.textContent = notifiedResults.length;
+	if (activityLogPanel) activityLogPanel.hidden = currentTab !== 'activity';
+	if (resultsTablePanel) resultsTablePanel.hidden = currentTab === 'activity';
+	if (currentTab === 'activity') {
+		filtersRow.style.display = 'none';
+		bulkActionsBar.style.display = 'none';
+		notifiedBulkBar.style.display = 'none';
+		return;
+	}
 
     if (currentTab === 'pending') {
       filtersRow.style.display = '';
@@ -128,6 +146,61 @@ document.addEventListener('DOMContentLoaded', () => {
       lastColHeader.textContent = 'ACTIONS';
     }
   }
+
+  function renderActivityLog() {
+    const pageCount = Math.max(1, Math.ceil(activityEntries.length / pageSize));
+    activityPage = Math.min(activityPage, pageCount - 1);
+    const start = activityPage * pageSize;
+    activityLogBody.replaceChildren();
+    const rows = activityEntries.slice(start, start + pageSize);
+    if (!rows.length) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 5;
+      cell.textContent = 'No application review activities recorded.';
+      row.appendChild(cell);
+      activityLogBody.appendChild(row);
+    } else {
+      rows.forEach((entry) => {
+        const row = document.createElement('tr');
+        const timestamp = entry.createdAt ? new Date(entry.createdAt).toLocaleString('en-PH', { timeZone: 'Asia/Manila' }) : '—';
+        const action = String(entry.action || 'review').replace(/^application_/, '').replaceAll('_', ' ').toUpperCase();
+        const statusChange = entry.fromStatus && entry.toStatus ? `${entry.fromStatus} → ${entry.toStatus}` : '—';
+        [timestamp, entry.adminName || entry.adminId || '—', entry.applicantId || '—', action, statusChange].forEach((value) => {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
+        activityLogBody.appendChild(row);
+      });
+    }
+    activityLogPageLabel.textContent = `Page ${activityPage + 1} of ${pageCount}`;
+    activityLogPrev.disabled = activityPage === 0;
+    activityLogNext.disabled = activityPage >= pageCount - 1;
+  }
+
+  async function loadActivityLog() {
+    activityLogBody.innerHTML = '<tr><td colspan="5">Loading activity log...</td></tr>';
+    try {
+      const response = await fetch('/api/admin/applications/activity-log', { credentials: 'same-origin', cache: 'no-store' });
+      const result = await response.json().catch(() => ({}));
+      if (response.status === 401) return window.location.assign('/admission/adminLoginPage.html');
+      if (!response.ok) throw new Error(result.error || 'Could not load the activity log.');
+      activityEntries = result.entries || [];
+      activityPage = 0;
+      renderActivityLog();
+    } catch (error) {
+      const row = document.createElement('tr');
+      const cell = document.createElement('td');
+      cell.colSpan = 5;
+      cell.textContent = error.message;
+      row.replaceChildren(cell);
+      activityLogBody.replaceChildren(row);
+    }
+  }
+
+  activityLogPrev?.addEventListener('click', () => { activityPage -= 1; renderActivityLog(); });
+  activityLogNext?.addEventListener('click', () => { activityPage += 1; renderActivityLog(); });
 
   // =========================================
   // RENDER TABLE

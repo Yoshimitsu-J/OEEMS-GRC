@@ -886,7 +886,7 @@ router.post('/application/submit', requireSameOrigin, requireAuthenticated, requ
 						reviewedByAdminId: null,
 						updatedAt: new Date()
 					},
-					$setOnInsert: { applicantId, documentType, createdAt: new Date() }
+					$setOnInsert: { applicantId, documentType: document.documentType, createdAt: new Date() }
 				}, { upsert: true, session });
 			}
 		});

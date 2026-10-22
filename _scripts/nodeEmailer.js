@@ -86,4 +86,26 @@ ${contactNumber}`;
 	});
 }
 
-module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation };
+async function sendAdmissionDecision({ email, applicantName, decision, applicantId, applicationNumber, rejectionCause, rejectionMessage, pdfBuffer, admissionEmail, contactNumber }) {
+	if (!email) throw new Error('Applicant email is unavailable.');
+	const fullName = applicantName || 'Applicant';
+	if (decision === 'rejected' || decision === 'declined') {
+		const reason = rejectionMessage || rejectionCause || 'The application did not meet the required criteria.';
+		await getTransporter().sendMail({
+			from: process.env.MAIL_FROM || process.env.SMTP_USER,
+			to: email,
+			subject: `Application Update – Documents or Requirements Require Revision | [Applicant ID: ${applicantId}]`,
+			text: `Dear ${fullName},\n\nWe regret to inform you that your application has been declined after review.\n\nReason: ${reason}\n\nPlease review the cause above, make the necessary revisions, and restart your application from the Schedule Exam step. Your application progress must begin again from that stage.\n\nShould you have questions, contact the Admissions Office at ${admissionEmail || process.env.ADMISSION_EMAIL || 'the Admissions Office'} or ${contactNumber || '09123456789'} and reference your Applicant ID.\n\nBest regards,\nAdmissions Office\nGlobal Reciprocal Colleges\n09123456789`
+		});
+		return;
+	}
+	await getTransporter().sendMail({
+		from: process.env.MAIL_FROM || process.env.SMTP_USER,
+		to: email,
+		subject: `Application Approved – Statement of Application & Examination Permit | [Applicant ID: ${applicationNumber}]`,
+		text: `Dear ${fullName},\n\nWe are pleased to inform you that your application for the upcoming entrance examination at Global Reciprocal Colleges has been officially approved by the Admissions Office.\n\nAttached to this email is your official Statement of Application (A4-sized PDF), which includes your verified details, examination schedule, and a secure QR code containing your full application information and unique Application ID (${applicationNumber}).\n\nImportant Reminders for Your Examination:\n1. Required Items to Bring: Please present your printed Statement of Application (featuring your QR Code) along with your official Payment Slip from the Cashier and a valid ID to the Examination Facilitator upon entry for verification.\n2. Venue & Schedule: Please arrive at least 30 minutes before your scheduled batch time indicated in your Statement of Application.\n\nShould you have any questions or require further assistance, please reach out to the Admissions Office at ${admissionEmail || process.env.ADMISSION_EMAIL || 'the Admissions Office'} or ${contactNumber || '09123456789'} with your Applicant ID referenced.\n\nCongratulations, and we wish you the best on your entrance examination!\n\nBest regards,\nAdmissions Office\nGlobal Reciprocal Colleges\n09123456789`,
+		attachments: pdfBuffer ? [{ filename: `Statement-of-Application-${applicationNumber}.pdf`, content: pdfBuffer, contentType: 'application/pdf' }] : []
+	});
+}
+
+module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation, sendAdmissionDecision };

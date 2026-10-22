@@ -55,24 +55,69 @@
     <!-- MAIN CONTENT -->
     <main class="admin-main-content">
       <h2 class="page-title">APPLICATIONS</h2>
-      <div class="table-card">
-        <table class="admin-table applications-table">
-          <thead>
-            <tr>
+      <section class="table-card activities-card" aria-labelledby="activitiesTitle">
+        <div class="activities-heading">
+          <h3 id="activitiesTitle">Activities</h3>
+          <div class="activities-actions">
+            <button type="button" class="activity-filter-btn" data-activity-status="approved">Approved</button>
+            <button type="button" class="activity-filter-btn" data-activity-status="rejected">Rejected</button>
+          </div>
+        </div>
+        <div id="activitiesListPanel" hidden>
+          <h4 id="activitiesListTitle"></h4>
+          <div class="applications-table-scroll">
+            <table class="admin-table applications-table activity-list-table">
+              <thead><tr><th>Name</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="activitiesListBody"></tbody>
+            </table>
+          </div>
+          <div class="applications-pagination">
+            <button type="button" id="activitiesPrev" class="applications-page-btn">PREV</button>
+            <span id="activitiesPageLabel">Page 1 of 1</span>
+            <button type="button" id="activitiesNext" class="applications-page-btn">NEXT</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="applications-table-section" aria-labelledby="activeApplicationsTitle">
+        <h3 id="activeApplicationsTitle">Applications</h3>
+        <div class="table-card applications-table-scroll">
+          <table class="admin-table applications-table">
+            <thead><tr>
               <th><button type="button" class="applications-sort" data-sort="name">NAME <i class="bi bi-arrow-down-up"></i></button></th>
               <th><button type="button" class="applications-sort" data-sort="date">DATE <i class="bi bi-arrow-down-up"></i></button></th>
-              <th>FORM-138 / REPORT CARD</th>
-              <th>PSA BIRTH CERTIFICATE</th>
-              <th>GOOD MORAL</th>
-              <th>APPLICATION SUMMARY</th>
-              <th>APPROVAL ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="applicationsTableBody">
-            <tr><td colspan="7" class="applications-empty">Loading submitted applications...</td></tr>
-          </tbody>
-        </table>
-      </div>
+              <th>FORM-138 / REPORT CARD</th><th>2X2 PICTURE</th><th>GOOD MORAL</th>
+              <th>APPLICATION SUMMARY</th><th>APPROVAL ACTIONS</th>
+            </tr></thead>
+            <tbody id="applicationsTableBody"><tr><td colspan="7" class="applications-empty">Loading submitted applications...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="applications-pagination">
+          <button type="button" id="applicationsPrev" class="applications-page-btn">PREV</button>
+          <span id="applicationsPageLabel">Page 1 of 1</span>
+          <button type="button" id="applicationsNext" class="applications-page-btn">NEXT</button>
+        </div>
+      </section>
+
+      <section class="applications-table-section" aria-labelledby="restoredApplicationsTitle">
+        <h3 id="restoredApplicationsTitle">Restored</h3>
+        <div class="table-card applications-table-scroll">
+          <table class="admin-table applications-table">
+            <thead><tr>
+              <th><button type="button" class="applications-sort" data-sort="name">NAME <i class="bi bi-arrow-down-up"></i></button></th>
+              <th><button type="button" class="applications-sort" data-sort="date">DATE <i class="bi bi-arrow-down-up"></i></button></th>
+              <th>FORM-138 / REPORT CARD</th><th>2X2 PICTURE</th><th>GOOD MORAL</th>
+              <th>APPLICATION SUMMARY</th><th>APPROVAL ACTIONS</th>
+            </tr></thead>
+            <tbody id="restoredTableBody"><tr><td colspan="7" class="applications-empty">Loading restored applications...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="applications-pagination">
+          <button type="button" id="restoredPrev" class="applications-page-btn">PREV</button>
+          <span id="restoredPageLabel">Page 1 of 1</span>
+          <button type="button" id="restoredNext" class="applications-page-btn">NEXT</button>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -91,6 +136,16 @@
 
   <dialog id="rejectApplicationDialog" class="applications-dialog reject-application-dialog" aria-labelledby="rejectApplicationTitle">
     <h2 id="rejectApplicationTitle">Reject application?</h2>
+    <fieldset class="rejection-causes">
+      <legend>Select a rejection cause</legend>
+      <label><input type="radio" name="rejectionCause" value="Incomplete or Missing Required Documents"><span><strong>Incomplete or Missing Required Documents</strong><small>Mandatory credentials were not submitted.</small></span></label>
+      <label><input type="radio" name="rejectionCause" value="Blurred or Illegible"><span><strong>Blurred or Illegible</strong><small>Uploaded text, grades, or personal details are unreadable.</small></span></label>
+      <label><input type="radio" name="rejectionCause" value="Failure to Meet Academic Prerequisites"><span><strong>Failure to Meet Academic Prerequisites</strong><small>Minimum GPA, core grades, or cutoff scores were not met.</small></span></label>
+      <label><input type="radio" name="rejectionCause" value="Altered or Modified Documents"><span><strong>Altered or Modified Documents</strong><small>Files appear cropped, edited, manipulated, or improperly filtered.</small></span></label>
+      <label><input type="radio" name="rejectionCause" value="Unprofessional Use"><span><strong>Unprofessional Use</strong><small>Applicant did not use the application professionally.</small></span></label>
+      <label><input type="radio" name="rejectionCause" value="Others"><span><strong>Others</strong><small>Send a personalized rejection message.</small></span></label>
+    </fieldset>
+    <label id="otherRejectionWrap" class="other-rejection-wrap" hidden>Personalized message<textarea id="otherRejectionMessage" rows="4" maxlength="1000"></textarea></label>
     <p id="reviewActionError" role="alert"></p>
     <div class="review-modal-actions">
       <button type="button" class="applications-dialog-close" id="cancelRejectApplication">Cancel</button>

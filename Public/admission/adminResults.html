@@ -81,6 +81,10 @@
           NOTIFIED / RECYCLE BIN
           <span class="tab-badge" id="notifiedCount">0</span>
         </button>
+        <button class="app-tab" data-tab="activity">
+          <i class="bi bi-clock-history"></i>
+          ACTIVITY LOG
+        </button>
       </div>
 
       <!-- =========================================
@@ -174,7 +178,7 @@
       <!-- =========================================
            TABLE
            ========================================= -->
-      <div class="table-card">
+      <div class="table-card" id="resultsTablePanel">
         <table class="admin-table results-table">
           <thead>
             <tr>
@@ -195,6 +199,21 @@
           </tbody>
         </table>
       </div>
+
+      <section id="activityLogPanel" class="table-card activity-log-panel" hidden aria-labelledby="activityLogTitle">
+        <h3 id="activityLogTitle">APPLICATION ACTIVITY LOG</h3>
+        <div class="activity-log-scroll">
+          <table class="admin-table activity-log-table">
+            <thead><tr><th>DATE / TIME</th><th>ADMIN</th><th>APPLICANT ID</th><th>ACTION</th><th>STATUS CHANGE</th></tr></thead>
+            <tbody id="activityLogBody"><tr><td colspan="5">Loading activity...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="applications-pagination">
+          <button type="button" id="activityLogPrev" class="applications-page-btn">PREV</button>
+          <span id="activityLogPageLabel">Page 1 of 1</span>
+          <button type="button" id="activityLogNext" class="applications-page-btn">NEXT</button>
+        </div>
+      </section>
     </main>
   </div>
 
