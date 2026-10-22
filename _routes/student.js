@@ -142,6 +142,7 @@ function makeProfileInput(body) {
 		lastName: text(body.lastName),
 		givenName: text(body.givenName),
 		middleName: text(body.middleName),
+		suffix: text(body.suffix, 24),
 		sex: text(body.sex, 16).toLowerCase(),
 		birthday,
 		phone,
@@ -752,32 +753,44 @@ router.get('/application/summary.pdf', requireAuthenticated, requireCompletedPro
 
 		response.set({
 			'Content-Type': 'application/pdf',
-			'Content-Disposition': `attachment; filename="${profile.applicantId}-application-summary.pdf"`,
+			'Content-Disposition': `${request.query.download === '1' ? 'attachment' : 'inline'}; filename="${profile.applicantId}-application-summary.pdf"`,
 			'Cache-Control': 'no-store'
 		});
 		const document = new PDFDocument({ size: 'A4', margin: 52, info: { Title: 'OEEMS Application Summary' } });
 		document.pipe(response);
-		document.fontSize(19).fillColor('#800000').text('GLOBAL RECIPROCAL COLLEGES', { align: 'center' });
-		document.moveDown(0.35).fontSize(14).fillColor('#222222').text('Entrance Examination Application Summary', { align: 'center' });
-		document.moveDown(1.4).fontSize(11).fillColor('#800000').text('APPLICANT DETAILS');
-		document.moveDown(0.5).fillColor('#222222');
-		[
-			['Applicant ID', profile.applicantId],
-			['Applicant Name', `${profile.lastName}, ${profile.givenName}${profile.middleName ? ` ${profile.middleName}` : ''}`],
-			['Email', response.locals.authUser.email],
-			['Sex', profile.sex],
-			['Date of Birth', new Date(profile.birthday).toLocaleDateString('en-PH', { dateStyle: 'long', timeZone: 'Asia/Manila' })],
-			['Phone', profile.phone],
-			['Address', `${profile.address.streetAddress}, ${profile.address.barangay}, ${profile.address.city}, ${profile.address.region}, ${profile.address.country}`],
-			['Guardian', `${profile.guardian.name} (${profile.guardian.phone})`]
-		].forEach(([label, value]) => document.font('Helvetica-Bold').text(`${label}: `, { continued: true }).font('Helvetica').text(String(value || '—')));
-		document.moveDown(1).font('Helvetica-Bold').fontSize(11).fillColor('#800000').text('EXAMINATION SCHEDULE');
-		document.moveDown(0.5).font('Helvetica').fontSize(10).fillColor('#222222');
-		document.text(`Date: ${new Date(workflow.schedule.examDate).toLocaleDateString('en-PH', { dateStyle: 'long', timeZone: 'Asia/Manila' })}`);
-		document.text(`Batch: ${workflow.schedule.batch.replace(/^batch_/, 'Batch ')}`);
-		document.text(`Time: ${workflow.schedule.startTime} - ${workflow.schedule.endTime}`);
-		document.text(`Facility: ${workflow.schedule.facilityId || 'To be assigned'}`);
-		document.moveDown(1).fontSize(9).fillColor('#666666').text('This summary is for application reference and is not valid for taking the entrance examination until approved by the Admissions Department.', { align: 'justify' });
+		const fullName = [profile.givenName, profile.middleName, profile.lastName, profile.suffix].filter(Boolean).join(' ');
+		const address = profile.address || {};
+		const section = (title) => {
+			document.moveDown(1).font('Helvetica-Bold').fontSize(11).fillColor('#800000').text(title);
+			document.moveDown(0.35).moveTo(52, document.y).lineTo(543, document.y).strokeColor('#555555').lineWidth(0.7).stroke();
+			document.moveDown(0.5).font('Helvetica').fontSize(10).fillColor('#111111');
+		};
+		const detail = (label, value) => document.font('Helvetica-Bold').text(`${label}: `, { continued: true }).font('Helvetica').text(String(value || '—'));
+
+		document.font('Helvetica-Bold').fontSize(17).fillColor('#800000').text('GLOBAL RECIPROCAL COLLEGES', { align: 'center' });
+		document.moveDown(0.35).font('Helvetica').fontSize(13).fillColor('#222222').text('Application Summary', { align: 'center' });
+		document.moveDown(1.6);
+		detail('Application ID', profile.applicantId);
+		section('APPLICANT INFORMATION');
+		detail('Name', fullName);
+		detail('Last Name', profile.lastName);
+		detail('Given Name', profile.givenName);
+		detail('Middle Name', profile.middleName || 'N/A');
+		detail('Suffix', profile.suffix || 'N/A');
+		section('ADDRESS');
+		detail('Country', address.country);
+		detail('Region', address.region);
+		detail('City / Municipality', address.city);
+		detail('Barangay', address.barangay);
+		detail('Home Address', address.streetAddress || address.street);
+		section('EXAM SCHEDULE');
+		detail('Date', new Date(workflow.schedule.examDate).toLocaleDateString('en-PH', { dateStyle: 'long', timeZone: 'Asia/Manila' }));
+		detail('Batch', workflow.schedule.batch.replace(/^batch_/, 'Batch '));
+		detail('Time', `${workflow.schedule.startTime} - ${workflow.schedule.endTime}`);
+		section('APPLICANT CONTACT INFORMATION');
+		detail('Mobile Number', profile.phone);
+		detail('Email Address', response.locals.authUser.email);
+		document.moveDown(1.4).fontSize(9).fillColor('#666666').text('This summary is for review. Your application remains subject to verification by the Admission Office.', { align: 'justify' });
 		document.end();
 	} catch (error) {
 		console.error('Application summary PDF failed:', error.message);
@@ -789,7 +802,7 @@ router.post('/application/submit', requireSameOrigin, requireAuthenticated, requ
 	const profile = response.locals.studentProfile;
 	const user = response.locals.authUser;
 	const applicantId = profile.applicantId;
-	const cycle = currentCycle();
+	const cycle = (await StudentApplication.findOne({ applicantId }).select('cycle').lean())?.cycle || currentCycle();
 	const existingApplication = await StudentApplication.findOne({ applicantId, cycle }).lean();
 	if (existingApplication?.status === 'under_review' && existingApplication.admissionStatus === 'pending') {
 		return response.status(200).json({ ok: true, applicationStatus: 'Pending', alreadySubmitted: true, redirectUrl: '/student/' });
@@ -824,6 +837,58 @@ router.post('/application/submit', requireSameOrigin, requireAuthenticated, requ
 			application.admissionStatus = 'pending';
 			application.approval = { status: 'pending', reviewedAt: null, reviewedByAdminId: null, reason: null };
 			submittedApplication = await application.save({ session });
+
+			const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+			const submittedAt = submittedApplication.updatedAt || new Date();
+			const fullName = [profile.lastName, profile.givenName, profile.middleName, profile.suffix].filter(Boolean).join(' ');
+			const admissionApplication = {
+				applicantId,
+				studentId: profile.studentId,
+				name: fullName,
+				email: user.email,
+				phone: profile.phone,
+				cycle,
+				status: 'pending',
+				submittedAt,
+				profile: {
+					lastName: profile.lastName,
+					givenName: profile.givenName,
+					middleName: profile.middleName || '',
+					suffix: profile.suffix || '',
+					address: profile.address
+				},
+				schedule: {
+					scheduleId: schedule.scheduleId,
+					examDate: schedule.examDate,
+					batch: schedule.batch,
+					startTime: schedule.startTime,
+					endTime: schedule.endTime,
+					facilityId: schedule.facilityId || null
+				},
+				updatedAt: new Date()
+			};
+			await admissionDb.collection('applications').updateOne({ applicantId }, {
+				$set: admissionApplication,
+				$setOnInsert: { createdAt: new Date() }
+			}, { upsert: true, session });
+
+			for (const document of documents) {
+				await admissionDb.collection('document_reviews').updateOne({ applicantId, documentType: document.documentType }, {
+					$set: {
+						studentId: profile.studentId,
+						documentId: document._id,
+						originalName: document.originalName || null,
+						storageKey: document.storageKey || null,
+						contentType: document.contentType || null,
+						verificationStatus: document.verificationStatus,
+						reviewStatus: 'pending',
+						reviewedAt: null,
+						reviewedByAdminId: null,
+						updatedAt: new Date()
+					},
+					$setOnInsert: { applicantId, documentType, createdAt: new Date() }
+				}, { upsert: true, session });
+			}
 		});
 	} catch (error) {
 		if (error.status === 409) return response.status(409).json({ error: error.message });
@@ -843,26 +908,35 @@ router.post('/application/submit', requireSameOrigin, requireAuthenticated, requ
 			applicantId,
 			lastName: profile.lastName,
 			givenName: profile.givenName,
+			middleName: profile.middleName,
+			suffix: profile.suffix,
 			submittedAt,
+			targetAcademicYear: cycle,
 			schedule: {
 				batch: schedule.batch.replace(/^batch_/, 'Batch '),
 				date: examDate.toLocaleDateString('en-PH', { dateStyle: 'long', timeZone: 'Asia/Manila' }),
 				time: `${schedule.startTime} - ${schedule.endTime}`,
 				facility: schedule.facilityId || 'To be assigned'
 			},
-			portalUrl
+			portalUrl,
+			admissionEmail: process.env.ADMISSION_EMAIL || 'admissions@grc.edu.ph',
+			contactNumber: process.env.ADMISSION_CONTACT_NUMBER || '09123456789'
 		});
 		emailSent = true;
 	} catch (error) {
 		console.error('Application confirmation email could not be sent:', error.code || error.message);
 	}
 
-	request.app.get('io')?.to(`student:${user._id}`).emit('student:application-submitted', {
-		applicantId,
-		applicationStatus: 'Pending',
-		progressPercent: 100
-	});
 	response.status(202).json({ ok: true, applicationStatus: 'Pending', emailSent, redirectUrl: '/student/' });
+	try {
+		request.app.get('io')?.to(`student:${user._id}`).emit('student:application-submitted', {
+			applicantId,
+			applicationStatus: 'Pending',
+			progressPercent: 100
+		});
+	} catch (error) {
+		console.error('Student submission notification failed:', error.message);
+	}
 });
 
 module.exports = router;

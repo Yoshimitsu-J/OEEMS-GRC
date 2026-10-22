@@ -1,598 +1,242 @@
-/* =========================================
-   ADMIN APPLICATIONS — Bulk + Sort + Archive
-   (APPROVE/DECLINE — walang pass/fail)
-   ========================================= */
-
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Admin Applications JS Initialized.');
-
-  // =========================================
-  // STATE
-  // =========================================
-  let activeApplications = [];
-
-  let archivedApplications = [];
-  let currentTab = 'active';
-  let selectedIds = new Set();
-  let currentSort = { field: 'name', direction: 'asc' };
-
-  // =========================================
-  // DOM ELEMENTS
-  // =========================================
   const tableBody = document.getElementById('applicationsTableBody');
-  const filterName = document.getElementById('filterName');
-  const filterDate = document.getElementById('filterDate');
-  const sortBySelect = document.getElementById('sortBy');
-  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-  const selectedCountEl = document.getElementById('selectedCount');
-  const archivedSelectedCountEl = document.getElementById('archivedSelectedCount');
-  const bulkActionsBar = document.getElementById('bulkActionsBar');
-  const archivedBulkBar = document.getElementById('archivedBulkBar');
-  const bulkApproveBtn = document.getElementById('bulkApproveBtn');
-  const bulkDeclineBtn = document.getElementById('bulkDeclineBtn');
-  const bulkRestoreBtn = document.getElementById('bulkRestoreBtn');
-  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-  const clearSelectionBtn = document.getElementById('clearSelectionBtn');
-  const clearArchivedBtn = document.getElementById('clearArchivedBtn');
-  const activeCountEl = document.getElementById('activeCount');
-  const archivedCountEl = document.getElementById('archivedCount');
-  const filtersRow = document.getElementById('filtersRow');
-  const lastColHeader = document.getElementById('lastColHeader');
-  const imageModal = document.getElementById('imageModal');
-  const imageModalImg = document.getElementById('imageModalImg');
-  const imageModalTitle = document.getElementById('imageModalTitle');
-  const closeImageModal = document.getElementById('closeImageModal');
-  const closeImageBtn = document.getElementById('closeImageBtn');
+  const documentDialog = document.getElementById('applicationDocumentDialog');
+  const documentTitle = document.getElementById('applicationDocumentTitle');
+  const documentEmpty = document.getElementById('applicationDocumentEmpty');
+  const documentImage = document.getElementById('applicationDocumentImage');
+  const summaryDialog = document.getElementById('applicationSummaryDialog');
+  const summaryContent = document.getElementById('applicationSummaryModalContent');
+  const rejectDialog = document.getElementById('rejectApplicationDialog');
+  const rejectTitle = document.getElementById('rejectApplicationTitle');
+  const reviewError = document.getElementById('reviewActionError');
+  const rejectButton = document.getElementById('confirmRejectApplication');
+  const documentTypes = [
+    { key: 'form138', label: 'Form-138 / Report Card' },
+    { key: 'psa_birth_certificate', label: 'PSA Birth Certificate' },
+    { key: 'good_moral', label: 'Good Moral' }
+  ];
+  let applications = [];
+  let sort = { field: 'date', direction: 'desc' };
+  let pendingReject = null;
+  let previewUrl = '';
 
-  // =========================================
-  // LOAD FROM LOCALSTORAGE
-  // =========================================
-  const saved = localStorage.getItem('applicationsData');
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      if (data.active) activeApplications = data.active;
-      if (data.archived) archivedApplications = data.archived;
-      console.log('Loaded applications from localStorage');
-    } catch (e) {
-      console.warn('Failed to load:', e);
-    }
-  }
-
-  function saveToStorage() {
-    localStorage.setItem('applicationsData', JSON.stringify({
-      active: activeApplications,
-      archived: archivedApplications
-    }));
-  }
-
-  // =========================================
-  // TAB SWITCHING
-  // =========================================
-  document.querySelectorAll('.app-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.app-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentTab = tab.dataset.tab;
-      selectedIds.clear();
-      updateTabsAndBars();
-      renderTable();
+  async function api(url, options = {}) {
+    const response = await fetch(url, {
+      credentials: 'same-origin',
+      cache: 'no-store',
+      ...options,
+      headers: { ...(options.headers || {}), ...(options.body ? { 'Content-Type': 'application/json' } : {}) }
     });
-  });
-
-  function updateTabsAndBars() {
-    if (activeCountEl) activeCountEl.textContent = activeApplications.length;
-    if (archivedCountEl) archivedCountEl.textContent = archivedApplications.length;
-
-    if (currentTab === 'active') {
-      filtersRow.style.display = '';
-      bulkActionsBar.style.display = '';
-      archivedBulkBar.style.display = 'none';
-      lastColHeader.textContent = 'APPROVAL';
-    } else {
-      filtersRow.style.display = 'none';
-      bulkActionsBar.style.display = 'none';
-      archivedBulkBar.style.display = '';
-      lastColHeader.textContent = 'ACTIONS';
+    const result = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      window.location.assign('/admission/adminLoginPage.html');
+      throw new Error('Admission administrator authentication required.');
     }
+    if (!response.ok) throw new Error(result.error || 'Request failed.');
+    return result;
   }
 
-  // =========================================
-  // RENDER TABLE
-  // =========================================
-  function renderTable() {
-    tableBody.innerHTML = '';
-    const data = getCurrentData();
+  function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
 
-    if (data.length === 0) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td colspan="8" class="applications-empty">
-          <i class="bi bi-${currentTab === 'active' ? 'inbox' : 'archive'}"></i>
-          <p>${currentTab === 'active' ? 'No active applications.' : 'Recycle bin is empty.'}</p>
-        </td>
-      `;
-      tableBody.appendChild(tr);
-      updateBulkBars();
+  function formatDate(value) {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-PH', {
+      year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Manila'
+    });
+  }
+
+  function sortedApplications() {
+    return [...applications].sort((left, right) => {
+      const direction = sort.direction === 'asc' ? 1 : -1;
+      if (sort.field === 'name') return (left.name || '').localeCompare(right.name || '') * direction;
+      return (new Date(left.submittedAt) - new Date(right.submittedAt)) * direction;
+    });
+  }
+
+  function renderTable() {
+    tableBody.replaceChildren();
+    const rows = sortedApplications();
+    if (!rows.length) {
+      const row = element('tr');
+      const cell = element('td', 'applications-empty', 'No submitted applications are awaiting review.');
+      cell.colSpan = 7;
+      row.appendChild(cell);
+      tableBody.appendChild(row);
       return;
     }
 
-    data.forEach((app) => {
-      const tr = document.createElement('tr');
-      tr.dataset.id = app.id;
+    rows.forEach((application) => {
+      const row = element('tr');
+      row.dataset.applicantId = application.applicantId;
+      row.append(
+        element('td', 'col-name', application.name || application.applicantId),
+        element('td', 'col-date', formatDate(application.submittedAt))
+      );
 
-      if (app.status === 'approved') tr.classList.add('row-approved');
-      if (app.status === 'declined') tr.classList.add('row-declined');
-
-      const isChecked = selectedIds.has(app.id);
-
-      let lastCell = '';
-      if (currentTab === 'active') {
-        lastCell = `
-          <td class="col-approval">
-            <div class="action-btn-group">
-              <button class="btn-approve" data-action="approve" data-id="${app.id}">APPROVE</button>
-              <button class="btn-decline" data-action="decline" data-id="${app.id}">DECLINE</button>
-            </div>
-          </td>
-        `;
-      } else {
-        const statusBadge = app.status === 'approved'
-          ? '<span class="archive-status approved">APPROVED</span>'
-          : '<span class="archive-status declined">DECLINED</span>';
-
-        lastCell = `
-          <td class="col-approval">
-            <div class="archive-action-group">
-              ${statusBadge}
-              <button class="btn-restore" data-id="${app.id}" title="Restore">
-                <i class="bi bi-arrow-counterclockwise"></i>
-              </button>
-              <button class="btn-delete-perm" data-id="${app.id}" title="Delete">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </td>
-        `;
-      }
-
-      tr.innerHTML = `
-        <td class="col-checkbox">
-          <input type="checkbox" class="table-checkbox row-checkbox" 
-                 data-id="${app.id}" ${isChecked ? 'checked' : ''}>
-        </td>
-        <td class="col-name">${app.name}</td>
-        <td class="col-date">${formatDate(app.date)}</td>
-        <td class="col-doc">${renderDocCell(app.form138, 'Form-138', app.id, app.name)}</td>
-        <td class="col-doc">${renderDocCell(app.psa, 'PSA Birth Cert', app.id, app.name)}</td>
-        <td class="col-doc">${renderDocCell(app.goodMoral, 'Good Moral', app.id, app.name)}</td>
-        <td class="col-doc">${renderDocCell(app.math, 'Math Exam', app.id, app.name)}</td>
-        ${lastCell}
-      `;
-
-      tableBody.appendChild(tr);
-    });
-
-    // Bind row checkboxes
-    tableBody.querySelectorAll('.row-checkbox').forEach((cb) => {
-      cb.addEventListener('change', (e) => {
-        const id = e.target.dataset.id;
-        if (e.target.checked) selectedIds.add(id);
-        else selectedIds.delete(id);
-        updateSelectAllState();
-        updateBulkBars();
+      documentTypes.forEach((type) => {
+        const cell = element('td', 'col-doc');
+        const preview = element('button', 'document-preview-btn', 'PREVIEW');
+        preview.type = 'button';
+        preview.setAttribute('aria-label', `Preview ${type.label} for ${application.name}`);
+        preview.addEventListener('click', () => previewDocument(application, type));
+        cell.appendChild(preview);
+        row.appendChild(cell);
       });
-    });
 
-    // Bind SHOW IMG
-    tableBody.querySelectorAll('.show-img-link').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        openImageModal(link.dataset.docType, link.dataset.applicant);
-      });
-    });
+      const summaryCell = element('td');
+      const summaryButton = element('button', 'application-review-btn', 'REVIEW');
+      summaryButton.type = 'button';
+      summaryButton.addEventListener('click', () => openSummary(application));
+      summaryCell.appendChild(summaryButton);
+      row.appendChild(summaryCell);
 
-    // Single approve/decline
-    tableBody.querySelectorAll('.btn-approve').forEach((btn) => {
-      btn.addEventListener('click', () => handleApproval(btn.dataset.id, 'approve'));
+      const actionCell = element('td', 'col-approval');
+      const actionGroup = element('div', 'action-btn-group');
+      const approve = element('button', 'btn-approve', 'APPROVE');
+      approve.type = 'button';
+      approve.addEventListener('click', () => reviewApplication(application, 'approve'));
+      const reject = element('button', 'btn-decline', 'REJECT');
+      reject.type = 'button';
+      reject.addEventListener('click', () => askToReject(application));
+      actionGroup.append(approve, reject);
+      actionCell.appendChild(actionGroup);
+      row.appendChild(actionCell);
+      tableBody.appendChild(row);
     });
-    tableBody.querySelectorAll('.btn-decline').forEach((btn) => {
-      btn.addEventListener('click', () => handleApproval(btn.dataset.id, 'decline'));
-    });
-
-    // Restore
-    tableBody.querySelectorAll('.btn-restore').forEach((btn) => {
-      btn.addEventListener('click', () => handleRestore(btn.dataset.id));
-    });
-
-    // Permanent delete
-    tableBody.querySelectorAll('.btn-delete-perm').forEach((btn) => {
-      btn.addEventListener('click', () => handleDeletePermanent(btn.dataset.id));
-    });
-
-    updateSelectAllState();
-    updateBulkBars();
   }
 
-  // =========================================
-  // GET CURRENT DATA
-  // =========================================
-  function getCurrentData() {
-    let source = currentTab === 'active' ? activeApplications : archivedApplications;
-    let filtered = [...source];
-
-    if (currentTab === 'active') {
-      const nameKeyword = filterName.value.trim().toLowerCase();
-      if (nameKeyword) {
-        filtered = filtered.filter((a) => a.name.toLowerCase().includes(nameKeyword));
-      }
-      const dateKeyword = filterDate.value;
-      if (dateKeyword) {
-        filtered = filtered.filter((a) => a.date === dateKeyword);
-      }
+  async function loadApplications() {
+    tableBody.innerHTML = '<tr><td colspan="7" class="applications-empty">Loading submitted applications...</td></tr>';
+    try {
+      const result = await api('/api/admin/applications');
+      applications = result.applications || [];
+      renderTable();
+    } catch (error) {
+      tableBody.replaceChildren();
+      const row = element('tr');
+      const cell = element('td', 'applications-empty', error.message);
+      cell.colSpan = 7;
+      row.appendChild(cell);
+      tableBody.appendChild(row);
     }
-
-    filtered.sort((a, b) => {
-      const { field, direction } = currentSort;
-      const dir = direction === 'asc' ? 1 : -1;
-      if (field === 'name') return a.name.localeCompare(b.name) * dir;
-      if (field === 'date') return (new Date(a.date) - new Date(b.date)) * dir;
-      if (field === 'status') {
-        const order = { pending: 1, approved: 2, declined: 3 };
-        return (order[a.status] - order[b.status]) * dir;
-      }
-      return 0;
-    });
-
-    return filtered;
   }
 
-  // =========================================
-  // DOC CELL
-  // =========================================
-  function renderDocCell(value, docType, applicantId, applicantName) {
-    if (value === 'show-img') {
-      return `<a href="#" class="show-img-link" 
-                data-doc-type="${docType}" 
-                data-applicant="${applicantName}" 
-                data-applicant-id="${applicantId}">SHOW IMG</a>`;
+  async function previewDocument(application, type) {
+    documentTitle.textContent = `${type.label} — ${application.name}`;
+    documentEmpty.hidden = true;
+    documentImage.hidden = true;
+    documentImage.removeAttribute('src');
+    documentDialog.showModal();
+    try {
+      const url = `/api/admin/applications/${encodeURIComponent(application.applicantId)}/documents/${type.key}`;
+      const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) {
+        documentEmpty.textContent = 'No uploaded image is available. This document may be submitted physically to the Admission Office.';
+        documentEmpty.hidden = false;
+        return;
+      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(await response.blob());
+      documentImage.src = previewUrl;
+      documentImage.alt = `${type.label} for ${application.name}`;
+      documentImage.hidden = false;
+    } catch {
+      documentEmpty.textContent = 'Could not load the document preview. Please try again.';
+      documentEmpty.hidden = false;
     }
-    if (value === 'to-follow') return `<span class="to-follow">To follow</span>`;
-    return `<span class="doc-missing">—</span>`;
   }
 
-  function formatDate(dateStr) {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const y = d.getFullYear();
-    return `${m}/${day}/${y}`;
+  function addSummaryField(container, label, value) {
+    const row = element('p');
+    row.append(element('strong', '', `${label}: `), document.createTextNode(value || '—'));
+    container.appendChild(row);
   }
 
-  // =========================================
-  // SELECT ALL
-  // =========================================
-  if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener('change', (e) => {
-      const data = getCurrentData();
-      if (e.target.checked) {
-        data.forEach((app) => selectedIds.add(app.id));
-      } else {
-        data.forEach((app) => selectedIds.delete(app.id));
-      }
-      renderTable();
-    });
+  async function openSummary(application) {
+    summaryContent.replaceChildren(element('p', '', 'Loading application details...'));
+    summaryDialog.showModal();
+    try {
+      const result = await api(`/api/admin/applications/${encodeURIComponent(application.applicantId)}/summary`);
+      const profile = result.profile || {};
+      const address = profile.address || {};
+      const schedule = result.schedule || {};
+      summaryContent.replaceChildren();
+      addSummaryField(summaryContent, 'Application ID', result.applicantId);
+      addSummaryField(summaryContent, 'Last Name', profile.lastName);
+      addSummaryField(summaryContent, 'Given Name', profile.givenName);
+      addSummaryField(summaryContent, 'Middle Name', profile.middleName || 'N/A');
+      addSummaryField(summaryContent, 'Suffix', profile.suffix || 'N/A');
+      addSummaryField(summaryContent, 'Country', address.country);
+      addSummaryField(summaryContent, 'Region', address.region);
+      addSummaryField(summaryContent, 'City/Municipality', address.city);
+      addSummaryField(summaryContent, 'Barangay', address.barangay);
+      addSummaryField(summaryContent, 'Home Address', address.streetAddress || address.street);
+      addSummaryField(summaryContent, 'Mobile Number', result.phone || profile.phone);
+      addSummaryField(summaryContent, 'Email Address', result.email);
+      addSummaryField(summaryContent, 'Exam Date', formatDate(schedule.examDate));
+      addSummaryField(summaryContent, 'Batch', String(schedule.batch || '').replace(/^batch_/, 'Batch '));
+      addSummaryField(summaryContent, 'Exam Time', `${schedule.startTime || '—'} - ${schedule.endTime || '—'}`);
+      addSummaryField(summaryContent, 'Submission Date', formatDate(result.submittedAt));
+    } catch (error) {
+      summaryContent.replaceChildren(element('p', '', error.message));
+    }
   }
 
-  function updateSelectAllState() {
-    if (!selectAllCheckbox) return;
-    const data = getCurrentData();
-    const visibleIds = data.map((a) => a.id);
-    const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
-    const someSelected = visibleIds.some((id) => selectedIds.has(id));
-    selectAllCheckbox.checked = allSelected;
-    selectAllCheckbox.indeterminate = someSelected && !allSelected;
+  function askToReject(application) {
+    pendingReject = application;
+    rejectTitle.textContent = `Reject ${application.name}?`;
+    reviewError.textContent = '';
+    rejectDialog.showModal();
   }
 
-  // =========================================
-  // UPDATE BULK BARS
-  // =========================================
-  function updateBulkBars() {
-    const count = selectedIds.size;
-    if (selectedCountEl) selectedCountEl.textContent = count;
-    if (archivedSelectedCountEl) archivedSelectedCountEl.textContent = count;
-  }
-
-  // =========================================
-  // CLEAR SELECTION
-  // =========================================
-  if (clearSelectionBtn) {
-    clearSelectionBtn.addEventListener('click', () => {
-      if (selectedIds.size === 0) {
-        showToast('⚠️ Wala pang naka-select.', 'danger');
-        return;
-      }
-      selectedIds.clear();
-      renderTable();
-    });
-  }
-  if (clearArchivedBtn) {
-    clearArchivedBtn.addEventListener('click', () => {
-      if (selectedIds.size === 0) {
-        showToast('⚠️ Wala pang naka-select.', 'danger');
-        return;
-      }
-      selectedIds.clear();
-      renderTable();
-    });
-  }
-
-  // =========================================
-  // APPROVE / DECLINE — Move to Archive
-  // =========================================
-  function handleApproval(appId, action) {
-    const index = activeApplications.findIndex((a) => a.id === appId);
-    if (index === -1) return;
-    const app = activeApplications[index];
-    const label = action === 'approve' ? 'APPROVE' : 'DECLINE';
-
-    if (!confirm(`${label} application of ${app.name}?`)) return;
-
-    app.status = action === 'approve' ? 'approved' : 'declined';
-    app.archivedAt = new Date().toISOString();
-
-    activeApplications.splice(index, 1);
-    archivedApplications.unshift(app);
-
-    saveToStorage();
-    selectedIds.clear();
-    updateTabsAndBars();
-    renderTable();
-    showToast(`${action === 'approve' ? '✅' : '❌'} ${app.name} ${label}D — Moved to Archive`, action === 'approve' ? 'success' : 'danger');
-  }
-
-  // =========================================
-  // RESTORE
-  // =========================================
-  function handleRestore(appId) {
-    const index = archivedApplications.findIndex((a) => a.id === appId);
-    if (index === -1) return;
-    const app = archivedApplications[index];
-
-    if (!confirm(`Restore ${app.name} to Active Applications?`)) return;
-
-    app.status = 'pending';
-    delete app.archivedAt;
-
-    archivedApplications.splice(index, 1);
-    activeApplications.unshift(app);
-
-    saveToStorage();
-    selectedIds.clear();
-    updateTabsAndBars();
-    renderTable();
-    showToast(`↩️ ${app.name} restored to Active`, 'info');
-  }
-
-  // =========================================
-  // DELETE PERMANENTLY
-  // =========================================
-  function handleDeletePermanent(appId) {
-    const index = archivedApplications.findIndex((a) => a.id === appId);
-    if (index === -1) return;
-    const app = archivedApplications[index];
-
-    if (!confirm(`⚠️ PERMANENTLY DELETE ${app.name}?`)) return;
-
-    archivedApplications.splice(index, 1);
-    saveToStorage();
-    selectedIds.clear();
-    updateTabsAndBars();
-    renderTable();
-    showToast(`🗑️ ${app.name} deleted permanently`, 'danger');
-  }
-
-  // =========================================
-  // BULK APPROVE
-  // =========================================
-  if (bulkApproveBtn) {
-    bulkApproveBtn.addEventListener('click', () => {
-      const count = selectedIds.size;
-      if (count === 0) {
-        showToast('⚠️ Please select at least one item first', 'danger');
-        return;
-      }
-      if (!confirm(`APPROVE ${count} selected application(s)?`)) return;
-
-      const toArchive = [];
-      const remaining = [];
-
-      activeApplications.forEach((app) => {
-        if (selectedIds.has(app.id)) {
-          app.status = 'approved';
-          app.archivedAt = new Date().toISOString();
-          toArchive.push(app);
-        } else {
-          remaining.push(app);
-        }
+  async function reviewApplication(application, decision) {
+    try {
+      await api(`/api/admin/applications/${encodeURIComponent(application.applicantId)}/review`, {
+        method: 'PUT',
+        body: JSON.stringify({ decision })
       });
-
-      activeApplications = remaining;
-      archivedApplications = [...toArchive, ...archivedApplications];
-
-      saveToStorage();
-      selectedIds.clear();
-      updateTabsAndBars();
+      applications = applications.filter((item) => item.applicantId !== application.applicantId);
       renderTable();
-      showToast(`✅ ${count} application(s) APPROVED`, 'success');
-    });
+      return true;
+    } catch (error) {
+      if (decision === 'reject') reviewError.textContent = error.message;
+      else window.alert(error.message);
+      return false;
+    }
   }
 
-  // =========================================
-  // BULK DECLINE
-  // =========================================
-  if (bulkDeclineBtn) {
-    bulkDeclineBtn.addEventListener('click', () => {
-      const count = selectedIds.size;
-      if (count === 0) {
-        showToast('⚠️ Please select at least one item first', 'danger');
-        return;
-      }
-      if (!confirm(`DECLINE ${count} selected application(s)?`)) return;
+  rejectButton.addEventListener('click', async () => {
+    if (!pendingReject) return;
+    rejectButton.disabled = true;
+    const rejected = await reviewApplication(pendingReject, 'reject');
+    if (rejected) rejectDialog.close();
+    rejectButton.disabled = false;
+    if (rejected) pendingReject = null;
+  });
 
-      const toArchive = [];
-      const remaining = [];
-
-      activeApplications.forEach((app) => {
-        if (selectedIds.has(app.id)) {
-          app.status = 'declined';
-          app.archivedAt = new Date().toISOString();
-          toArchive.push(app);
-        } else {
-          remaining.push(app);
-        }
-      });
-
-      activeApplications = remaining;
-      archivedApplications = [...toArchive, ...archivedApplications];
-
-      saveToStorage();
-      selectedIds.clear();
-      updateTabsAndBars();
-      renderTable();
-      showToast(`❌ ${count} application(s) DECLINED`, 'danger');
-    });
-  }
-
-  // =========================================
-  // BULK RESTORE
-  // =========================================
-  if (bulkRestoreBtn) {
-    bulkRestoreBtn.addEventListener('click', () => {
-      const count = selectedIds.size;
-      if (count === 0) {
-        showToast('⚠️ Please select at least one item first', 'danger');
-        return;
-      }
-      if (!confirm(`RESTORE ${count} selected application(s)?`)) return;
-
-      const toRestore = [];
-      const remaining = [];
-
-      archivedApplications.forEach((app) => {
-        if (selectedIds.has(app.id)) {
-          app.status = 'pending';
-          delete app.archivedAt;
-          toRestore.push(app);
-        } else {
-          remaining.push(app);
-        }
-      });
-
-      archivedApplications = remaining;
-      activeApplications = [...toRestore, ...activeApplications];
-
-      saveToStorage();
-      selectedIds.clear();
-      updateTabsAndBars();
-      renderTable();
-      showToast(`↩️ ${count} application(s) restored`, 'info');
-    });
-  }
-
-  // =========================================
-  // BULK DELETE
-  // =========================================
-  if (bulkDeleteBtn) {
-    bulkDeleteBtn.addEventListener('click', () => {
-      const count = selectedIds.size;
-      if (count === 0) {
-        showToast('⚠️ Please select at least one item first', 'danger');
-        return;
-      }
-      if (!confirm(`⚠️ PERMANENTLY DELETE ${count} application(s)?`)) return;
-
-      archivedApplications = archivedApplications.filter((a) => !selectedIds.has(a.id));
-
-      saveToStorage();
-      selectedIds.clear();
-      updateTabsAndBars();
-      renderTable();
-      showToast(`🗑️ ${count} application(s) deleted`, 'danger');
-    });
-  }
-
-  // =========================================
-  // FILTERS
-  // =========================================
-  if (filterName) filterName.addEventListener('input', renderTable);
-  if (filterDate) filterDate.addEventListener('change', renderTable);
-
-  // =========================================
-  // SORT
-  // =========================================
-  if (sortBySelect) {
-    sortBySelect.addEventListener('change', (e) => {
-      const val = e.target.value;
-      if (val === 'name-asc') currentSort = { field: 'name', direction: 'asc' };
-      if (val === 'name-desc') currentSort = { field: 'name', direction: 'desc' };
-      if (val === 'date-asc') currentSort = { field: 'date', direction: 'asc' };
-      if (val === 'date-desc') currentSort = { field: 'date', direction: 'desc' };
-      if (val === 'status') currentSort = { field: 'status', direction: 'asc' };
-      renderTable();
-    });
-  }
-
-  document.querySelectorAll('.sortable-th').forEach((th) => {
-    th.addEventListener('click', () => {
-      const field = th.dataset.sort;
-      if (currentSort.field === field) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-      } else {
-        currentSort = { field, direction: 'asc' };
-      }
+  document.getElementById('cancelRejectApplication').addEventListener('click', () => rejectDialog.close());
+  document.querySelectorAll('[data-close-dialog]').forEach((button) => {
+    button.addEventListener('click', () => document.getElementById(button.dataset.closeDialog).close());
+  });
+  document.querySelectorAll('.applications-sort').forEach((button) => {
+    button.addEventListener('click', () => {
+      const field = button.dataset.sort;
+      sort.direction = sort.field === field && sort.direction === 'asc' ? 'desc' : 'asc';
+      sort.field = field;
       renderTable();
     });
   });
+  documentDialog.addEventListener('close', () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = '';
+    documentImage.removeAttribute('src');
+  });
 
-  // =========================================
-  // IMAGE MODAL
-  // =========================================
-  function openImageModal(docType, applicantName) {
-    imageModalTitle.textContent = `${docType} — ${applicantName}`;
-    imageModalImg.src = `../assets/image/grc-logo.png`;
-    imageModal.classList.remove('hidden');
-  }
-
-  if (closeImageModal) closeImageModal.addEventListener('click', () => imageModal.classList.add('hidden'));
-  if (closeImageBtn) closeImageBtn.addEventListener('click', () => imageModal.classList.add('hidden'));
-  if (imageModal) {
-    imageModal.addEventListener('click', (e) => {
-      if (e.target === imageModal) imageModal.classList.add('hidden');
-    });
-  }
-
-  // =========================================
-  // TOAST
-  // =========================================
-  function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `toast-notification toast-${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-
-    setTimeout(() => toast.classList.add('show'), 10);
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  // =========================================
-  // INITIAL RENDER
-  // =========================================
-  updateTabsAndBars();
-  renderTable();
+  loadApplications();
 });

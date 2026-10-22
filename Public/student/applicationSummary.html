@@ -61,44 +61,67 @@
     </aside>
 
     <main class="main-content">
-      <div class="card">
-        <h1 class="card-title text-center">Application Summary</h1>
+      <section class="application-paper" aria-labelledby="applicationSummaryTitle">
+        <h1 id="applicationSummaryTitle">Application Summary</h1>
+        <p class="application-id-line"><strong>Application ID:</strong> <span id="summaryApplicantId">Loading...</span></p>
 
-        <div class="summary-header">
-          <div class="summary-qr-box">
-            <div id="summaryQrCode" class="summary-qr-image"></div>
-            <p class="summary-qr-label">Scan Me</p>
+        <h2>APPLICANT INFORMATION</h2>
+        <section class="application-paper-section">
+          <h3>NAME</h3>
+          <div class="application-paper-grid name-grid">
+            <p><strong>LAST NAME:</strong><span id="summaryLastName">—</span></p>
+            <p><strong>GIVEN NAME:</strong><span id="summaryGivenName">—</span></p>
+            <p><strong>MIDDLE NAME:</strong><span id="summaryMiddleName">—</span></p>
+            <p><strong>SUFFIX:</strong><span id="summarySuffix">—</span></p>
           </div>
-          <div class="summary-name-box">
-            <h2 id="summaryName" class="profile-loading" data-profile="fullname" aria-busy="true"></h2>
-            <p id="summaryEmail" class="profile-loading" data-profile="email" aria-busy="true"></p>
+        </section>
+        <section class="application-paper-section">
+          <h3>ADDRESS</h3>
+          <div class="application-paper-grid address-grid">
+            <p><strong>COUNTRY:</strong><span id="summaryCountry">—</span></p>
+            <p><strong>REGION:</strong><span id="summaryRegion">—</span></p>
+            <p><strong>CITY/MUNICIPALITY, BARANGAY:</strong><span id="summaryCityBarangay">—</span></p>
+            <p class="full-row"><strong>ADDRESS:</strong><span id="summaryHomeAddress">—</span></p>
           </div>
+        </section>
+        <section class="application-paper-section">
+          <h3>EXAM SCHEDULE</h3>
+          <div class="application-paper-grid exam-grid">
+            <p><strong>DATE:</strong><span id="summaryExamDate">—</span></p>
+            <p><strong>BATCH:</strong><span id="summaryBatchTime">—</span></p>
+          </div>
+        </section>
+        <section class="application-paper-section last-paper-section">
+          <h3>APPLICANT CONTACT INFORMATION</h3>
+          <div class="application-paper-grid contact-grid">
+            <p><strong>MOBILE NUMBER</strong><span id="summaryMobile">—</span></p>
+            <p><strong>EMAIL ADDRESS</strong><span id="summaryEmail">—</span></p>
+          </div>
+        </section>
+        <p class="application-paper-disclaimer">Your application is subject to verification by the Admission Office.</p>
+      </section>
+
+      <section class="application-pdf-review" aria-labelledby="pdfReviewTitle">
+        <div class="application-review-heading">
+          <h2 id="pdfReviewTitle">PDF REVIEW</h2>
+          <button class="btn-primary btn-download-summary" id="downloadSummaryBtn" type="button">DOWNLOAD PDF</button>
         </div>
+        <iframe id="summaryPdfFrame" title="A4 Application Summary PDF" loading="lazy"></iframe>
+      </section>
 
-        <table class="summary-table">
-          <tr><td>Sex</td><td class="profile-loading" data-profile="sex" aria-busy="true"></td></tr>
-          <tr><td>Address</td><td class="profile-loading" data-profile="address" aria-busy="true"></td></tr>
-          <tr><td>Phone Number</td><td class="profile-loading" data-profile="phone" aria-busy="true"></td></tr>
-          <tr><td>Account Creation Date</td><td class="profile-loading" data-profile="accountCreated" aria-busy="true"></td></tr>
-          <tr><td>Booking Exam Date</td><td id="summaryBookingDate">—</td></tr>
-          <tr><td>Amount of Exam</td><td>Php 200.00</td></tr>
-          <tr><td>Examination Schedule</td><td id="summaryExamDate">—</td></tr>
-          <tr><td>Examination Time</td><td id="summaryExamTime">—</td></tr>
-          <tr><td>Exam Facility Location</td><td id="summaryExamFacility">—</td></tr>
-        </table>
-
-        <p class="summary-disclaimer">
-          *This is not valid for taking Entrance Examination. Wait for your application to be approved by admission and receive an Statement of Application.
-        </p>
-
-        <div class="summary-actions">
-          <button class="btn-primary btn-download-summary" id="downloadSummaryBtn" type="button">DOWNLOAD SUMMARY</button>
-          <button class="btn-primary" id="submitApplicationBtn" type="button">SUBMIT APPLICATION</button>
-          <button class="btn-secondary" id="openDisclaimer">READ DISCLAIMER</button>
-        </div>
+      <div class="summary-actions">
+        <button class="btn-primary" id="submitApplicationBtn" type="button">SUBMIT APPLICATION</button>
+        <button class="btn-secondary" id="openDisclaimer">READ DISCLAIMER</button>
       </div>
     </main>
   </div>
+
+  <dialog class="application-submit-dialog" id="applicationSubmittedDialog" aria-labelledby="applicationSubmittedTitle">
+    <h2 id="applicationSubmittedTitle">Application Submitted</h2>
+    <p id="applicationSubmittedMessage">Thank you for submitting your application for the upcoming entrance examination at Global Reciprocal Colleges. We are writing to confirm that we have successfully received your application details and uploaded documents.</p>
+    <p id="submissionEmailNote" class="submission-email-note"></p>
+    <button class="btn-primary" type="button" id="closeApplicationSubmitted">OK</button>
+  </dialog>
 
   <div id="disclaimerModal" class="modal-overlay hidden">
     <div class="modal-card disclaimer-card">

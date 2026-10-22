@@ -45,41 +45,38 @@ async function sendOtp(email, code, purpose) {
 	});
 }
 
-async function sendApplicationSubmissionConfirmation({ email, applicantId, lastName, givenName, submittedAt, schedule, portalUrl }) {
+async function sendApplicationSubmissionConfirmation({ email, applicantId, lastName, givenName, middleName, suffix, submittedAt, targetAcademicYear, schedule, portalUrl, admissionEmail, contactNumber }) {
 	const submittedDate = new Intl.DateTimeFormat('en-PH', {
 		dateStyle: 'long',
 		timeZone: 'Asia/Manila'
 	}).format(submittedAt);
-	const scheduleText = `${schedule.batch} / ${schedule.date} / ${schedule.time} / ${schedule.facility}`;
-	const subject = `Entrance Examination Application Received – ${applicantId} | Global Reciprocal Colleges`;
-	const text = `Dear ${lastName}, ${givenName},
+	const fullName = [givenName, middleName, lastName, suffix].filter(Boolean).join(' ');
+	const subject = `Application Received – Pending Verification | [Applicant ID: ${applicantId}]`;
+	const text = `Dear ${fullName},
 
-Thank you for submitting your application for the Global Reciprocal Colleges Entrance Examination. We have successfully received your application details and uploaded documents through the Student Services Online Entrance Examination Registration System (OEEMS).
+Thank you for submitting your application for the upcoming entrance examination at Global Reciprocal Colleges. We are writing to confirm that we have successfully received your application details and uploaded documents.
 
-Application Details
-Applicant Name: ${lastName}, ${givenName}
+Application Overview:
 Applicant ID: ${applicantId}
-Application Date Submitted: ${submittedDate}
-Selected Exam Schedule: ${scheduleText}
+Submission Date: ${submittedDate}
+Target Academic Year: SY ${targetAcademicYear.replace('-', '–')}
 
-Next Steps
-1. Document Verification:
-Our Admissions Staff is currently reviewing your uploaded requirements.
+Your application and submitted documents are currently placed under official review by the Admission Office.
 
-2. Download Your SOApp:
-Once your submitted documents and selected schedule are verified and approved by the Admissions Department, your Statement of Application (SOApp) document will become available for download directly in your portal.
+Review Timeline: Document verification typically takes 3–5 business days.
+Status Updates: You can check the real-time status of your application by logging into your Application portal.
+Further Action: Once your documents are verified and approved, your Statement of Application / Examination Permit will be sent to your registered email ${email}.
 
-3. Monitor Your Status:
-You may track the real-time progress of your application and verification status at any time by logging into your Student Dashboard and checking the Application Status.
+Please note: If any of your submitted documents require clarification or re-uploading, you will receive a notification via email and through your portal dashboard.
 
-Access Your Portal: ${portalUrl}
+Should you have any urgent questions or concerns, please reach out to the Admission Office at ${admissionEmail} or ${contactNumber} with your Applicant ID referenced.
 
-If you have any questions or need to make corrections to your application, please reach out to the GRC Admissions Department or use the "Report a Problem" feature inside your student account.
+Access your portal: ${portalUrl}
 
 Best regards,
-Admission Office
+Admissions Office
 Global Reciprocal Colleges
-Student Services - Online Entrance Examination Registration`;
+${contactNumber}`;
 
 	await getTransporter().sendMail({
 		from: process.env.MAIL_FROM || process.env.SMTP_USER,

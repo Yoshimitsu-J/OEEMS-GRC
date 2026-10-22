@@ -33,6 +33,7 @@ const studentProfileSchema = new mongoose.Schema({
 	lastName: { type: String, required: true, trim: true },
 	givenName: { type: String, required: true, trim: true },
 	middleName: { type: String, default: '', trim: true },
+	suffix: { type: String, default: '', trim: true, maxlength: 24 },
 	sex: { type: String, enum: ['male', 'female'], required: true },
 	birthday: { type: Date, required: true },
 	phone: { type: String, required: true, trim: true },

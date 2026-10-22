@@ -1,18 +1,10 @@
-/* =========================================
-   APPLICATION SUMMARY — Real QR Code Generator
-   ========================================= */
-
 document.addEventListener('DOMContentLoaded', () => {
-  const nameEl = document.getElementById('summaryName');
-  const emailEl = document.getElementById('summaryEmail');
-  const rows = document.querySelectorAll('.summary-table tr');
   const downloadButton = document.getElementById('downloadSummaryBtn');
   const submitButton = document.getElementById('submitApplicationBtn');
-
-  const showValue = (row, value) => {
-    const cell = rows[row]?.querySelector('td:last-child');
-    if (cell) cell.textContent = value || '—';
-  };
+  const pdfFrame = document.getElementById('summaryPdfFrame');
+  const submittedDialog = document.getElementById('applicationSubmittedDialog');
+  const emailNote = document.getElementById('submissionEmailNote');
+  const setText = (id, value) => { document.getElementById(id).textContent = value || '—'; };
   const formatDate = (value) => value
     ? new Date(value).toLocaleDateString('en-PH', { dateStyle: 'long', timeZone: 'Asia/Manila' })
     : '—';
@@ -26,39 +18,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileResult = await profileResponse.json();
     const status = await statusResponse.json();
     const profile = profileResult.profile;
-    const fullName = `${profile.givenName} ${profile.middleName ? `${profile.middleName} ` : ''}${profile.lastName}`.trim();
-    nameEl.textContent = fullName;
-    emailEl.textContent = profileResult.email;
+    setText('summaryApplicantId', profile.applicantId);
+    setText('summaryLastName', profile.lastName);
+    setText('summaryGivenName', profile.givenName);
+    setText('summaryMiddleName', profile.middleName || 'N/A');
+    setText('summarySuffix', profile.suffix || 'N/A');
+    setText('summaryCountry', profile.address?.country);
+    setText('summaryRegion', profile.address?.region);
+    setText('summaryCityBarangay', [profile.address?.city, profile.address?.barangay].filter(Boolean).join(', '));
+    setText('summaryHomeAddress', profile.address?.streetAddress || profile.address?.street);
+    setText('summaryMobile', profile.phone);
+    setText('summaryEmail', profileResult.email);
+    setText('summaryExamDate', formatDate(status.schedule?.examDate));
+    setText('summaryBatchTime', status.schedule
+      ? `${String(status.schedule.batch || '').replace(/^batch_/, 'Batch ')} (${status.schedule.startTime} - ${status.schedule.endTime})`
+      : '—');
     document.title = `Application Summary - ${profile.applicantId}`;
-
-    showValue(0, profile.sex);
-    showValue(1, [profile.address.streetAddress, profile.address.barangay, profile.address.city,
-      profile.address.region, profile.address.country].filter(Boolean).join(', '));
-    showValue(2, profile.phone);
-    showValue(3, formatDate(profile.createdAt));
-    showValue(4, formatDate(status.schedule?.bookedAt));
-    showValue(5, 'See Admissions Department');
-    showValue(6, formatDate(status.schedule?.examDate));
-    showValue(7, status.schedule ? `${status.schedule.startTime} - ${status.schedule.endTime}` : '—');
-    showValue(8, status.schedule?.facilityId || 'To be assigned');
-
-    const qrContainer = document.getElementById('summaryQrCode');
-    if (qrContainer && typeof QRCode !== 'undefined') {
-      qrContainer.replaceChildren();
-      new QRCode(qrContainer, {
-        text: JSON.stringify({ type: 'OEEMS_APPLICATION', applicantId: profile.applicantId }),
-        width: 130,
-        height: 130,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-      });
+    if (pdfFrame) {
+      pdfFrame.src = `/api/student/application/summary.pdf?inline=1&v=${Date.now()}`;
     }
-    return status;
+    const submitted = status.workflowStatus === 'under_review' || status.applicationStatus === 'Pending';
+    if (submitted) {
+      submitButton.hidden = true;
+      emailNote.textContent = 'Your application is pending Admission Office verification.';
+    }
   }
 
   downloadButton?.addEventListener('click', () => {
-    window.location.assign('/api/student/application/summary.pdf');
+    window.location.assign('/api/student/application/summary.pdf?download=1');
   });
 
   submitButton?.addEventListener('click', async () => {
@@ -72,14 +59,20 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not submit the application.');
-      if (!result.emailSent && !result.alreadySubmitted) {
-        window.StepGuard?.showMessage('Your application was received, but the confirmation email could not be sent. Please contact the Admissions Department.');
-      }
-      window.location.replace(result.redirectUrl || '/student/');
+      submitButton.hidden = true;
+      emailNote.textContent = result.emailSent
+        ? 'A confirmation email has been sent to your registered email address.'
+        : 'Your application was received, but the confirmation email could not be sent. Please contact the Admission Office.';
+      submittedDialog.showModal();
     } catch (error) {
       window.StepGuard?.showMessage(error.message);
       submitButton.disabled = false;
     }
+  });
+
+  document.getElementById('closeApplicationSubmitted').addEventListener('click', () => {
+    submittedDialog.close();
+    window.location.assign('/student/');
   });
 
   loadSummary().catch((error) => {

@@ -2304,6 +2304,61 @@ a.btn-logout-nav:hover {
   margin-top: 8px !important;
 }
 
+.applications-table { min-width: 980px; }
+.applications-sort { border: 0; background: transparent; color: inherit; font: inherit; font-weight: inherit; cursor: pointer; }
+.applications-sort:hover { color: #d5ead9; }
+.document-preview-btn,
+.application-review-btn {
+  padding: 8px 11px;
+  border: 1px solid #8b0000;
+  border-radius: 4px;
+  background: #fff;
+  color: #800000;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.document-preview-btn:hover,
+.application-review-btn:hover { background: #f8eeee; }
+.applications-table .btn-approve { background: #c9e8d0; color: #174d2b; }
+.applications-table .btn-approve:hover { background: #b6ddc0; }
+.applications-table .btn-decline { background: #f2caca; color: #7c1717; }
+.applications-table .btn-decline:hover { background: #eab7b7; }
+
+.applications-dialog {
+  width: min(92vw, 760px);
+  max-height: 88vh;
+  margin: auto;
+  padding: 22px;
+  overflow: auto;
+  border: 0;
+  border-top: 5px solid #800000;
+  border-radius: 6px;
+  color: #252525;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+.applications-dialog::backdrop { background: rgba(0, 0, 0, 0.58); }
+.applications-dialog h2 { margin: 0 0 16px; color: #800000; font-size: 20px; }
+#applicationDocumentImage { display: block; max-width: 100%; max-height: 68vh; margin: 0 auto 16px; object-fit: contain; }
+#applicationDocumentImage[hidden] { display: none; }
+.document-preview-empty { padding: 18px; background: #f5f2f2; color: #555; line-height: 1.5; }
+.document-preview-empty[hidden] { display: none; }
+.applications-dialog-close { min-height: 38px; padding: 8px 14px; border: 1px solid #777; border-radius: 4px; background: #fff; color: #333; font-weight: 700; cursor: pointer; }
+.application-summary-modal-content { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+.application-summary-modal-content p { margin: 0; padding: 9px 0; border-bottom: 1px solid #e5e0e0; overflow-wrap: anywhere; font-size: 13px; }
+.application-summary-modal-content strong { color: #444; }
+.reject-application-dialog { width: min(92vw, 470px); }
+.reject-application-dialog > p { line-height: 1.5; }
+#reviewActionError { color: #9b1c1c; }
+.review-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+.review-modal-actions .btn-decline { min-height: 38px; padding: 8px 14px; border: 0; border-radius: 4px; background: #f2caca; color: #7c1717; font-weight: 800; cursor: pointer; }
+.review-modal-actions button:disabled { cursor: wait; opacity: 0.65; }
+
+@media (max-width: 700px) {
+  .application-summary-modal-content { grid-template-columns: 1fr; }
+  .review-modal-actions { flex-wrap: wrap; }
+}
+
 /* =========================================
    36. APPLICATIONS — Tabs (Active / Archived)
    ========================================= */

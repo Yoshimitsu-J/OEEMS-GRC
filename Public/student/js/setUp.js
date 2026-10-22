@@ -427,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
             lastName: document.getElementById('lastName').value.trim(),
             givenName: document.getElementById('givenName').value.trim(),
             middleName: document.getElementById('middleName').value.trim(),
+            suffix: document.getElementById('suffix').value.trim(),
             sex: sex.toLowerCase(),
             birthday,
             phone,

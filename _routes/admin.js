@@ -1,6 +1,8 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
+const path = require('node:path');
+const StudentApplication = require('../_models/StudentApplication');
 const { getDatabaseConnection } = require('../_scripts/mongodb_connection');
 const { requireSameOrigin } = require('../_middleware/sameOrigin');
 const { requireAdmin } = require('../_middleware/adminAccess');
@@ -62,6 +64,157 @@ router.post('/auth/logout', requireSameOrigin, requireAdmin, (request, response,
 router.get('/auth/me', requireAdmin, (request, response) => {
 	const admin = response.locals.authAdmin;
 	response.json({ adminId: admin.adminId, email: admin.email, name: admin.name, role: admin.role });
+});
+
+router.get('/applications', requireAdmin, async (request, response) => {
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const applications = await admissionDb.collection('applications').find({ status: 'pending' })
+			.sort({ submittedAt: -1, createdAt: -1 }).toArray();
+		response.set('Cache-Control', 'no-store');
+		response.json({ applications: applications.map((application) => ({
+			applicantId: application.applicantId,
+			name: application.name || [application.profile?.lastName, application.profile?.givenName, application.profile?.middleName, application.profile?.suffix].filter(Boolean).join(' '),
+			submittedAt: application.submittedAt || application.createdAt,
+			status: application.status,
+			documents: application.documentTypes || ['form138', 'psa_birth_certificate', 'good_moral']
+		})) });
+	} catch (error) {
+		console.error('Admission applications list failed:', error.message);
+		response.status(500).json({ error: 'Could not load submitted applications.' });
+	}
+});
+
+router.get('/applications/:applicantId/summary', requireAdmin, async (request, response) => {
+	const applicantId = request.params.applicantId.trim();
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const studentDb = getDatabaseConnection('OEEMS_Student').db;
+		const application = await admissionDb.collection('applications').findOne({ applicantId });
+		if (!application) return response.status(404).json({ error: 'Application not found.' });
+		const [profile, schedule, user] = await Promise.all([
+			studentDb.collection('student_profiles').findOne({ applicantId }),
+			studentDb.collection('student_schedules').findOne({ applicantId, bookingStatus: { $in: ['reserved', 'confirmed'] } }),
+			studentDb.collection('users').findOne({ applicantId }, { projection: { email: 1 } })
+		]);
+		response.set('Cache-Control', 'no-store');
+		response.json({
+			applicantId,
+			name: application.name || [profile?.lastName, profile?.givenName, profile?.middleName, profile?.suffix].filter(Boolean).join(' '),
+			email: application.email || user?.email || '',
+			profile: application.profile || profile || {},
+			schedule: application.schedule || schedule || null,
+			submittedAt: application.submittedAt || application.createdAt,
+			status: application.status
+		});
+	} catch (error) {
+		console.error('Admission application summary read failed:', error.message);
+		response.status(500).json({ error: 'Could not load the application summary.' });
+	}
+});
+
+router.get('/applications/:applicantId/documents/:documentType', requireAdmin, async (request, response) => {
+	const applicantId = request.params.applicantId.trim();
+	const documentType = request.params.documentType;
+	const allowedDocuments = new Set(['form138', 'psa_birth_certificate', 'good_moral']);
+	if (!allowedDocuments.has(documentType)) return response.status(404).end();
+	try {
+		const studentDb = getDatabaseConnection('OEEMS_Student').db;
+		const uploaded = await studentDb.collection('student_documents').findOne({
+			applicantId,
+			documentType,
+			verificationStatus: { $in: ['submitted', 'under_review', 'accepted', 'rejected'] }
+		}, { projection: { storageKey: 1, contentType: 1, originalName: 1 } });
+		if (!uploaded?.storageKey || !mongoose.isValidObjectId(uploaded.storageKey) || !['image/jpeg', 'image/png'].includes(uploaded.contentType)) {
+			return response.status(404).json({ error: 'No uploaded preview is available for this document.' });
+		}
+		response.set({
+			'Content-Type': uploaded.contentType,
+			'Content-Disposition': `inline; filename="${path.basename(uploaded.originalName || 'document')}"`,
+			'Cache-Control': 'no-store, private',
+			'X-Content-Type-Options': 'nosniff'
+		});
+		const bucket = new mongoose.mongo.GridFSBucket(studentDb, { bucketName: 'student_uploads' });
+		const stream = bucket.openDownloadStream(new mongoose.Types.ObjectId(uploaded.storageKey));
+		stream.once('error', () => {
+			if (!response.headersSent) response.status(404).end();
+		});
+		stream.pipe(response);
+	} catch (error) {
+		console.error('Admission document preview failed:', error.message);
+		if (!response.headersSent) response.status(500).json({ error: 'Could not load this document preview.' });
+	}
+});
+
+router.put('/applications/:applicantId/review', requireSameOrigin, requireAdmin, async (request, response) => {
+	const applicantId = request.params.applicantId.trim();
+	const decision = request.body?.decision;
+	if (!applicantId || !['approve', 'reject'].includes(decision)) {
+		return response.status(400).json({ error: 'Choose approve or reject.' });
+	}
+	const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+	const studentDb = getDatabaseConnection('OEEMS_Student').db;
+	const session = mongoose.connection.getClient().startSession();
+	const reviewedAt = new Date();
+	const nextStatus = decision === 'approve' ? 'approved' : 'rejected';
+	try {
+		await session.withTransaction(async () => {
+			const application = await admissionDb.collection('applications').findOne({ applicantId, status: 'pending' }, { session });
+			if (!application) {
+				const error = new Error('This application is no longer pending review. Refresh the table.');
+				error.status = 409;
+				throw error;
+			}
+			await admissionDb.collection('applications').updateOne({ _id: application._id, status: 'pending' }, {
+				$set: { status: nextStatus, admissionStatus: nextStatus, reviewedAt, reviewedByAdminId: response.locals.authAdmin.adminId, updatedAt: reviewedAt }
+			}, { session });
+			await admissionDb.collection('document_reviews').updateMany({ applicantId }, {
+				$set: { reviewStatus: nextStatus, reviewedAt, reviewedByAdminId: response.locals.authAdmin.adminId, updatedAt: reviewedAt }
+			}, { session });
+
+			const studentApplicationStatus = decision === 'approve' ? 'approved' : 'declined';
+			const studentUpdate = await StudentApplication.updateOne({ applicantId, status: 'under_review' }, {
+				$set: {
+					status: studentApplicationStatus,
+					admissionStatus: studentApplicationStatus,
+					approval: { status: studentApplicationStatus, reviewedAt, reviewedByAdminId: response.locals.authAdmin.adminId, reason: null },
+					admissionApplicationId: application._id.toString()
+				}
+			}, { session, runValidators: true });
+			if (studentUpdate.matchedCount !== 1) {
+				const error = new Error('Student application is no longer pending review.');
+				error.status = 409;
+				throw error;
+			}
+
+			await studentDb.collection('student_documents').updateMany({ applicantId }, {
+				$set: {
+					verificationStatus: decision === 'approve' ? 'accepted' : 'rejected',
+					reviewedAt,
+					reviewedByAdminId: response.locals.authAdmin.adminId,
+					...(decision === 'reject' ? { rejectionReason: 'Please review your application and contact the Admission Office.' } : {})
+				}
+			}, { session });
+			await admissionDb.collection('admin_audit_logs').insertOne({
+				adminId: response.locals.authAdmin.adminId,
+				action: `application_${decision}d`,
+				resourceType: 'application',
+				resourceId: applicantId,
+				details: { decision },
+				ipAddress: request.ip || null,
+				userAgent: request.get('user-agent') || null,
+				createdAt: reviewedAt
+			}, { session });
+		});
+		response.json({ ok: true, applicantId, status: nextStatus });
+		request.app.get('io')?.emit('admission:application-reviewed', { applicantId, status: nextStatus });
+	} catch (error) {
+		if (error.status) return response.status(error.status).json({ error: error.message });
+		console.error('Admission application review failed:', error.message);
+		response.status(500).json({ error: 'Could not update the application review.' });
+	} finally {
+		await session.endSession();
+	}
 });
 
 function getMonthWindow(year, month) {

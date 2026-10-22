@@ -2062,6 +2062,122 @@ body {
   opacity: 0.7;
 }
 
+.application-paper {
+  width: min(100%, 210mm);
+  min-height: 297mm;
+  margin: 0 auto 22px;
+  padding: 17mm 16mm;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+}
+
+.application-paper > h1 {
+  margin: 0 0 26px;
+  color: #800000;
+  font-size: 18px;
+  text-align: center;
+}
+
+.application-paper > h2 {
+  margin: 22px 0 12px;
+  color: #800000;
+  font-size: 12px;
+  text-align: center;
+}
+
+.application-id-line { margin: 0 0 28px; }
+
+.application-paper-section {
+  padding: 10px 0 14px;
+  border-top: 1px solid #555;
+}
+
+.application-paper-section h3 {
+  margin: 0 0 16px;
+  font-size: 11px;
+}
+
+.application-paper-grid {
+  display: grid;
+  gap: 14px 20px;
+  padding: 0 8px;
+}
+
+.name-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.address-grid { grid-template-columns: 1fr 1fr 2fr; }
+.exam-grid,
+.contact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.application-paper-grid p {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.application-paper-grid strong,
+.application-paper-grid span { display: block; }
+.application-paper-grid strong { margin-bottom: 4px; font-size: 10px; }
+.application-paper-grid .full-row { grid-column: 1 / -1; }
+.last-paper-section { border-bottom: 1px solid #555; }
+.application-paper-disclaimer { margin-top: 18px; color: #555; font-size: 10px; }
+
+.application-pdf-review {
+  width: min(100%, 210mm);
+  margin: 0 auto 24px;
+}
+
+.application-review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.application-review-heading h2 { margin: 0; font-size: 15px; }
+.application-review-heading .btn-download-summary { width: auto; margin: 0; }
+
+#summaryPdfFrame {
+  display: block;
+  width: 100%;
+  height: min(145vw, 297mm);
+  border: 1px solid #bdb5b5;
+  background: #eee;
+}
+
+.summary-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+
+.application-submit-dialog {
+  width: min(92vw, 520px);
+  margin: auto;
+  padding: 26px;
+  border: 0;
+  border-top: 5px solid #800000;
+  border-radius: 6px;
+  color: #292929;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+}
+
+.application-submit-dialog::backdrop { background: rgba(0, 0, 0, 0.58); }
+.application-submit-dialog h2 { margin-top: 0; color: #800000; }
+.submission-email-note { color: #555; font-size: 13px; }
+.application-submit-dialog button { min-width: 100px; }
+
+@media (max-width: 700px) {
+  .application-paper { min-height: 0; padding: 10mm 7mm; }
+  .name-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .address-grid { grid-template-columns: 1fr 1fr; }
+  .address-grid p:nth-child(3) { grid-column: 1 / -1; }
+  #summaryPdfFrame { height: 140vw; }
+}
+
+@media print {
+  .application-paper { width: 210mm; min-height: 297mm; margin: 0; box-shadow: none; }
+}
+
 .schedule-confirm-dialog {
   width: min(92vw, 480px);
   max-height: min(85vh, 620px);

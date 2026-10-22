@@ -55,145 +55,48 @@
     <!-- MAIN CONTENT -->
     <main class="admin-main-content">
       <h2 class="page-title">APPLICATIONS</h2>
-
-      <!-- =========================================
-           TABS: Active / Archived
-           ========================================= -->
-      <div class="applications-tabs">
-        <button class="app-tab active" data-tab="active">
-          <i class="bi bi-inbox-fill"></i> 
-          ACTIVE 
-          <span class="tab-badge" id="activeCount">0</span>
-        </button>
-        <button class="app-tab" data-tab="archived">
-          <i class="bi bi-archive-fill"></i> 
-          ARCHIVED / RECYCLE BIN 
-          <span class="tab-badge" id="archivedCount">0</span>
-        </button>
-      </div>
-
-      <!-- =========================================
-           FILTERS
-           ========================================= -->
-      <div class="applications-filters" id="filtersRow">
-        <div class="filter-item">
-          <label class="filter-label">FILTER By Name</label>
-          <input type="text" id="filterName" class="filter-input" placeholder="Search name...">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">FILTER By Date</label>
-          <input type="date" id="filterDate" class="filter-input">
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label">SORT By</label>
-          <select id="sortBy" class="filter-input">
-            <option value="name-asc">Name (A–Z)</option>
-            <option value="name-desc">Name (Z–A)</option>
-            <option value="date-desc">Date (Newest)</option>
-            <option value="date-asc">Date (Oldest)</option>
-            <option value="status">Status</option>
-          </select>
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label required-label">REQUIRED</label>
-          <span class="required-note">Form 138</span>
-        </div>
-
-        <div class="filter-item">
-          <label class="filter-label required-label">REQUIRED</label>
-          <span class="required-note">PSA Birth Cert</span>
-        </div>
-      </div>
-
-      <!-- =========================================
-           BULK ACTIONS BAR (ACTIVE TAB)
-           ========================================= -->
-      <div class="bulk-actions-bar" id="bulkActionsBar">
-        <div class="bulk-left">
-          <div class="bulk-select-info">
-            <i class="bi bi-check2-square"></i>
-            <span id="selectedCount">0</span> selected
-          </div>
-          <button class="bulk-clear-btn" id="clearSelectionBtn">
-            <i class="bi bi-x-circle"></i> Clear
-          </button>
-        </div>
-
-        <div class="bulk-right">
-          <button class="bulk-btn bulk-approve" id="bulkApproveBtn">
-            <i class="bi bi-check-circle-fill"></i> APPROVE SELECTED
-          </button>
-          <button class="bulk-btn bulk-decline" id="bulkDeclineBtn">
-            <i class="bi bi-x-circle-fill"></i> DECLINE SELECTED
-          </button>
-        </div>
-      </div>
-
-      <!-- =========================================
-           BULK ACTIONS BAR (ARCHIVED TAB)
-           ========================================= -->
-      <div class="bulk-actions-bar archived-bar" id="archivedBulkBar">
-        <div class="bulk-left">
-          <div class="bulk-select-info">
-            <i class="bi bi-archive-fill"></i>
-            <span id="archivedSelectedCount">0</span> selected
-          </div>
-          <button class="bulk-clear-btn" id="clearArchivedBtn">
-            <i class="bi bi-x-circle"></i> Clear
-          </button>
-        </div>
-
-        <div class="bulk-right">
-          <button class="bulk-btn bulk-restore" id="bulkRestoreBtn">
-            <i class="bi bi-arrow-counterclockwise"></i> RESTORE SELECTED
-          </button>
-          <button class="bulk-btn bulk-delete" id="bulkDeleteBtn">
-            <i class="bi bi-trash-fill"></i> DELETE PERMANENTLY
-          </button>
-        </div>
-      </div>
-
-      <!-- =========================================
-           TABLE
-           ========================================= -->
       <div class="table-card">
         <table class="admin-table applications-table">
           <thead>
             <tr>
-              <th class="col-checkbox">
-                <input type="checkbox" id="selectAllCheckbox" class="table-checkbox" title="Select all">
-              </th>
-              <th data-sort="name" class="sortable-th">NAME <i class="bi bi-arrow-down-up"></i></th>
-              <th data-sort="date" class="sortable-th">DATE <i class="bi bi-arrow-down-up"></i></th>
-              <th>FORM-138</th>
-              <th>PSA Birth Cert</th>
-              <th>Good Moral</th>
-              <th>MATH</th>
-              <th id="lastColHeader">APPROVAL</th>
+              <th><button type="button" class="applications-sort" data-sort="name">NAME <i class="bi bi-arrow-down-up"></i></button></th>
+              <th><button type="button" class="applications-sort" data-sort="date">DATE <i class="bi bi-arrow-down-up"></i></button></th>
+              <th>FORM-138 / REPORT CARD</th>
+              <th>PSA BIRTH CERTIFICATE</th>
+              <th>GOOD MORAL</th>
+              <th>APPLICATION SUMMARY</th>
+              <th>APPROVAL ACTIONS</th>
             </tr>
           </thead>
           <tbody id="applicationsTableBody">
-            <!-- Populated by JS -->
+            <tr><td colspan="7" class="applications-empty">Loading submitted applications...</td></tr>
           </tbody>
         </table>
       </div>
     </main>
   </div>
 
-  <!-- IMAGE VIEWER MODAL -->
-  <div id="imageModal" class="modal-overlay hidden">
-    <div class="modal-card image-modal-card">
-      <span class="close-modal" id="closeImageModal">&times;</span>
-      <h3 id="imageModalTitle" class="image-modal-title">Document Preview</h3>
-      <div class="image-modal-body">
-        <img id="imageModalImg" src="" alt="Document">
-      </div>
-      <button class="btn-close-image" id="closeImageBtn">CLOSE</button>
+  <dialog id="applicationDocumentDialog" class="applications-dialog" aria-labelledby="applicationDocumentTitle">
+    <h2 id="applicationDocumentTitle">Document Preview</h2>
+    <p id="applicationDocumentEmpty" class="document-preview-empty" hidden></p>
+    <img id="applicationDocumentImage" alt="Submitted application document">
+    <button type="button" class="applications-dialog-close" data-close-dialog="applicationDocumentDialog">CLOSE</button>
+  </dialog>
+
+  <dialog id="applicationSummaryDialog" class="applications-dialog" aria-labelledby="applicationSummaryModalTitle">
+    <h2 id="applicationSummaryModalTitle">Application Summary</h2>
+    <div id="applicationSummaryModalContent" class="application-summary-modal-content"></div>
+    <button type="button" class="applications-dialog-close" data-close-dialog="applicationSummaryDialog">CLOSE</button>
+  </dialog>
+
+  <dialog id="rejectApplicationDialog" class="applications-dialog reject-application-dialog" aria-labelledby="rejectApplicationTitle">
+    <h2 id="rejectApplicationTitle">Reject application?</h2>
+    <p id="reviewActionError" role="alert"></p>
+    <div class="review-modal-actions">
+      <button type="button" class="applications-dialog-close" id="cancelRejectApplication">Cancel</button>
+      <button type="button" class="btn-decline" id="confirmRejectApplication">Reject</button>
     </div>
-  </div>
+  </dialog>
 
   <script src="js/adminCommon.js"></script>
   <script src="js/adminApplications.js"></script>
