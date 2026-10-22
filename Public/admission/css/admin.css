@@ -2362,6 +2362,7 @@ a.btn-logout-nav:hover {
 .review-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 .review-modal-actions .btn-decline { min-height: 38px; padding: 8px 14px; border: 0; border-radius: 4px; background: #f2caca; color: #7c1717; font-weight: 800; cursor: pointer; }
 .review-modal-actions button:disabled { cursor: wait; opacity: 0.65; }
+.activity-close-button { display: block; margin: 12px 0 4px auto; }
 
 .activities-card { margin-bottom: 20px; padding: 16px; }
 .activities-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }

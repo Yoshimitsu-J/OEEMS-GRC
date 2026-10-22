@@ -46,6 +46,28 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 	app.use(sessionMiddleware);
 	app.use('/admission', protectAdmissionPages);
 
+	app.use((request, response, next) => {
+		if (!request.session?.user) return next();
+		const studentPath = request.path === '/api/student'
+			|| request.path.startsWith('/api/student/')
+			|| request.path === '/student'
+			|| request.path.startsWith('/student/')
+			|| request.path.startsWith('/public/student/');
+		if (!studentPath) return next();
+		const now = Date.now();
+		const lastStudentActivity = Number(request.session.studentLastActivity || now);
+		if (now - lastStudentActivity > 10 * 60 * 1000) {
+			delete request.session.user;
+			request.session.save(() => {
+				if (request.originalUrl.startsWith('/api/')) return response.status(401).json({ error: 'Student session expired due to inactivity.' });
+				response.redirect('/public/index.html?openLogin=true&reason=inactivity');
+			});
+			return;
+		}
+		request.session.studentLastActivity = now;
+		next();
+	});
+
 	app.use(['/student', '/public/student'], (request, response, next) => {
 		const requestPath = request.path.toLowerCase();
 		const setupPage = requestPath.endsWith('/setupaccount.html');

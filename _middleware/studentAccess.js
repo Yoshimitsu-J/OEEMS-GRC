@@ -107,9 +107,20 @@ async function checkStepAccess(request, response, next) {
 	try {
 		const applicantId = studentProfile.applicantId;
 		const application = await StudentApplication.findOne({ applicantId }).lean();
-		const submitted = application?.status === 'under_review' && application.admissionStatus === 'pending';
-		if (submitted && !['', 'index.html', 'studentinformation.html'].includes(page)) {
-			return response.redirect('/student/?access=previous-step');
+		const submitted = ['under_review', 'approved', 'exam_completed', 'result_released'].includes(application?.status);
+		const declined = application?.status === 'declined' || application?.admissionStatus === 'declined';
+		if (declined) {
+			if (!['', 'index.html', 'studentinformation.html', 'scheduleexam.html', 'schedule.html'].includes(page)) {
+				return response.redirect('/student/scheduleExam.html?access=previous-step');
+			}
+			return page === 'scheduleexam.html' || page === 'schedule.html' || !restrictedPages.has(page) ? next() : response.redirect('/student/scheduleExam.html?access=previous-step');
+		}
+		if (submitted) {
+			const submittedAllowed = ['', 'index.html', 'studentinformation.html', 'examresult.html'];
+			if (application.status === 'approved' && ['takeexam.html', 'exam'].includes(page)) return next();
+			if (!submittedAllowed.includes(page)) {
+				return response.redirect('/student/?access=previous-step');
+			}
 		}
 		if (!restrictedPages.has(page)) return next();
 

@@ -59,8 +59,9 @@ async function syncStudentProgress(applicantId, progress, session) {
 
 function workflowStatus(application) {
 	if (!application) return 'In Progress';
+	if (application.status === 'declined') return 'Declined';
 	if (application.status === 'under_review' && application.admissionStatus === 'pending') return 'Pending';
-	if (['approved', 'declined', 'exam_completed', 'result_released'].includes(application.status)) return 'Completed';
+	if (['approved', 'exam_completed', 'result_released'].includes(application.status)) return 'Completed';
 	return 'In Progress';
 }
 
@@ -74,12 +75,13 @@ async function getWorkflow(profile) {
 		.filter((document) => ['submitted', 'under_review', 'accepted'].includes(document.verificationStatus))
 		.map((document) => document.documentType));
 	const documentCount = REQUIRED_UPLOADS.filter((type) => submittedTypes.has(type)).length;
-	const isSubmitted = workflowStatus(application) !== 'In Progress';
-	const progressPercent = isSubmitted ? 100 : schedule ? (documentCount === REQUIRED_UPLOADS.length ? 75 : 50) : 25;
+	const isSubmitted = application?.status !== 'declined' && workflowStatus(application) !== 'In Progress';
+	const progressPercent = isSubmitted ? 100 : application?.status === 'declined' ? 25 : schedule ? (documentCount === REQUIRED_UPLOADS.length ? 75 : 50) : 25;
 	let nextStep = null;
 
 	if (!isSubmitted) {
-		if (!schedule) nextStep = { number: 2, title: 'Schedule Exam', href: 'scheduleExam.html' };
+		if (application?.status === 'declined') nextStep = { number: 2, title: 'Schedule Exam', href: 'scheduleExam.html' };
+		else if (!schedule) nextStep = { number: 2, title: 'Schedule Exam', href: 'scheduleExam.html' };
 		else if (documentCount < REQUIRED_UPLOADS.length || application?.status !== 'documents_submitted') nextStep = { number: 3, title: 'Upload Documents', href: 'uploadDocuments.html' };
 		else nextStep = { number: 4, title: 'Review and Submit Application', href: 'applicationSummary.html' };
 	} else if (application?.status === 'approved') {

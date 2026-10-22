@@ -76,6 +76,7 @@
             <span id="activitiesPageLabel">Page 1 of 1</span>
             <button type="button" id="activitiesNext" class="applications-page-btn">NEXT</button>
           </div>
+          <button type="button" id="closeActivitiesList" class="applications-dialog-close activity-close-button">Close</button>
         </div>
       </section>
 
@@ -150,6 +151,15 @@
     <div class="review-modal-actions">
       <button type="button" class="applications-dialog-close" id="cancelRejectApplication">Cancel</button>
       <button type="button" class="btn-decline" id="confirmRejectApplication">Reject</button>
+    </div>
+  </dialog>
+
+  <dialog id="approveApplicationDialog" class="applications-dialog" aria-labelledby="approveApplicationTitle">
+    <h2 id="approveApplicationTitle">Approve application?</h2>
+    <p id="approveApplicationNotice"></p>
+    <div class="review-modal-actions">
+      <button type="button" class="applications-dialog-close" id="cancelApproveApplication">Cancel</button>
+      <button type="button" class="btn-approve" id="confirmApproveApplication">Confirm</button>
     </div>
   </dialog>
 

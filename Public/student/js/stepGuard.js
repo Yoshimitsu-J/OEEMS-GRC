@@ -79,15 +79,21 @@
   }
 
   function isPending() {
-    return status?.workflowStatus === 'under_review';
+    return ['under_review', 'approved', 'exam_completed', 'result_released'].includes(status?.workflowStatus);
+  }
+
+  function isDeclined() {
+    return status?.workflowStatus === 'declined' || status?.applicationStatus === 'Declined';
   }
 
   function isStepAllowed(step) {
     if (!status) return false;
-    if (isPending()) return false;
-    if (status.workflowStatus === 'approved') return step === 5;
+    if (isDeclined()) return step === 2;
+    if (status.workflowStatus === 'under_review') return step === 6;
+    if (status.workflowStatus === 'approved') return step === 5 || step === 6;
+    if (status.workflowStatus === 'exam_completed') return step === 6;
     if (status.workflowStatus === 'result_released') return step === 6;
-    if (status.workflowStatus === 'exam_completed' || step > 4) return false;
+    if (step > 4) return false;
     const completedThrough = status.nextStep?.number || 2;
     return step <= completedThrough;
   }
@@ -180,6 +186,16 @@
   document.addEventListener('click', (event) => {
     const anchor = event.target.closest('a[href]');
     if (!anchor) return;
+    const target = new URL(anchor.href, window.location.href);
+    if (target.pathname.split('/').pop().toLowerCase() === 'examresult.html') {
+      event.preventDefault();
+      openModal({
+        title: 'Exam Result',
+        message: "Exam Result - You will receive an 'Entrance Examination Result' via email once the admission reviews your exam result",
+        showProceed: false
+      });
+      return;
+    }
     const step = stepForAnchor(anchor);
     if (step && !isStepAllowed(step)) {
       event.preventDefault();
@@ -194,6 +210,13 @@
       if (new URLSearchParams(window.location.search).get('access') === 'previous-step') {
         openModal();
         window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      if (window.location.pathname.split('/').pop().toLowerCase() === 'examresult.html' && isPending()) {
+        openModal({
+          title: 'Exam Result',
+          message: "Exam Result - You will receive an 'Entrance Examination Result' via email once the admission reviews your exam result",
+          showProceed: false
+        });
       }
     } catch (error) {
       document.querySelectorAll('.profile-loading').forEach((element) => {

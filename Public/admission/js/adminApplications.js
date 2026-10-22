@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activityStatus = '';
   let sort = { field: 'date', direction: 'desc' };
   let pendingReject = null;
+  let pendingApprove = null;
   let previewUrl = '';
 
   async function api(url, options = {}) {
@@ -89,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const group = element('div', 'action-btn-group');
     const approve = element('button', 'btn-approve', 'APPROVE');
     approve.type = 'button';
-    approve.addEventListener('click', () => reviewApplication(application, 'approve'));
+    approve.addEventListener('click', () => askToApprove(application));
     const reject = element('button', 'btn-decline', 'REJECT');
     reject.type = 'button';
     reject.addEventListener('click', () => askToReject(application));
@@ -285,6 +286,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function askToApprove(application) {
+    pendingApprove = application;
+    document.getElementById('approveApplicationTitle').textContent = `Approve ${application.name}?`;
+    document.getElementById('approveApplicationNotice').textContent = `Approve ${application.name} - Application will send the approved application notice via email with the attached 'Statement of Application' PDF. This action cannot be undone.`;
+    document.getElementById('approveApplicationDialog').showModal();
+  }
+
   function askToReject(application) {
     pendingReject = application;
     rejectTitle.textContent = `Reject ${application.name}?`;
@@ -310,16 +318,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  rejectDialog.querySelectorAll('[name="rejectionCause"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const otherWrap = document.getElementById('otherRejectionWrap');
+      otherWrap.hidden = input.value !== 'Others';
+      if (input.value !== 'Others') document.getElementById('otherRejectionMessage').value = '';
+      reviewError.textContent = '';
+    });
+  });
   rejectButton.addEventListener('click', async () => {
     if (!pendingReject) return;
+    const selected = rejectDialog.querySelector('[name="rejectionCause"]:checked');
+    if (!selected) {
+      reviewError.textContent = 'Select a rejection cause.';
+      return;
+    }
+    const rejection = { rejectionCause: selected.value };
+    if (selected.value === 'Others') {
+      rejection.rejectionMessage = document.getElementById('otherRejectionMessage').value.trim();
+      if (!rejection.rejectionMessage) {
+        reviewError.textContent = 'Enter a personalized rejection message.';
+        return;
+      }
+    }
     rejectButton.disabled = true;
-    const rejected = await reviewApplication(pendingReject, 'reject');
+    const rejected = await reviewApplication(pendingReject, 'reject', rejection);
     if (rejected) rejectDialog.close();
     rejectButton.disabled = false;
     if (rejected) pendingReject = null;
   });
 
   document.getElementById('cancelRejectApplication').addEventListener('click', () => rejectDialog.close());
+  document.getElementById('cancelApproveApplication').addEventListener('click', () => document.getElementById('approveApplicationDialog').close());
+  document.getElementById('confirmApproveApplication').addEventListener('click', async () => {
+    if (!pendingApprove) return;
+    const confirmButton = document.getElementById('confirmApproveApplication');
+    confirmButton.disabled = true;
+    const approved = await reviewApplication(pendingApprove, 'approve');
+    if (approved) document.getElementById('approveApplicationDialog').close();
+    confirmButton.disabled = false;
+    if (approved) pendingApprove = null;
+  });
+  document.getElementById('closeActivitiesList').addEventListener('click', () => {
+    activityPanel.hidden = true;
+    activityStatus = '';
+  });
   document.querySelectorAll('[data-close-dialog]').forEach((button) => {
     button.addEventListener('click', () => document.getElementById(button.dataset.closeDialog).close());
   });

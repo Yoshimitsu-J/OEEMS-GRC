@@ -36,8 +36,10 @@ router.post('/auth/login', requireSameOrigin, loginLimiter, async (request, resp
 			return response.status(401).json({ error: 'Invalid administrator credentials.' });
 		}
 
+		const studentSession = request.session.user;
 		await new Promise((resolve, reject) => request.session.regenerate((error) => error ? reject(error) : resolve()));
 		request.session.admin = { id: admin._id.toString(), adminId: admin.adminId, role: admin.role };
+		if (studentSession) request.session.user = studentSession;
 		await saveSession(request);
 		await db.collection('admin_users').updateOne({ _id: admin._id }, { $set: { lastLoginAt: new Date() } });
 		await db.collection('admin_audit_logs').insertOne({
@@ -58,6 +60,14 @@ router.post('/auth/login', requireSameOrigin, loginLimiter, async (request, resp
 });
 
 router.post('/auth/logout', requireSameOrigin, requireAdmin, (request, response, next) => {
+	delete request.session.admin;
+	if (request.session.user) {
+		request.session.save((error) => {
+			if (error) return next(error);
+			response.json({ ok: true, redirectUrl: '/student/' });
+		});
+		return;
+	}
 	request.session.destroy((error) => {
 		if (error) return next(error);
 		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
@@ -78,7 +88,9 @@ router.get('/facilitator/status', requireAdmin, (request, response) => {
 router.get('/applications', requireAdmin, async (request, response) => {
 	try {
 		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
-		const requestedStatus = ['approved', 'rejected'].includes(request.query.status) ? request.query.status : null;
+		const requestedStatus = ['approved', 'rejected', 'declined'].includes(request.query.status)
+			? (request.query.status === 'rejected' ? 'declined' : request.query.status)
+			: null;
 		const query = requestedStatus
 			? { status: requestedStatus }
 			: request.query.queue === 'restored'
@@ -235,7 +247,7 @@ router.put('/applications/:applicantId/review', requireSameOrigin, requireAdmin,
 	const studentDb = getDatabaseConnection('OEEMS_Student').db;
 	const session = mongoose.connection.getClient().startSession();
 	const reviewedAt = new Date();
-	const nextStatus = decision === 'approve' ? 'approved' : 'rejected';
+	const nextStatus = decision === 'approve' ? 'approved' : 'declined';
 	let emailContext = null;
 	try {
 		await session.withTransaction(async () => {
@@ -368,7 +380,7 @@ router.put('/applications/:applicantId/restore', requireSameOrigin, requireAdmin
 		await session.withTransaction(async () => {
 			const application = await admissionDb.collection('applications').findOne({
 				applicantId,
-				status: { $in: ['approved', 'rejected'] }
+				status: { $in: ['approved', 'declined'] }
 			}, { session });
 			if (!application) {
 				const error = new Error('This application cannot be restored. Refresh the activity list.');

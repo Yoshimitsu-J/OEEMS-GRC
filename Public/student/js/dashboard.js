@@ -6,10 +6,27 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Dashboard JS Initialized.');
 
   let logoutPending = false;
+  let studentIdleTimer;
+  const STUDENT_IDLE_LIMIT = 10 * 60 * 1000;
   const clearClientState = () => {
-    localStorage.clear();
     sessionStorage.clear();
   };
+
+  const resetStudentIdleTimer = () => {
+    window.clearTimeout(studentIdleTimer);
+    studentIdleTimer = window.setTimeout(async () => {
+      if (logoutPending) return;
+      clearClientState();
+      try {
+        await fetch('/api/auth/logout', { method: 'POST', headers: { Accept: 'application/json' }, credentials: 'same-origin', cache: 'no-store' });
+      } catch {}
+      window.location.replace('/public/index.html?openLogin=true&reason=inactivity');
+    }, STUDENT_IDLE_LIMIT);
+  };
+  ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach((eventName) => {
+    document.addEventListener(eventName, resetStudentIdleTimer, { passive: true });
+  });
+  resetStudentIdleTimer();
 
   document.querySelectorAll('a[href="/api/auth/logout"]').forEach((logoutLink) => {
     logoutLink.addEventListener('click', async (event) => {
@@ -175,12 +192,16 @@ document.addEventListener('DOMContentLoaded', () => {
       action.hidden = false;
     }
 
-    if (status.workflowStatus === 'under_review') {
-      document.querySelectorAll('.sidebar nav ul li a').forEach((link) => {
-        const target = link.getAttribute('href');
-        link.closest('li').hidden = !['index.html', 'studentInformation.html'].includes(target);
-      });
-    }
+    const submitted = ['under_review', 'approved', 'exam_completed', 'result_released'].includes(status.workflowStatus);
+    const declined = status.workflowStatus === 'declined' || status.applicationStatus === 'Declined';
+    document.querySelectorAll('.sidebar nav ul li a').forEach((link) => {
+      const target = link.getAttribute('href');
+      if (declined) {
+        link.closest('li').hidden = !['index.html', 'studentInformation.html', 'scheduleExam.html'].includes(target);
+      } else if (submitted) {
+        link.closest('li').hidden = !['index.html', 'studentInformation.html', 'examResult.html'].includes(target);
+      }
+    });
   };
 
   updateDashboard().catch((error) => console.error(error.message));

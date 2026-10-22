@@ -67,12 +67,15 @@ function saveSession(request) {
 }
 
 async function establishSession(request, user) {
+	const admissionSession = request.session.admin;
 	await regenerateSession(request);
 	request.session.user = {
 		id: user.id,
 		email: user.email,
 		role: 'Student'
 	};
+	request.session.studentLastActivity = Date.now();
+	if (admissionSession) request.session.admin = admissionSession;
 	await saveSession(request);
 }
 
@@ -608,6 +611,14 @@ router.get('/google/callback', async (request, response) => {
 
 router.post('/logout', requireSameOrigin, (request, response, next) => {
 	request.app.get('io')?.in(`session:${request.sessionID}`).disconnectSockets(true);
+	delete request.session.user;
+	if (request.session.admin) {
+		request.session.save((error) => {
+			if (error) return next(error);
+			response.json({ ok: true, redirectUrl: '/admission/applicationPage.html' });
+		});
+		return;
+	}
 	request.session.destroy((error) => {
 		if (error) return next(error);
 		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
@@ -617,6 +628,14 @@ router.post('/logout', requireSameOrigin, (request, response, next) => {
 
 router.get('/logout', (request, response, next) => {
 	request.app.get('io')?.in(`session:${request.sessionID}`).disconnectSockets(true);
+	delete request.session.user;
+	if (request.session.admin) {
+		request.session.save((error) => {
+			if (error) return next(error);
+			response.redirect('/admission/applicationPage.html');
+		});
+		return;
+	}
 	request.session.destroy((error) => {
 		if (error) return next(error);
 		response.clearCookie(process.env.SESSION_COOKIE_NAME || 'connect.sid', { path: '/' });
