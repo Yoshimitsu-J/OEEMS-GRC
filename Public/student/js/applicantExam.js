@@ -123,28 +123,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
+  async function fetchExamJson(url, options = {}, timeoutSeconds = 20) {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), timeoutSeconds * 1000);
+    try {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        ...options,
+        signal: controller.signal
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `The server returned HTTP ${response.status}.`);
+      return result;
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error('Exam loading timed out. Check your connection and try again.');
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  }
+
   async function initializeExam() {
     if (!applicationCode) {
       window.location.assign('/public/examination/login.html');
       return;
     }
+    startButton.disabled = true;
+    startButton.textContent = 'Loading...';
+    questionElement.textContent = 'Loading examination...';
+    progressElement.textContent = '0 out of 0 items';
+    optionsElement.replaceChildren();
+    nextButton.disabled = true;
     try {
-      const [questionResponse, startResponse] = await Promise.all([
-        fetch('/api/examination/questionnaire', { credentials: 'same-origin', cache: 'no-store' }),
-        fetch('/api/examination/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ applicationCode }) })
-      ]);
-      const questionResult = await questionResponse.json();
-      const startResult = await startResponse.json();
-      if (!questionResponse.ok) throw new Error(questionResult.error || 'Could not load exam questions.');
-      if (!startResponse.ok) throw new Error(startResult.error || 'Could not start examination.');
-      questions = questionResult.questions;
+      const questionResult = await fetchExamJson('/api/examination/questionnaire');
+      const startResult = await fetchExamJson('/api/examination/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationCode })
+      });
+      questions = Array.isArray(questionResult.questions) ? questionResult.questions : [];
+      if (!questions.length) throw new Error('No examination questions are configured. Contact the Admissions Office.');
       attemptId = startResult.attemptId;
       timeLeft = startResult.durationSeconds || 180;
       renderQuestion();
     } catch (error) {
+      attemptId = null;
       questionElement.textContent = error.message;
       optionsElement.replaceChildren();
       nextButton.disabled = true;
+      startButton.disabled = false;
+      startButton.textContent = 'Retry Exam';
+      if (!instructions.open) instructions.showModal();
+    } finally {
+      startButton.disabled = false;
+      if (attemptId) startButton.textContent = 'Start Exam';
     }
   }
 
@@ -155,6 +188,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (attemptId) startTimer();
   });
 
-  requestFullscreen();
   instructions.showModal();
 });

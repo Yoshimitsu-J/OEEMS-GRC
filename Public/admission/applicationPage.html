@@ -122,10 +122,18 @@
     </main>
   </div>
 
-  <dialog id="applicationDocumentDialog" class="applications-dialog" aria-labelledby="applicationDocumentTitle">
+  <dialog id="applicationDocumentDialog" class="applications-dialog document-preview-dialog" aria-labelledby="applicationDocumentTitle">
     <h2 id="applicationDocumentTitle">Document Preview</h2>
     <p id="applicationDocumentEmpty" class="document-preview-empty" hidden></p>
-    <img id="applicationDocumentImage" alt="Submitted application document">
+    <div id="applicationDocumentViewport" class="document-preview-viewport">
+      <img id="applicationDocumentImage" alt="Submitted application document">
+    </div>
+    <div class="document-zoom-controls" aria-label="Document zoom controls">
+      <button type="button" id="documentZoomOut" class="document-zoom-btn" aria-label="Zoom out">−</button>
+      <output id="documentZoomLevel" class="document-zoom-level">100%</output>
+      <button type="button" id="documentZoomIn" class="document-zoom-btn" aria-label="Zoom in">+</button>
+      <button type="button" id="documentZoomReset" class="document-zoom-reset">RESET</button>
+    </div>
     <button type="button" class="applications-dialog-close" data-close-dialog="applicationDocumentDialog">CLOSE</button>
   </dialog>
 

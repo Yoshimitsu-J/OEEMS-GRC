@@ -60,7 +60,7 @@
           <span class="results-hint">
             <i class="bi bi-info-circle"></i> Hover name to view All Categories
           </span>
-          <span class="results-passing">PASSING: <strong>50 and Above</strong></span>
+          <span class="results-passing">PASSING: <strong id="passingScoreLabel">50 and Above</strong></span>
           <span class="results-note">
             <i class="bi bi-envelope-fill"></i> Result will sent to applicant's Email
           </span>
@@ -73,17 +73,17 @@
       <div class="applications-tabs">
         <button class="app-tab active" data-tab="pending">
           <i class="bi bi-hourglass-split"></i>
-          PENDING NOTIFICATION
+          PENDING RESULTS
           <span class="tab-badge" id="pendingCount">0</span>
         </button>
         <button class="app-tab" data-tab="notified">
           <i class="bi bi-check-circle-fill"></i>
-          NOTIFIED / RECYCLE BIN
+          COMPLETED
           <span class="tab-badge" id="notifiedCount">0</span>
         </button>
-        <button class="app-tab" data-tab="activity">
-          <i class="bi bi-clock-history"></i>
-          ACTIVITY LOG
+        <button class="app-tab" data-tab="summary">
+          <i class="bi bi-clipboard-data"></i>
+          SUMMARY
         </button>
       </div>
 
@@ -97,7 +97,7 @@
         </div>
 
         <div class="filter-item">
-          <label class="filter-label">FILTER By Result</label>
+          <label class="filter-label">FILTER / ARCHIVE By Result</label>
           <select id="filterResult" class="filter-input">
             <option value="">All Results</option>
             <option value="passed">PASSED Only</option>
@@ -117,13 +117,13 @@
         </div>
 
         <div class="filter-item">
-          <label class="filter-label required-label">PASSING SCORE</label>
-          <span class="required-note">50</span>
+          <label class="filter-label required-label" for="passingScoreInput">PASSING SCORE</label>
+          <input type="number" id="passingScoreInput" class="filter-input" min="0" step="1" value="50">
         </div>
 
         <div class="filter-item">
           <label class="filter-label required-label">MAX SCORE</label>
-          <span class="required-note">90</span>
+          <span class="required-note" id="maxScoreLabel">0</span>
         </div>
       </div>
 
@@ -142,10 +142,10 @@
         </div>
 
         <div class="bulk-right">
-          <button class="bulk-btn bulk-approve" id="bulkMarkPassedBtn">
+          <button class="bulk-btn bulk-approve" id="bulkMarkPassedBtn" disabled>
             <i class="bi bi-check-circle-fill"></i> MARK AS PASSED
           </button>
-          <button class="bulk-btn bulk-decline" id="bulkMarkFailedBtn">
+          <button class="bulk-btn bulk-decline" id="bulkMarkFailedBtn" disabled>
             <i class="bi bi-x-circle-fill"></i> MARK AS FAILED
           </button>
         </div>
@@ -187,11 +187,10 @@
               </th>
               <th data-sort="name" class="sortable-th">NAME <i class="bi bi-arrow-down-up"></i></th>
               <th data-sort="score" class="sortable-th">RAW SCORE <small>(out of 90)</small> <i class="bi bi-arrow-down-up"></i></th>
-              <th>PROGRAM RECOMM.</th>
-              <th>LOGIC R.</th>
-              <th>MATH</th>
+              <th>CATEGORY SCORES</th>
               <th data-sort="result" class="sortable-th">RESULT <i class="bi bi-arrow-down-up"></i></th>
-              <th id="lastColHeader">NOTIFY &amp; MARK</th>
+              <th>ANTI-CHEATING</th>
+              <th id="lastColHeader">ACTIONS</th>
             </tr>
           </thead>
           <tbody id="resultsTableBody">
@@ -200,18 +199,25 @@
         </table>
       </div>
 
-      <section id="activityLogPanel" class="table-card activity-log-panel" hidden aria-labelledby="activityLogTitle">
-        <h3 id="activityLogTitle">APPLICATION ACTIVITY LOG</h3>
-        <div class="activity-log-scroll">
-          <table class="admin-table activity-log-table">
-            <thead><tr><th>DATE / TIME</th><th>ADMIN</th><th>APPLICANT ID</th><th>ACTION</th><th>STATUS CHANGE</th></tr></thead>
-            <tbody id="activityLogBody"><tr><td colspan="5">Loading activity...</td></tr></tbody>
-          </table>
+      <section id="resultsSummaryPanel" class="table-card results-summary-panel" hidden aria-labelledby="resultsSummaryTitle">
+        <div class="results-summary-heading">
+          <h3 id="resultsSummaryTitle">EXAMINATION RESULTS SUMMARY</h3>
         </div>
-        <div class="applications-pagination">
-          <button type="button" id="activityLogPrev" class="applications-page-btn">PREV</button>
-          <span id="activityLogPageLabel">Page 1 of 1</span>
-          <button type="button" id="activityLogNext" class="applications-page-btn">NEXT</button>
+        <div class="results-summary-grid">
+          <div class="results-summary-column passed-summary">
+            <div class="results-summary-column-header">
+              <h4>PASSED</h4>
+              <button type="button" id="copyPassedNames" class="summary-copy-btn"><i class="bi bi-copy"></i> COPY PASSED</button>
+            </div>
+            <ol id="passedNamesList" class="summary-names-list"></ol>
+          </div>
+          <div class="results-summary-column failed-summary">
+            <div class="results-summary-column-header">
+              <h4>FAILED</h4>
+              <button type="button" id="copyFailedNames" class="summary-copy-btn"><i class="bi bi-copy"></i> COPY FAILED</button>
+            </div>
+            <ol id="failedNamesList" class="summary-names-list"></ol>
+          </div>
         </div>
       </section>
     </main>
@@ -223,7 +229,31 @@
     <div id="tooltipBody" class="tooltip-body"></div>
   </div>
 
+  <dialog id="failureResultDialog" class="applications-dialog">
+    <h2>Send Failed Result</h2>
+    <p id="failureResultApplicant"></p>
+    <label for="failureReasonSelect">Cause of Failure</label>
+    <select id="failureReasonSelect" class="filter-input">
+      <option value="">Select a cause</option>
+      <option>Poor Time Management</option>
+      <option>Knowledge Gaps and Inadequate Preparation</option>
+      <option>Cheating Detected</option>
+    </select>
+    <label for="failureCustomMessage">Custom Message (optional)</label>
+    <textarea id="failureCustomMessage" rows="5" class="filter-input"></textarea>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button type="button" id="sendFailureResult" class="bulk-btn bulk-decline">SEND FAILED RESULT</button>
+      <button type="button" data-close-dialog="failureResultDialog" class="applications-dialog-close">CANCEL</button>
+    </div>
+  </dialog>
+
+  <dialog id="antiCheatingDialog" class="applications-dialog">
+    <h2>Anti-Cheating Review</h2>
+    <div id="antiCheatingContent"></div>
+    <button type="button" data-close-dialog="antiCheatingDialog" class="applications-dialog-close">CLOSE</button>
+  </dialog>
+
   <script src="js/adminCommon.js"></script>
-  <script src="js/adminResults.js"></script>
+  <script src="js/adminResultsLive.js"></script>
 </body>
 </html>

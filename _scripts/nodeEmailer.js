@@ -108,4 +108,25 @@ async function sendAdmissionDecision({ email, applicantName, decision, applicant
 	});
 }
 
-module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation, sendAdmissionDecision };
+async function sendExaminationResult({ email, applicantName, applicationId, result, examDate, reasonTitle, customMessage }) {
+	if (!email) throw new Error('Applicant email is unavailable.');
+	const fullName = applicantName || 'Applicant';
+	if (result === 'passed') {
+		await getTransporter().sendMail({
+			from: process.env.MAIL_FROM || process.env.SMTP_USER,
+			to: email,
+			subject: 'Congratulations! GRC-CAT Entrance Examination Result',
+			text: `Dear ${fullName},\n\nWarm congratulations! We are pleased to inform you that you have successfully passed the entrance examination for admission to Global Reciprocal Colleges for the upcoming academic term.\n\nYour hard work and dedication have truly paid off, and we are excited to welcome you into our academic community.\n\nTo secure your slot and proceed with your enrollment:\n1. Log in to your application portal to view your official score and admission status.\n2. Submit your remaining admission credentials to the Admissions Office.\n3. Complete the initial enrollment registration.\n\nShould you have any questions, please reach out to the Admissions Office at ${process.env.ADMISSION_EMAIL || 'admissions@grc.edu.ph'} or 09123456789.\n\nOnce again, congratulations on this milestone.\n\nAdmissions Office\nGlobal Reciprocal Colleges\n09123456789`
+		});
+		return;
+	}
+	const reason = [reasonTitle, customMessage].filter(Boolean).join('\n\n');
+	await getTransporter().sendMail({
+		from: process.env.MAIL_FROM || process.env.SMTP_USER,
+		to: email,
+		subject: `Important Update: Entrance Examination Results – ${fullName} / ${applicationId || 'Application'}`,
+		text: `Dear ${fullName},\n\nThank you for your interest in Global Reciprocal Colleges and for taking the entrance examination for the GRC-CAT Entrance Examination program on ${examDate || new Date().toLocaleDateString('en-PH')}.\n\nWe are writing to inform you that, after a thorough review of your exam submission, you were not able to meet the passing criteria required for admission for the upcoming academic intake.\n\nReason:\n${reason || 'The required passing criteria were not met.'}\n\nWe recognize the time and effort you dedicated. While this outcome prevents us from offering you admission at this time, we encourage you to apply again in the next admissions cycle or explore alternative programs.\n\nShould you have any questions regarding your application, please contact the Admissions Office at ${process.env.ADMISSION_EMAIL || 'admissions@grc.edu.ph'} or 09123456789.\n\nSincerely,\nAdmission Office\nGlobal Reciprocal Colleges\n09123456789`
+	});
+}
+
+module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation, sendAdmissionDecision, sendExaminationResult };

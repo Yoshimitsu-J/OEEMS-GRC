@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const documentTitle = document.getElementById('applicationDocumentTitle');
   const documentEmpty = document.getElementById('applicationDocumentEmpty');
   const documentImage = document.getElementById('applicationDocumentImage');
+  const documentViewport = document.getElementById('applicationDocumentViewport');
+  const documentZoomOut = document.getElementById('documentZoomOut');
+  const documentZoomIn = document.getElementById('documentZoomIn');
+  const documentZoomReset = document.getElementById('documentZoomReset');
+  const documentZoomLevel = document.getElementById('documentZoomLevel');
   const summaryDialog = document.getElementById('applicationSummaryDialog');
   const summaryContent = document.getElementById('applicationSummaryModalContent');
   const rejectDialog = document.getElementById('rejectApplicationDialog');
@@ -32,6 +37,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let pendingReject = null;
   let pendingApprove = null;
   let previewUrl = '';
+  let documentZoom = 1;
+
+  function setDocumentZoom(nextZoom) {
+    documentZoom = Math.min(4, Math.max(1, nextZoom));
+    if (documentImage) documentImage.style.transform = `scale(${documentZoom})`;
+    if (documentZoomLevel) documentZoomLevel.textContent = `${Math.round(documentZoom * 100)}%`;
+    if (documentZoomOut) documentZoomOut.disabled = documentZoom <= 1;
+    if (documentZoomIn) documentZoomIn.disabled = documentZoom >= 4;
+  }
+
+  function resetDocumentZoom() {
+    setDocumentZoom(1);
+    if (documentViewport?.scrollTo) documentViewport.scrollTo({ left: 0, top: 0 });
+  }
 
   async function api(url, options = {}) {
     const response = await fetch(url, {
@@ -230,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
     documentEmpty.hidden = true;
     documentImage.hidden = true;
     documentImage.removeAttribute('src');
+    resetDocumentZoom();
     documentDialog.showModal();
     try {
       const url = `/api/admin/applications/${encodeURIComponent(application.applicantId)}/documents/${type.key}`;
@@ -383,7 +403,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   activityPrev.addEventListener('click', () => { activityPage -= 1; renderActivities(); });
   activityNext.addEventListener('click', () => { activityPage += 1; renderActivities(); });
+  documentZoomOut?.addEventListener('click', () => setDocumentZoom(documentZoom - 0.25));
+  documentZoomIn?.addEventListener('click', () => setDocumentZoom(documentZoom + 0.25));
+  documentZoomReset?.addEventListener('click', resetDocumentZoom);
+  documentViewport?.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    setDocumentZoom(documentZoom + (event.deltaY < 0 ? 0.25 : -0.25));
+  }, { passive: false });
   documentDialog.addEventListener('close', () => {
+    resetDocumentZoom();
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     previewUrl = '';
     documentImage.removeAttribute('src');
@@ -526,6 +554,7 @@ if (false) document.addEventListener('DOMContentLoaded', () => {
     documentEmpty.hidden = true;
     documentImage.hidden = true;
     documentImage.removeAttribute('src');
+    resetDocumentZoom();
     documentDialog.showModal();
     try {
       const url = `/api/admin/applications/${encodeURIComponent(application.applicantId)}/documents/${type.key}`;

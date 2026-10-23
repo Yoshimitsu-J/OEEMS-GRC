@@ -61,9 +61,10 @@
     </aside>
 
     <main class="main-content">
-      <div class="card exam-result-card">
+      <div class="card exam-result-card" id="examResultCard">
         <h1 class="card-title">Exam Result</h1>
-        <p>No exam result found. Please take the exam first.</p>
+        <p id="examResultMessage">Loading your examination result...</p>
+        <div id="examResultDetails" hidden></div>
         <a href="index.html" class="link-no-underline">
           <button class="btn-primary exam-result-back-btn"><i class="bi bi-arrow-left"></i> Back to Dashboard</button>
         </a>
@@ -74,5 +75,22 @@
   <script src="js/stepGuard.js"></script>
   <script src="js/applicantCommon.js"></script>
   <script src="js/dashboard.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const message = document.getElementById('examResultMessage');
+      const details = document.getElementById('examResultDetails');
+      try {
+        const response = await fetch('/api/student/exam-result', { credentials: 'same-origin', cache: 'no-store' });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'No examination result found.');
+        message.textContent = result.result === 'passed' ? 'Congratulations! You passed the examination.' : 'You did not meet the passing score.';
+        details.hidden = false;
+        const categories = Object.entries(result.categoryScores || {}).map(([category, score]) => `<p><strong>${category}:</strong> ${score.correct || 0}/${score.total || 0}</p>`).join('');
+        details.innerHTML = `<p><strong>Raw Score:</strong> ${result.score} / ${result.maxScore}</p><p><strong>Passing Score:</strong> ${result.passingScore}</p><p><strong>Result:</strong> ${result.result.toUpperCase()}</p>${categories}`;
+      } catch (error) {
+        message.textContent = error.message;
+      }
+    });
+  </script>
 </body>
 </html>

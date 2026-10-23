@@ -72,7 +72,7 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 		const requestPath = request.path.toLowerCase();
 		const setupPage = requestPath.endsWith('/setupaccount.html');
 		const staticAsset = /\.(?:css|js|png|jpe?g|webp|svg|ico|woff2?)$/i.test(requestPath);
-		if (staticAsset) return requireAuthenticated(request, response, next);
+		if (staticAsset) return next();
 		if (setupPage) {
 			return requireAuthenticated(request, response, (authError) => {
 				if (authError) return next(authError);

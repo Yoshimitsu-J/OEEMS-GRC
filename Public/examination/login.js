@@ -5,13 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const dialog = document.getElementById('verificationDialog');
   let applicant = null;
 
-  async function enterFullscreen() {
-    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-      try { await document.documentElement.requestFullscreen(); } catch {}
-    }
-  }
-
-  enterFullscreen();
 
   submit.addEventListener('click', async () => {
     const applicationCode = input.value.trim().toUpperCase();
@@ -49,9 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
     input.focus();
   });
 
-  document.getElementById('itsMeButton').addEventListener('click', () => {
+  document.getElementById('itsMeButton').addEventListener('click', async () => {
     if (!applicant) return;
     sessionStorage.setItem('examinationApplicationCode', applicant.applicationCode);
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      try { await document.documentElement.requestFullscreen(); } catch {}
+    }
     window.location.assign('/public/examination/exam.html?applicationCode=' + encodeURIComponent(applicant.applicationCode));
   });
 });

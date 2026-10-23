@@ -8,14 +8,16 @@
     body { margin: 0; min-height: 100vh; display: grid; place-items: center; font-family: "Segoe UI", sans-serif; background: #f4f2f2; }
     main { width: min(92vw, 620px); padding: 28px; background: white; border-top: 5px solid #800000; text-align: center; }
     h1 { color: #800000; }
-    a { display: inline-block; margin-top: 12px; color: #800000; font-weight: 800; }
+    .complete-mark { width: 72px; height: 72px; margin: 0 auto 12px; display: grid; place-items: center; border-radius: 50%; background: #800000; color: white; font-size: 42px; }
+    a { width: min(100%, 320px); min-height: 44px; margin-top: 18px; display: inline-grid; place-items: center; border-radius: 4px; background: #800000; color: white; text-decoration: none; font-weight: 800; }
   </style>
 </head>
 <body>
   <main>
-    <h1>Exam Submitted</h1>
-    <p>Your examination responses have been recorded. The Admission Office will review your result.</p>
-    <a href="/mode_select.html">Return to module selection</a>
+    <div class="complete-mark" aria-hidden="true">✓</div>
+    <h1>Examination Submitted Successfully</h1>
+    <p>Your responses have been saved. You may now clear the workstation for the next examinee.</p>
+    <a href="/public/examination/login.html">BACK TO EXAM MODULE</a>
   </main>
 </body>
 </html>

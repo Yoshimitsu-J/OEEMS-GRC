@@ -252,6 +252,34 @@ router.get('/application-status', requireAuthenticated, requireCompletedProfile,
 	}
 });
 
+router.get('/exam-result', requireAuthenticated, requireCompletedProfile, async (request, response) => {
+	try {
+		const applicantId = response.locals.studentProfile.applicantId;
+		const application = await StudentApplication.findOne({ applicantId }).lean();
+		if (application?.status !== 'result_released') return response.status(404).json({ error: 'Your examination result has not been released yet.' });
+		const db = getDatabaseConnection('OEEMS_Student').db;
+		const attempt = await db.collection('student_exam_attempts').findOne({ applicantId, status: { $in: ['submitted', 'disqualified'] }, resultArchived: true }, { sort: { submittedAt: -1 } });
+		if (!attempt) return response.status(404).json({ error: 'Your examination result has not been released yet.' });
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const settings = await admissionDb.collection('examination_settings').findOne({ documentType: 'results_settings' });
+		const passingScore = Number.isInteger(settings?.passingScore) && settings.passingScore >= 0 ? settings.passingScore : 50;
+		response.set('Cache-Control', 'no-store');
+		response.json({
+			result: attempt.notificationResult || ((attempt.score || 0) >= passingScore ? 'passed' : 'failed'),
+			score: Number(attempt.score || 0),
+			maxScore: Number(attempt.totalItems || 0),
+			passingScore,
+			categoryScores: attempt.categoryScores || {},
+			failureReason: attempt.failureReason || null,
+			customMessage: attempt.customFailureMessage || null,
+			releasedAt: attempt.resultNotifiedAt || attempt.submittedAt || null
+		});
+	} catch (error) {
+		console.error('Student examination result read failed:', error.message);
+		response.status(500).json({ error: 'Could not load your examination result.' });
+	}
+});
+
 router.get('/schedules', requireAuthenticated, requireCompletedProfile, async (request, response) => {
 	try {
 		const db = getDatabaseConnection('OEEMS_Admission').db;

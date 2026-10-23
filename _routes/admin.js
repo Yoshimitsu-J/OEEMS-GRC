@@ -10,7 +10,7 @@ const { getDatabaseConnection } = require('../_scripts/mongodb_connection');
 const { requireSameOrigin } = require('../_middleware/sameOrigin');
 const { requireAdmin } = require('../_middleware/adminAccess');
 const { verifyPassword } = require('../_scripts/authSecurity');
-const { sendAdmissionDecision } = require('../_scripts/nodeEmailer');
+const { sendAdmissionDecision, sendExaminationResult } = require('../_scripts/nodeEmailer');
 
 const router = express.Router();
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
@@ -753,6 +753,123 @@ router.put('/schedules/computers/:facilityId', requireSameOrigin, requireAdmin, 
 		response.status(500).json({ error: 'Could not save facility computer statuses.' });
 	} finally {
 		await session.endSession();
+	}
+});
+
+router.get('/results', requireAdmin, async (request, response) => {
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const studentDb = getDatabaseConnection('OEEMS_Student').db;
+		const settings = await admissionDb.collection('examination_settings').findOne({ documentType: 'results_settings' });
+		const passingScore = Number.isInteger(settings?.passingScore) && settings.passingScore >= 0 ? settings.passingScore : 50;
+		const attempts = await studentDb.collection('student_exam_attempts').find({ status: { $in: ['submitted', 'disqualified'] } }).sort({ submittedAt: -1, createdAt: -1 }).toArray();
+		const ids = [...new Set(attempts.map((attempt) => attempt.applicantId).filter(Boolean))];
+		const [applications, profiles, users] = await Promise.all([
+			admissionDb.collection('applications').find({ $or: [{ applicantId: { $in: ids } }, { applicationNumber: { $in: ids } }] }).toArray(),
+			studentDb.collection('student_profiles').find({ applicantId: { $in: ids } }).toArray(),
+			studentDb.collection('users').find({ applicantId: { $in: ids } }).toArray()
+		]);
+		const applicationByApplicantId = new Map(applications.map((application) => [application.applicantId, application]));
+		const profileByApplicantId = new Map(profiles.map((profile) => [profile.applicantId, profile]));
+		const userByApplicantId = new Map(users.map((user) => [user.applicantId, user]));
+		const results = attempts.map((attempt) => {
+			const application = applicationByApplicantId.get(attempt.applicantId);
+			const profile = profileByApplicantId.get(attempt.applicantId);
+			const user = userByApplicantId.get(attempt.applicantId);
+			const score = Number(attempt.score || 0);
+			const totalItems = Number(attempt.totalItems || 0);
+			const categoryScores = attempt.categoryScores || {};
+			const categories = Object.fromEntries(Object.entries(categoryScores).map(([category, data]) => [category, `${data.correct || 0}/${data.total || 0}`]));
+			const name = profile ? [profile.lastName, profile.givenName, profile.middleName, profile.suffix].filter(Boolean).join(', ') : application?.name || 'Applicant';
+			return {
+				id: attempt.attemptId,
+				applicantId: attempt.applicantId,
+				applicationId: attempt.applicationNumber || attempt.applicantId,
+				name,
+				email: application?.email || profile?.email || user?.email || '',
+				score,
+				maxScore: totalItems,
+				categories,
+				result: attempt.disqualified ? 'failed' : score >= passingScore ? 'passed' : 'failed',
+				violations: attempt.violations || [],
+				disqualified: attempt.disqualified === true,
+				examDate: attempt.submittedAt || attempt.startedAt,
+				archived: attempt.resultArchived === true,
+				archiveStatus: attempt.notificationResult || null,
+				failureReason: attempt.failureReason || null,
+				customMessage: attempt.customFailureMessage || null,
+				notifiedAt: attempt.resultNotifiedAt || null
+			};
+		});
+		response.set('Cache-Control', 'no-store');
+		response.json({ passingScore, maxScore: results.reduce((maximum, result) => Math.max(maximum, Number(result.maxScore || 0)), 0), results });
+	} catch (error) {
+		console.error('Admission examination results read failed:', error.message);
+		response.status(500).json({ error: 'Could not load examination results.' });
+	}
+});
+
+router.put('/results/settings', requireSameOrigin, requireAdmin, async (request, response) => {
+	const passingScore = Number(request.body?.passingScore);
+	if (!Number.isInteger(passingScore) || passingScore < 0) return response.status(400).json({ error: 'Enter a valid passing score.' });
+	try {
+		const db = getDatabaseConnection('OEEMS_Admission').db;
+		await db.collection('examination_settings').updateOne({ documentType: 'results_settings' }, {
+			$set: { passingScore, updatedAt: new Date(), updatedByAdminId: response.locals.authAdmin.adminId },
+			$setOnInsert: { documentType: 'results_settings', createdAt: new Date() }
+		}, { upsert: true });
+		request.app.get('io')?.emit('admission:results-updated', { passingScore });
+		response.json({ ok: true, passingScore });
+	} catch (error) {
+		console.error('Passing score update failed:', error.message);
+		response.status(500).json({ error: 'Could not update the passing score.' });
+	}
+});
+
+router.post('/results/:attemptId/action', requireSameOrigin, requireAdmin, async (request, response) => {
+	const outcome = String(request.body?.outcome || '').toLowerCase();
+	if (!['passed', 'failed'].includes(outcome)) return response.status(400).json({ error: 'Choose Passed or Failed.' });
+	try {
+		const studentDb = getDatabaseConnection('OEEMS_Student').db;
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const attempt = await studentDb.collection('student_exam_attempts').findOne({ attemptId: request.params.attemptId });
+		if (!attempt) return response.status(404).json({ error: 'Examination result was not found.' });
+		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId: attempt.applicantId }, { applicationNumber: attempt.applicationNumber }] });
+		const profile = await studentDb.collection('student_profiles').findOne({ applicantId: attempt.applicantId });
+		const user = await studentDb.collection('users').findOne({ applicantId: attempt.applicantId });
+		const name = profile ? [profile.lastName, profile.givenName, profile.middleName, profile.suffix].filter(Boolean).join(', ') : application?.name || 'Applicant';
+		const email = application?.email || profile?.email || user?.email || '';
+		await sendExaminationResult({ email, applicantName: name, applicationId: attempt.applicationNumber || attempt.applicantId, result: outcome, examDate: attempt.submittedAt || attempt.startedAt, reasonTitle: request.body?.reasonTitle || '', customMessage: request.body?.customMessage || '' });
+		await studentDb.collection('student_exam_attempts').updateOne({ _id: attempt._id }, { $set: { resultArchived: true, notificationResult: outcome, resultNotifiedAt: new Date(), failureReason: outcome === 'failed' ? request.body?.reasonTitle || null : null, customFailureMessage: outcome === 'failed' ? request.body?.customMessage || null : null, updatedAt: new Date() } });
+		await studentDb.collection('student_applications').updateOne({ applicantId: attempt.applicantId }, { $set: { status: 'result_released', examResult: outcome, resultReleasedAt: new Date(), updatedAt: new Date() } });
+		request.app.get('io')?.emit('admission:results-updated', { attemptId: attempt.attemptId, outcome });
+		request.app.get('io')?.to(`student:${user?._id}`).emit('student:application-updated', { applicantId: attempt.applicantId });
+		response.json({ ok: true, outcome, archived: true });
+	} catch (error) {
+		console.error('Examination result notification failed:', error.message);
+		response.status(500).json({ error: error.message || 'Could not send the examination result.' });
+	}
+});
+
+router.post('/results/:attemptId/restore', requireSameOrigin, requireAdmin, async (request, response) => {
+	try {
+		const db = getDatabaseConnection('OEEMS_Student').db;
+		await db.collection('student_exam_attempts').updateOne({ attemptId: request.params.attemptId }, { $set: { resultArchived: false, updatedAt: new Date() } });
+		request.app.get('io')?.emit('admission:results-updated', { attemptId: request.params.attemptId });
+		response.json({ ok: true });
+	} catch (error) {
+		response.status(500).json({ error: 'Could not restore this examination result.' });
+	}
+});
+
+router.delete('/results/:attemptId/delete', requireSameOrigin, requireAdmin, async (request, response) => {
+	try {
+		const db = getDatabaseConnection('OEEMS_Student').db;
+		await db.collection('student_exam_attempts').deleteOne({ attemptId: request.params.attemptId });
+		request.app.get('io')?.emit('admission:results-updated', { attemptId: request.params.attemptId });
+		response.json({ ok: true });
+	} catch (error) {
+		response.status(500).json({ error: 'Could not permanently delete this examination result.' });
 	}
 });
 

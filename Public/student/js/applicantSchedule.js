@@ -346,8 +346,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadSchedules(true);
+
+  let scheduleRefreshTimer = null;
+  function refreshSchedulesLive() {
+    window.clearTimeout(scheduleRefreshTimer);
+    scheduleRefreshTimer = window.setTimeout(() => {
+      loadSchedules(false);
+    }, 150);
+  }
+
   window.addEventListener('oeems:student-update', (event) => {
-    if (!event.detail?.scheduleLoaded) loadSchedules(false);
+    if (!event.detail?.scheduleLoaded) refreshSchedulesLive();
+  });
+  if (typeof window.io === 'function') {
+    const scheduleSocket = window.io();
+    scheduleSocket.on('admission:schedule-updated', refreshSchedulesLive);
+  }
+  window.addEventListener('focus', refreshSchedulesLive);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshSchedulesLive();
   });
 });
 

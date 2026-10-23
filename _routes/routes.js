@@ -46,7 +46,17 @@ router.post('/examination/start', async (request, response) => {
 		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId: applicationCode }, { applicationNumber: applicationCode }], status: 'approved' });
 		if (!application) return response.status(404).json({ error: 'Approved application code not found.' });
 		const existing = await studentDb.collection('student_exam_attempts').findOne({ applicantId: application.applicantId, status: 'in_progress' });
-		if (existing) return response.status(409).json({ error: 'An examination attempt is already active for this applicant.' });
+		if (existing) {
+			const durationSeconds = 180;
+			const elapsedSeconds = existing.startedAt ? Math.max(0, Math.floor((Date.now() - new Date(existing.startedAt).getTime()) / 1000)) : 0;
+			const remainingSeconds = Math.max(0, durationSeconds - elapsedSeconds);
+			if (remainingSeconds > 0) {
+				return response.json({ ok: true, attemptId: existing.attemptId, durationSeconds: remainingSeconds, resumed: true });
+			}
+			await studentDb.collection('student_exam_attempts').updateOne({ _id: existing._id }, {
+				$set: { status: 'expired', submittedAt: new Date(), disqualified: false, updatedAt: new Date() }
+			});
+		}
 		const now = new Date();
 		const crypto = require('node:crypto');
 		const version = await admissionDb.collection('exam_versions').findOne({ active: true });
@@ -55,7 +65,7 @@ router.post('/examination/start', async (request, response) => {
 			examVersionId: version?.version || 'default', status: 'in_progress', startedAt: now, submittedAt: null, violations: [], answers: {}, score: null, createdAt: now, updatedAt: now
 		});
 		const attempt = await studentDb.collection('student_exam_attempts').findOne({ applicantId: application.applicantId, status: 'in_progress' }, { sort: { startedAt: -1 } });
-		response.status(201).json({ ok: true, attemptId: attempt.attemptId, durationSeconds: 180 });
+		response.status(201).json({ ok: true, attemptId: attempt.attemptId, durationSeconds: 180, resumed: false });
 	} catch (error) {
 		console.error('Exam attempt start failed:', error.message);
 		response.status(500).json({ error: 'Could not start the examination.' });
@@ -83,24 +93,31 @@ router.post('/examination/submit', async (request, response) => {
 	try {
 		const admissionDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Admission').db;
 		const studentDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Student').db;
-		const attempt = await studentDb.collection('student_exam_attempts').findOne({ attemptId, status: 'in_progress' });
+		const attempt = await studentDb.collection('student_exam_attempts').findOne({ attemptId });
 		if (!attempt) return response.status(404).json({ error: 'Active examination attempt not found.' });
+		if (attempt.status !== 'in_progress') return response.json({ ok: true, alreadySubmitted: true, score: attempt.score || 0, totalItems: attempt.totalItems || 0 });
 		const configuration = await admissionDb.collection('questionnaire_questions').findOne({ documentType: 'questionnaire_configuration' });
 		let total = 0;
 		let correct = 0;
-		for (const questions of Object.values(configuration?.configuration?.questionsByCategory || {})) {
+		const categoryScores = {};
+		for (const [category, questions] of Object.entries(configuration?.configuration?.questionsByCategory || {})) {
+			categoryScores[category] = { correct: 0, total: 0 };
 			for (const question of questions || []) {
 				total += 1;
+				categoryScores[category].total += 1;
 				const selected = answers[question.id];
 				const selectedOptionIndex = (question.options || []).findIndex((option, index) =>
 					option.id === selected || selected === `${question.id}-option-${index + 1}`
 				);
-				if (selectedOptionIndex >= 0 && question.options[selectedOptionIndex]?.correct === true) correct += 1;
+				if (selectedOptionIndex >= 0 && question.options[selectedOptionIndex]?.correct === true) {
+					correct += 1;
+					categoryScores[category].correct += 1;
+				}
 			}
 		}
 		const now = new Date();
 		await studentDb.collection('student_exam_attempts').updateOne({ _id: attempt._id }, {
-			$set: { status: forceDisqualification ? 'disqualified' : 'submitted', submittedAt: now, answers, score: correct, totalItems: total, disqualified: forceDisqualification === true, updatedAt: now }
+			$set: { status: forceDisqualification ? 'disqualified' : 'submitted', submittedAt: now, answers, score: correct, totalItems: total, categoryScores, disqualified: forceDisqualification === true, updatedAt: now }
 		});
 		await studentDb.collection('student_applications').updateOne({ applicantId: attempt.applicantId }, { $set: { status: 'exam_completed', examAttemptId: attemptId, updatedAt: now } });
 		response.json({ ok: true, score: correct, totalItems: total });
