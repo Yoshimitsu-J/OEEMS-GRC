@@ -818,7 +818,8 @@ router.get('/results', requireAdmin, async (request, response) => {
 				archiveStatus: attempt.notificationResult || null,
 				failureReason: attempt.failureReason || null,
 				customMessage: attempt.customFailureMessage || null,
-				notifiedAt: attempt.resultNotifiedAt || null
+				notifiedAt: attempt.resultNotifiedAt || null,
+				newResult: !attempt.resultSeenAt
 			};
 		});
 		response.set('Cache-Control', 'no-store');
@@ -826,6 +827,16 @@ router.get('/results', requireAdmin, async (request, response) => {
 	} catch (error) {
 		console.error('Admission examination results read failed:', error.message);
 		response.status(500).json({ error: 'Could not load examination results.' });
+	}
+});
+
+router.post('/results/seen', requireSameOrigin, requireAdmin, async (request, response) => {
+	try {
+		const db = getDatabaseConnection('OEEMS_Student').db;
+		await db.collection('student_exam_attempts').updateMany({ status: { $in: ['submitted', 'disqualified'] }, resultArchived: { $ne: true }, resultSeenAt: { $exists: false } }, { $set: { resultSeenAt: new Date(), updatedAt: new Date() } });
+		response.json({ ok: true });
+	} catch (error) {
+		response.status(500).json({ error: 'Could not update result notification status.' });
 	}
 });
 

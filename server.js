@@ -1,6 +1,8 @@
 require('dotenv').config();
 
 const http = require('node:http');
+const https = require('node:https');
+const os = require('node:os');
 const path = require('node:path');
 const { Server } = require('socket.io');
 const User = require('./_models/User');
@@ -19,6 +21,8 @@ const app = createExpressApp({
 });
 const httpServer = http.createServer(app);
 const io = new Server(httpServer);
+const httpsPort = Number(process.env.HTTPS_PORT) || 3443;
+let httpsServer = null;
 let closeStudentChangeStreams = async () => {};
 
 app.use('/api', routes);
@@ -55,6 +59,23 @@ async function startServer() {
 			httpServer.once('error', reject);
 			httpServer.listen(port, host, resolve);
 		});
+
+		const { generate } = require('selfsigned');
+		const lanAddresses = Object.values(os.networkInterfaces()).flat().filter((address) => address?.family === 'IPv4' && !address.internal).map((address) => address.address);
+		const altNames = [{ type: 2, value: 'localhost' }, ...lanAddresses.map((ip) => ({ type: 7, ip }))];
+		const certificate = await generate([{ name: 'commonName', value: 'localhost' }], {
+			days: 365,
+			keySize: 2048,
+			extensions: [{ name: 'subjectAltName', altNames }]
+		});
+		if (certificate?.private && certificate?.cert) {
+			httpsServer = https.createServer({ key: certificate.private, cert: certificate.cert }, app);
+			io.attach(httpsServer);
+			await new Promise((resolve, reject) => {
+				httpsServer.once('error', reject);
+				httpsServer.listen(httpsPort, host, resolve);
+			});
+		}
 	} catch (error) {
 		if (error.code === 'EADDRINUSE') {
 			throw new Error(`Port ${port} is already in use. Stop the existing OEEMS server before starting another one.`);
@@ -65,14 +86,15 @@ async function startServer() {
 
 	console.log(`OEEMS is running at http://localhost:${port}`);
 	console.log(`LAN access: http://<host-machine-ip>:${port}`);
+	if (httpsServer?.listening) console.log(`Secure QR camera: https://<host-machine-ip>:${httpsPort}/public/facilitator/index.html`);
 }
 
 async function shutdown(signal) {
 	console.log(`\n${signal} received. Shutting down OEEMS...`);
 	await new Promise((resolve) => {
-		if (!httpServer.listening) return resolve();
 		io.close(resolve);
 	});
+	if (httpsServer?.listening) await new Promise((resolve) => httpsServer.close(resolve));
 	await closeStudentChangeStreams();
 	await disconnectFromMongoDB();
 

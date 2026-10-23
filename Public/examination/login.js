@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const submit = document.getElementById('submitApplicationCode');
   const error = document.getElementById('loginError');
   const dialog = document.getElementById('verificationDialog');
+  const completedDialog = document.getElementById('completedExamDialog');
   let applicant = null;
 
 
@@ -22,6 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ applicationCode })
       });
       const result = await response.json();
+      if (result.alreadySubmitted) {
+        document.getElementById('completedExamApplicationId').textContent = `Application ID: ${result.applicationId || applicationCode}`;
+        completedDialog.showModal();
+        return;
+      }
       if (!response.ok) throw new Error(result.error || 'Verification failed.');
       applicant = result.applicant;
       document.getElementById('verificationApplicantId').textContent = applicant.applicationCode;
@@ -38,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('notMeButton').addEventListener('click', () => {
     dialog.close();
     applicant = null;
+    input.value = '';
+    input.focus();
+  });
+
+  document.getElementById('completedExamOkButton').addEventListener('click', () => {
+    completedDialog.close();
     input.value = '';
     input.focus();
   });

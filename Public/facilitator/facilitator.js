@@ -125,7 +125,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   scanButton.addEventListener('click', async () => {
     if (stream) return stopScanner();
+    lookupError.style.color = '#a00000';
     lookupError.textContent = '';
+
+    if (!window.isSecureContext) {
+      const secureUrl = `https://${window.location.hostname || '192.168.1.7'}:3443/public/facilitator/index.html`;
+      lookupError.innerHTML = `Camera scanning requires HTTPS. Open <a href="${secureUrl}" style="color:#800000;font-weight:800">${secureUrl}</a>, accept the browser's certificate warning once, then click SCAN QR CODE again.`;
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      lookupError.textContent = 'This browser does not support camera scanning. Use a current Chrome or Edge browser.';
+      return;
+    }
+
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
       video.srcObject = stream;
@@ -134,7 +146,15 @@ document.addEventListener('DOMContentLoaded', () => {
       scanButton.textContent = 'STOP SCANNER';
       scanFrame = requestAnimationFrame(scanFrameLoop);
     } catch (error) {
-      lookupError.textContent = 'Camera access is unavailable. Enter the Application ID manually.';
+      if (error.name === 'NotAllowedError' || error.name === 'SecurityError') {
+        lookupError.textContent = 'Camera permission was denied. Allow camera access in the browser site settings, then try again.';
+      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+        lookupError.textContent = 'No camera device was found on this computer or phone.';
+      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+        lookupError.textContent = 'The camera is already in use by another application. Close it and try again.';
+      } else {
+        lookupError.textContent = `Camera access failed: ${error.message || 'Unknown camera error'}`;
+      }
     }
   });
 

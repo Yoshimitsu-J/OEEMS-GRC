@@ -2476,6 +2476,28 @@ a.btn-logout-nav:hover {
   background: #8B0000;
 }
 
+.unread-badge {
+  min-width: 12px !important;
+  width: 12px;
+  height: 12px;
+  padding: 0 !important;
+  border-radius: 50%;
+  color: transparent !important;
+  overflow: hidden;
+}
+
+.result-selection-cell { position: relative; }
+.new-result-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e63946;
+  box-shadow: 0 0 0 2px #fff;
+}
+
 /* =========================================
    37. BULK ACTIONS BAR — ALWAYS VISIBLE
    ========================================= */

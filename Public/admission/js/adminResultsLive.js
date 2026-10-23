@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const row = document.createElement('tr');
       const categories = Object.entries(item.categories || {}).map(([category, score]) => `<span>${escapeHtml(category)}: ${escapeHtml(score)}</span>`).join('<br>') || '—';
       row.innerHTML = `
-        <td><input type="checkbox" class="table-checkbox result-checkbox" data-id="${escapeHtml(item.id)}" ${selected.has(item.id) ? 'checked' : ''}></td>
+        <td class="result-selection-cell"><input type="checkbox" class="table-checkbox result-checkbox" data-id="${escapeHtml(item.id)}" ${selected.has(item.id) ? 'checked' : ''}>${item.newResult ? '<span class="new-result-dot" title="New result"></span>' : ''}</td>
         <td>${escapeHtml(item.name)}<br><small>${escapeHtml(item.applicationId)}</small></td>
         <td>${item.score} / ${item.maxScore}</td>
         <td>${categories}</td>
@@ -182,6 +182,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const arrivedData = await api('/api/admin/results/arrived').catch(() => ({ arrivals: [] }));
       arrivals = arrivedData.arrivals || [];
       renderArrivals();
+      const newCount = results.filter((item) => !item.archived && item.newResult).length;
+      const pendingCount = document.getElementById('pendingCount');
+      const completedCount = document.getElementById('notifiedCount');
+      if (pendingCount) {
+        pendingCount.textContent = String(newCount);
+        pendingCount.classList.toggle('unread-badge', newCount > 0);
+      }
+      if (completedCount) completedCount.textContent = String(results.filter((item) => item.archived).length);
       passingInput.value = data.passingScore;
       passingInput.max = data.maxScore;
       passingLabel.textContent = `${data.passingScore} and Above`;
@@ -281,10 +289,20 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('admission:arrival-updated', () => load());
   }
 
-  document.querySelectorAll('.app-tab').forEach((tab) => tab.addEventListener('click', () => {
+  document.querySelectorAll('.app-tab').forEach((tab) => tab.addEventListener('click', async () => {
     document.querySelectorAll('.app-tab').forEach((item) => item.classList.toggle('active', item === tab));
     currentView = tab.dataset.tab === 'notified' ? 'archived' : tab.dataset.tab === 'summary' ? 'summary' : tab.dataset.tab === 'arrived' ? 'arrived' : 'results';
     selected.clear();
+    if (tab.dataset.tab === 'pending') {
+      await api('/api/admin/results/seen', { method: 'POST', body: '{}' }).catch(() => {});
+      results.forEach((item) => { if (!item.archived) item.newResult = false; });
+      const pendingCount = document.getElementById('pendingCount');
+      if (pendingCount) {
+        pendingCount.textContent = '0';
+        pendingCount.classList.remove('unread-badge');
+      }
+    }
+
     const summaryVisible = currentView === 'summary';
     const arrivedVisible = currentView === 'arrived';
     if (resultsPanel) resultsPanel.hidden = summaryVisible || arrivedVisible;

@@ -232,6 +232,19 @@ router.post('/examination/verify', async (request, response) => {
 		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId: applicationCode }, { applicationNumber: applicationCode }], status: 'approved' });
 		if (!application) return response.status(404).json({ error: 'Approved application code not found.' });
 		const studentDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Student').db;
+		const submittedAttempt = await studentDb.collection('student_exam_attempts').findOne({ applicantId: application.applicantId, status: { $in: ['submitted', 'disqualified', 'expired'] } }, { sort: { submittedAt: -1, createdAt: -1 } });
+		if (submittedAttempt) {
+			const profile = await studentDb.collection('student_profiles').findOne({ applicantId: application.applicantId });
+			const user = await studentDb.collection('users').findOne({ applicantId: application.applicantId });
+			try {
+				const { sendDuplicateExamAttempt } = require('../_scripts/nodeEmailer');
+				await sendDuplicateExamAttempt({ email: application.email || profile?.email || user?.email || '', applicantName: profile ? [profile.givenName, profile.middleName, profile.lastName, profile.suffix].filter(Boolean).join(' ') : application.name || 'Applicant', applicationId: application.applicationNumber || application.applicantId });
+			} catch (emailError) {
+				console.error('Duplicate examination verification email failed:', emailError.message);
+			}
+			response.set('Cache-Control', 'no-store');
+			return response.status(409).json({ alreadySubmitted: true, applicationId: application.applicationNumber || application.applicantId, error: 'This Application ID has already submitted an examination attempt.' });
+		}
 		const profile = await studentDb.collection('student_profiles').findOne({ applicantId: applicationCode });
 		response.set('Cache-Control', 'no-store');
 		response.json({ verified: true, applicant: {
