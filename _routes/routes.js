@@ -5,6 +5,87 @@ const studentRoutes = require('./student');
 
 const router = express.Router();
 
+async function requireFacilitator(request, response, next) {
+	if (!request.session?.facilitator?.accessCode) return response.status(401).json({ error: 'Facilitator login required.' });
+	next();
+}
+
+router.post('/facilitator/login', async (request, response) => {
+	const accessCode = String(request.body?.accessCode || '').trim();
+	try {
+		const db = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Admission').db;
+		const facilitator = await db.collection('facilitators').findOne({ accessCode, status: 'active' });
+		if (!facilitator) return response.status(401).json({ error: 'Invalid facilitator access code.' });
+		request.session.facilitator = { id: String(facilitator._id), name: facilitator.name, role: facilitator.role, accessCode: facilitator.accessCode };
+		request.session.save((error) => {
+			if (error) return response.status(500).json({ error: 'Could not create facilitator session.' });
+			response.json({ ok: true, facilitator: { name: facilitator.name, role: facilitator.role } });
+		});
+	} catch (error) {
+		console.error('Facilitator login failed:', error.message);
+		response.status(500).json({ error: 'Could not verify facilitator access.' });
+	}
+});
+
+router.post('/facilitator/logout', requireFacilitator, (request, response) => {
+	delete request.session.facilitator;
+	request.session.save(() => response.json({ ok: true }));
+});
+
+router.get('/facilitator/me', requireFacilitator, (request, response) => {
+	response.json({ facilitator: request.session.facilitator });
+});
+
+router.get('/facilitator/applicant/:applicationId', requireFacilitator, async (request, response) => {
+	const applicationId = String(request.params.applicationId || '').trim().toUpperCase();
+	try {
+		const admissionDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Admission').db;
+		const studentDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Student').db;
+		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId: applicationId }, { applicationNumber: applicationId }] });
+		if (!application) return response.status(404).json({ error: 'Application ID not found.' });
+		const profile = await studentDb.collection('student_profiles').findOne({ applicantId: application.applicantId });
+		const schedule = await studentDb.collection('student_schedules').findOne({ applicantId: application.applicantId, bookingStatus: { $in: ['reserved', 'confirmed'] } });
+		response.set('Cache-Control', 'no-store');
+		response.json({
+			applicantId: application.applicantId,
+			applicationId: application.applicationNumber || application.applicantId,
+			name: profile ? [profile.lastName, profile.givenName, profile.middleName, profile.suffix].filter(Boolean).join(', ') : application.name || 'Applicant',
+			address: profile?.address ? Object.values(profile.address).filter(Boolean).join(', ') : application.profile?.address || 'Not provided',
+			mobileNumber: profile?.phone || application.profile?.phone || 'Not provided',
+			email: application.email || profile?.email || '',
+			examDate: schedule?.examDate || null,
+			examBatch: schedule?.batch || null,
+			examTime: schedule?.startTime && schedule?.endTime ? `${schedule.startTime} - ${schedule.endTime}` : null,
+			approvalStatus: application.status === 'declined' ? 'rejected' : application.status === 'approved' || application.status === 'exam_completed' || application.status === 'result_released' ? 'approved' : 'pending'
+		});
+	} catch (error) {
+		console.error('Facilitator applicant lookup failed:', error.message);
+		response.status(500).json({ error: 'Could not load applicant information.' });
+	}
+});
+
+router.post('/facilitator/arrived', requireFacilitator, async (request, response) => {
+	const applicantId = String(request.body?.applicantId || '').trim().toUpperCase();
+	if (!applicantId) return response.status(400).json({ error: 'Application information is required.' });
+	try {
+		const admissionDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Admission').db;
+		const studentDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Student').db;
+		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId }, { applicationNumber: applicantId }] });
+		if (!application) return response.status(404).json({ error: 'Application ID not found.' });
+		const profile = await studentDb.collection('student_profiles').findOne({ applicantId: application.applicantId });
+		const approvalStatus = application.status === 'declined' ? 'rejected' : application.status === 'approved' || application.status === 'exam_completed' || application.status === 'result_released' ? 'approved' : 'pending';
+		await admissionDb.collection('exam_arrivals').updateOne({ applicantId: application.applicantId }, {
+			$set: { applicationId: application.applicationNumber || application.applicantId, name: profile ? [profile.lastName, profile.givenName, profile.middleName, profile.suffix].filter(Boolean).join(', ') : application.name || 'Applicant', email: application.email || profile?.email || '', approvalStatus, arrivedAt: new Date(), facilitatedBy: request.session.facilitator, updatedAt: new Date() },
+			$setOnInsert: { applicantId: application.applicantId, createdAt: new Date() }
+		}, { upsert: true });
+		request.app.get('io')?.emit('admission:arrival-updated', { applicantId: application.applicantId });
+		response.json({ ok: true, arrived: true });
+	} catch (error) {
+		console.error('Exam arrival confirmation failed:', error.message);
+		response.status(500).json({ error: 'Could not confirm applicant arrival.' });
+	}
+});
+
 router.use('/auth', authRoutes);
 router.use('/admin', adminRoutes);
 router.use('/student', studentRoutes);
@@ -45,6 +126,22 @@ router.post('/examination/start', async (request, response) => {
 		const studentDb = require('../_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Student').db;
 		const application = await admissionDb.collection('applications').findOne({ $or: [{ applicantId: applicationCode }, { applicationNumber: applicationCode }], status: 'approved' });
 		if (!application) return response.status(404).json({ error: 'Approved application code not found.' });
+		const submittedAttempt = await studentDb.collection('student_exam_attempts').findOne({ applicantId: application.applicantId, status: { $in: ['submitted', 'disqualified', 'expired'] } }, { sort: { submittedAt: -1, createdAt: -1 } });
+		if (submittedAttempt) {
+			try {
+				const profile = await studentDb.collection('student_profiles').findOne({ applicantId: application.applicantId });
+				const user = await studentDb.collection('users').findOne({ applicantId: application.applicantId });
+				const { sendDuplicateExamAttempt } = require('../_scripts/nodeEmailer');
+				await sendDuplicateExamAttempt({
+					email: application.email || profile?.email || user?.email || '',
+					applicantName: profile ? [profile.givenName, profile.middleName, profile.lastName, profile.suffix].filter(Boolean).join(' ') : application.name || 'Applicant',
+					applicationId: application.applicationNumber || application.applicantId
+				});
+			} catch (emailError) {
+				console.error('Duplicate exam attempt email failed:', emailError.message);
+			}
+			return response.status(409).json({ error: 'This applicant has already submitted an examination attempt.', applicationId: application.applicationNumber || application.applicantId, alreadySubmitted: true });
+		}
 		const existing = await studentDb.collection('student_exam_attempts').findOne({ applicantId: application.applicantId, status: 'in_progress' });
 		if (existing) {
 			const durationSeconds = 180;

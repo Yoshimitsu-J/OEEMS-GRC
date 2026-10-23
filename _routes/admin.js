@@ -756,6 +756,26 @@ router.put('/schedules/computers/:facilityId', requireSameOrigin, requireAdmin, 
 	}
 });
 
+router.get('/results/arrived', requireAdmin, async (request, response) => {
+	try {
+		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;
+		const arrivals = await admissionDb.collection('exam_arrivals').find({}).sort({ arrivedAt: -1 }).toArray();
+		response.set('Cache-Control', 'no-store');
+		response.json({ arrivals: arrivals.map((arrival) => ({
+			applicantId: arrival.applicantId,
+			applicationId: arrival.applicationId,
+			name: arrival.name,
+			email: arrival.email || '',
+			approvalStatus: arrival.approvalStatus || 'pending',
+			arrivedAt: arrival.arrivedAt || null,
+			facilitatedBy: arrival.facilitatedBy || null
+		})) });
+	} catch (error) {
+		console.error('Exam arrivals read failed:', error.message);
+		response.status(500).json({ error: 'Could not load arrived applicants.' });
+	}
+});
+
 router.get('/results', requireAdmin, async (request, response) => {
 	try {
 		const admissionDb = getDatabaseConnection('OEEMS_Admission').db;

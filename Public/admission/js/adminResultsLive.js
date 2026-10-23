@@ -21,7 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const filtersRow = document.getElementById('filtersRow');
   const resultsPanel = document.getElementById('resultsTablePanel');
   const summaryPanel = document.getElementById('resultsSummaryPanel');
+  const arrivedPanel = document.getElementById('arrivedPanel');
   let results = [];
+  let arrivals = [];
   let selected = new Set();
   let currentView = 'results';
   let pendingFailureIds = [];
@@ -156,11 +158,30 @@ document.addEventListener('DOMContentLoaded', () => {
     window.alert(`${outcome.toUpperCase()} names copied.`);
   }
 
+  async function renderArrivals() {
+    const body = document.getElementById('arrivedTableBody');
+    body.replaceChildren();
+    if (!arrivals.length) {
+      body.innerHTML = '<tr><td colspan="5" class="applications-empty">No arrived applicants recorded.</td></tr>';
+      return;
+    }
+    arrivals.forEach((arrival) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${escapeHtml(arrival.name)}</td><td>${escapeHtml(arrival.applicantId)}</td><td>${escapeHtml(arrival.applicationId)}</td><td><span class="result-${arrival.approvalStatus === 'approved' ? 'passed' : arrival.approvalStatus === 'rejected' ? 'failed' : 'pending'}">${escapeHtml(arrival.approvalStatus.toUpperCase())}</span></td><td>${arrival.arrivedAt ? new Date(arrival.arrivedAt).toLocaleString('en-PH') : '—'}</td>`;
+      body.appendChild(row);
+    });
+    const count = document.getElementById('arrivedCount');
+    if (count) count.textContent = String(arrivals.length);
+  }
+
   async function load() {
     tableBody.innerHTML = '<tr><td colspan="7" class="applications-empty">Loading examination results...</td></tr>';
     try {
       const data = await api('/api/admin/results');
       results = data.results || [];
+      const arrivedData = await api('/api/admin/results/arrived').catch(() => ({ arrivals: [] }));
+      arrivals = arrivedData.arrivals || [];
+      renderArrivals();
       passingInput.value = data.passingScore;
       passingInput.max = data.maxScore;
       passingLabel.textContent = `${data.passingScore} and Above`;
@@ -254,17 +275,27 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clearNotifiedBtn')?.addEventListener('click', () => { selected.clear(); render(); });
   document.querySelectorAll('[data-close-dialog]').forEach((button) => button.addEventListener('click', () => document.getElementById(button.dataset.closeDialog)?.close()));
 
+  if (typeof window.io === 'function') {
+    const socket = window.io();
+    socket.on('admission:results-updated', () => load());
+    socket.on('admission:arrival-updated', () => load());
+  }
+
   document.querySelectorAll('.app-tab').forEach((tab) => tab.addEventListener('click', () => {
     document.querySelectorAll('.app-tab').forEach((item) => item.classList.toggle('active', item === tab));
-    currentView = tab.dataset.tab === 'notified' ? 'archived' : tab.dataset.tab === 'summary' ? 'summary' : 'results';
+    currentView = tab.dataset.tab === 'notified' ? 'archived' : tab.dataset.tab === 'summary' ? 'summary' : tab.dataset.tab === 'arrived' ? 'arrived' : 'results';
     selected.clear();
     const summaryVisible = currentView === 'summary';
-    if (resultsPanel) resultsPanel.hidden = summaryVisible;
+    const arrivedVisible = currentView === 'arrived';
+    if (resultsPanel) resultsPanel.hidden = summaryVisible || arrivedVisible;
     if (summaryPanel) summaryPanel.hidden = !summaryVisible;
+    if (arrivedPanel) arrivedPanel.hidden = !arrivedVisible;
     if (filtersRow) filtersRow.style.display = summaryVisible ? 'none' : '';
     if (resultsBulkBar) resultsBulkBar.style.display = currentView === 'results' ? '' : 'none';
     if (completedBulkBar) completedBulkBar.style.display = currentView === 'archived' ? '' : 'none';
-    if (summaryVisible) renderSummary(); else render();
+    if (summaryVisible) renderSummary();
+    else if (arrivedVisible) renderArrivals();
+    else render();
   }));
 
   load();

@@ -85,6 +85,11 @@
           <i class="bi bi-clipboard-data"></i>
           SUMMARY
         </button>
+        <button class="app-tab" data-tab="arrived">
+          <i class="bi bi-person-check-fill"></i>
+          ARRIVED
+          <span class="tab-badge" id="arrivedCount">0</span>
+        </button>
       </div>
 
       <!-- =========================================
@@ -198,6 +203,16 @@
           </tbody>
         </table>
       </div>
+
+      <section id="arrivedPanel" class="table-card results-summary-panel" hidden aria-labelledby="arrivedTitle">
+        <div class="results-summary-heading"><h3 id="arrivedTitle">ARRIVED APPLICANTS</h3></div>
+        <div class="activity-log-scroll">
+          <table class="admin-table activity-log-table">
+            <thead><tr><th>NAME</th><th>APPLICANT ID</th><th>APPLICATION ID</th><th>APPROVAL STATUS</th><th>ARRIVAL TIME</th></tr></thead>
+            <tbody id="arrivedTableBody"><tr><td colspan="5">Loading arrived applicants...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
 
       <section id="resultsSummaryPanel" class="table-card results-summary-panel" hidden aria-labelledby="resultsSummaryTitle">
         <div class="results-summary-heading">

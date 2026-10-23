@@ -108,6 +108,16 @@ async function sendAdmissionDecision({ email, applicantName, decision, applicant
 	});
 }
 
+async function sendDuplicateExamAttempt({ email, applicantName, applicationId }) {
+	if (!email) throw new Error('Applicant email is unavailable.');
+	await getTransporter().sendMail({
+		from: process.env.MAIL_FROM || process.env.SMTP_USER,
+		to: email,
+		subject: `Examination Entry Notice – Application ID ${applicationId}`,
+		text: `Dear ${applicantName || 'Applicant'},\n\nA new examination entry attempt was detected for your submitted exam.\n\nApplication ID: ${applicationId}\n\nEach applicant is allowed one examination attempt. Your submitted examination result is already recorded and cannot be submitted again. Please wait for the Admission Office's official notification.\n\nAdmission Office\nGlobal Reciprocal Colleges\n09123456789`
+	});
+}
+
 async function sendExaminationResult({ email, applicantName, applicationId, result, examDate, reasonTitle, customMessage }) {
 	if (!email) throw new Error('Applicant email is unavailable.');
 	const fullName = applicantName || 'Applicant';
@@ -129,4 +139,4 @@ async function sendExaminationResult({ email, applicantName, applicationId, resu
 	});
 }
 
-module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation, sendAdmissionDecision, sendExaminationResult };
+module.exports = { isSmtpConfigured, sendOtp, sendApplicationSubmissionConfirmation, sendAdmissionDecision, sendExaminationResult, sendDuplicateExamAttempt };

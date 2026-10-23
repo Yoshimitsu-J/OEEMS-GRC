@@ -42,6 +42,11 @@ registerSocketHandlers(io);
 
 async function startServer() {
 	await connectToMongoDB();
+	const admissionDb = require('./_scripts/mongodb_connection').getDatabaseConnection('OEEMS_Admission').db;
+	await admissionDb.collection('facilitators').updateOne({ accessCode: 'facilitator12345' }, {
+		$set: { name: 'Juan Delacruz', role: 'Admin', accessCode: 'facilitator12345', status: 'active', updatedAt: new Date() },
+		$setOnInsert: { createdAt: new Date() }
+	}, { upsert: true });
 	startStudentRetentionJob(io);
 	closeStudentChangeStreams = watchStudentChanges(io);
 

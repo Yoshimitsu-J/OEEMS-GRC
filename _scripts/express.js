@@ -141,6 +141,7 @@ function createExpressApp({ rootPage = path.join(__dirname, '..', 'mode_select.h
 	app.get('/public/admission/index.html', (request, response) => {
 		response.sendFile(path.join(publicPath, 'admission', 'index.html'));
 	});
+	app.get('/js/jsQR.js', (request, response) => response.sendFile(path.join(__dirname, '..', 'node_modules', 'jsqr', 'dist', 'jsQR.js')));
 	app.get('/', (request, response) => response.sendFile(rootPage));
 	app.use('/public', express.static(publicPath));
 	app.use(express.static(publicPath));
